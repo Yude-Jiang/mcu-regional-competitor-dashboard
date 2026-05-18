@@ -1,0 +1,7 @@
+# Python files to upload for Cloud Run
+requirements.txt
+
+# Files to avoid uploading
+README.md
+.Dockerfile
+
