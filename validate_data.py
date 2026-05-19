@@ -9,7 +9,7 @@ HERE = Path(__file__).parent
 REQUIRED_META = {"name_cn", "name_en", "symbol", "mcu_strategy", "mcu_confidence"}
 EXPECTED_SYMBOLS = {
     "603986","300327","688380","300077","688279",
-    "002180","688385","688694","688595","688391","688018"
+    "002180","688385","688766","688595","688391","688018"
 }
 
 
