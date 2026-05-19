@@ -2,12 +2,13 @@
 """smart_sync.py — Orchestrate the full MCU data refresh pipeline.
 
 Steps:
-  1. fetch_mcu_data.py  — AKShare fetch + MCU derivation → data.json
-  2. validate_data.py   — basic schema checks on data.json
+  1. fetch_mcu_data.py        — AKShare profit sheet + MCU derivation → data.json
+  2. fetch_yjbb_quarterly.py  — 业绩报表 Q4 snapshots → gross margin + NI YoY → merge
+  3. validate_data.py         — basic schema checks on data.json
 
 Usage:
     python smart_sync.py            # full refresh (all 11 companies)
-    python smart_sync.py 603986     # single-company refresh
+    python smart_sync.py 603986     # single-company profit-sheet refresh only
 """
 
 import subprocess
@@ -34,11 +35,15 @@ def main() -> None:
     steps = [
         (
             [sys.executable, "fetch_mcu_data.py"] + target,
-            "Fetch financials via AKShare + apply MCU derivation rules",
+            "Step 1 — Profit sheet (股票利润表) + MCU derivation → data.json",
+        ),
+        (
+            [sys.executable, "fetch_yjbb_quarterly.py"],
+            "Step 2 — 业绩报表 Q4 snapshots (gross margin, NI YoY) → merge into data.json",
         ),
         (
             [sys.executable, "validate_data.py"],
-            "Validate data.json schema",
+            "Step 3 — Validate data.json schema",
         ),
     ]
 
