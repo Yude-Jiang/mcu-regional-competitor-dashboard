@@ -1,372 +1,846 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCU Regional Competitor Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCU.CN — Regional Competitor Intel</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-       background: #f0f2f5; color: #1a2e4a; font-size: 13px; }
-
-header {
-  background: #1a2e4a; color: #fff;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 24px;
+/* ── Design system ── */
+:root {
+  --navy-1:#03234b; --navy-2:#425a78; --navy-3:#8191a5; --navy-4:#c0c8d2;
+  --cyan-1:#3cb4e6; --cyan-2:#6dc7ec; --cyan-3:#9dd9f2;
+  --yel-1:#ffd200;
+  --mag-1:#e6007e; --mag-2:#ec409e;
+  --bg-0:#f4f6f9; --bg-1:#ffffff; --bg-2:#f8fafc; --bg-3:#eef2f7;
+  --border:#dbe2eb; --border-b:#b8c4d2;
+  --text:var(--navy-1); --text-dim:var(--navy-2); --text-faint:var(--navy-3);
+  --pos:#1a8a4e; --neg:var(--mag-1); --accent:var(--cyan-1);
 }
-header h1 { font-size: 18px; font-weight: 700; }
-header .sub { font-size: 12px; color: #90aacb; margin-top: 3px; }
-#gen-date { font-size: 11px; color: #90aacb; }
+[data-theme="dark"] {
+  --bg-0:#07101e; --bg-1:#0c1726; --bg-2:#122033; --bg-3:#1a2c44;
+  --border:#1f3050; --border-b:#2e4a73;
+  --text:#d7e4f3; --text-dim:#7d94b3; --text-faint:#4d6280;
+  --pos:#5ad498; --neg:var(--mag-2);
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body {
+  font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  background:var(--bg-0); color:var(--text);
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
 
+/* ── Frame ── */
+.frame {
+  display:grid;
+  grid-template-rows: 40px auto 44px 244px 212px 1fr 22px;
+  min-height:100vh;
+}
+.frame::before {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size:32px 32px; opacity:.4;
+}
+.frame > * { position:relative; z-index:1; }
+
+/* ── Header ── */
+.hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; background:var(--navy-1); color:#fff;
+}
+.brand { display:flex; align-items:center; gap:10px; }
+.mark {
+  position:relative; width:26px; height:26px; background:var(--cyan-1);
+  display:inline-flex; align-items:center; justify-content:center;
+  font:700 12px/1 sans-serif; color:var(--navy-1); flex-shrink:0;
+}
+.mark::after {
+  content:""; position:absolute; right:-3px; bottom:-3px;
+  width:7px; height:7px; background:var(--yel-1);
+}
+.brand .ttl { font:700 13px/1 sans-serif; letter-spacing:.16em; color:#fff; }
+.brand .sep { color:var(--cyan-2); opacity:.5; margin:0 2px; }
+.brand .sub { font:10px/1 sans-serif; color:var(--cyan-2); letter-spacing:.14em; text-transform:uppercase; }
+.hdr-r { display:flex; align-items:center; gap:12px; }
+.hdr-meta { font:10px/1 sans-serif; color:var(--navy-3); letter-spacing:.05em; }
+.hdr-meta b { color:var(--cyan-3); }
+.theme-btn {
+  background:transparent; border:1px solid var(--navy-2); color:var(--cyan-3);
+  font:10px/1 sans-serif; padding:4px 8px; cursor:pointer; border-radius:2px;
+  letter-spacing:.05em; white-space:nowrap;
+}
+.theme-btn:hover { background:var(--navy-2); color:#fff; }
+
+/* ── Pipeline strip ── */
+.pipeline {
+  display:flex; align-items:stretch; height:38px;
+  background:var(--bg-1); border-bottom:1px solid var(--border);
+  overflow-x:auto; overflow-y:hidden;
+}
+.pipeline::-webkit-scrollbar { height:3px; }
+.pipeline::-webkit-scrollbar-thumb { background:var(--border-b); }
+.pipe-lbl {
+  display:flex; align-items:center; gap:6px; padding:0 12px;
+  background:var(--bg-2); border-right:1px solid var(--border);
+  font:600 9px/1 sans-serif; color:var(--navy-1);
+  text-transform:uppercase; letter-spacing:.1em; white-space:nowrap; flex-shrink:0;
+}
+.pipe-lbl::before { content:""; width:3px; height:14px; background:var(--cyan-1); }
+.fp-card {
+  display:inline-flex; flex-direction:column; justify-content:center; gap:2px;
+  padding:0 10px; border-right:1px solid var(--border);
+  border-left:3px solid transparent; min-width:90px; flex-shrink:0;
+  cursor:default; transition:background .1s;
+}
+.fp-card:hover { background:var(--bg-2); }
+.fp-sym  { font:600 8px/1 monospace; color:var(--text-faint); }
+.fp-name { font:600 10px/1.2 sans-serif; color:var(--text); white-space:nowrap; }
+.fp-badge {
+  font:500 7px/1 monospace; letter-spacing:.06em; text-transform:uppercase;
+  padding:1px 3px; border-radius:2px; background:var(--bg-3);
+  color:var(--text-dim); width:fit-content;
+}
+
+/* ── Controls ── */
 .controls {
-  background: #fff; border-bottom: 1px solid #dde3ec;
-  padding: 10px 24px;
-  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  display:flex; align-items:center; gap:16px; padding:0 16px;
+  background:var(--bg-1); border-bottom:1px solid var(--border); flex-wrap:wrap;
 }
-.controls label { font-size: 12px; color: #5a7a9a; }
-.controls select {
-  margin-left: 6px; padding: 4px 8px; border: 1px solid #c0cfe0;
-  border-radius: 4px; font-size: 12px; color: #1a2e4a;
+.ctrl-grp { display:flex; align-items:center; gap:6px; }
+.ctrl-grp label {
+  font:600 9px/1 sans-serif; color:var(--text-faint);
+  text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
 }
-.legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11px; }
-.legend span { display: flex; align-items: center; gap: 4px; }
-.dc { color: #2e7d32; } .dd { color: #1565c0; }
-.dp { color: #e65100; } .du { color: #c62828; } .dn { color: #9e9e9e; }
+.ctrl-sel, .ctrl-inp {
+  padding:4px 8px; border:1px solid var(--border-b); border-radius:2px;
+  background:var(--bg-0); color:var(--text); font:11px/1 sans-serif;
+  outline:none;
+}
+.ctrl-inp { width:172px; }
+.ctrl-inp::placeholder { color:var(--text-faint); }
+.legend {
+  display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap;
+}
+.legend span { display:flex; align-items:center; gap:3px; font:10px/1 sans-serif; color:var(--text-dim); white-space:nowrap; }
+.dot { font-size:11px; line-height:1; }
+.dc { color:var(--pos); }
+.dd { color:var(--cyan-1); }
+.dp { color:#c8920a; }
+.du { color:var(--neg); }
+.dn { color:var(--text-faint); }
 
-.table-wrap {
-  margin: 16px 24px; background: #fff; border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow-x: auto;
-}
-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-thead tr:first-child th {
-  background: #1a2e4a; color: #fff; padding: 8px 10px;
-  font-size: 11px; font-weight: 600; border-right: 1px solid #2d4a7a; text-align: center;
-}
-thead tr:last-child th {
-  background: #2d4a7a; color: #c8ddf5; padding: 6px 10px;
-  font-size: 11px; font-weight: 500; border-right: 1px solid #3a5a8a; text-align: center;
-}
-th.g-rev { background: #1e3a6e !important; }
-th.g-mcu { background: #0d3b5e !important; }
-th.g-rd  { background: #1d4e4e !important; }
-th.g-etc { background: #2d3436 !important; }
-
-.sticky { position: sticky; left: 0; z-index: 2; }
-thead .sticky { background: #1a2e4a; }
-tbody .sticky { background: #fff; border-right: 2px solid #dde3ec; }
-tbody tr:hover .sticky { background: #f0f5ff; }
-
-td {
-  padding: 7px 10px; border-bottom: 1px solid #eef1f6;
-  border-right: 1px solid #f0f2f5; vertical-align: middle; text-align: right;
-}
-td.l { text-align: left; } td.c { text-align: center; }
-tbody tr:hover td { background: #f5f8ff; }
-
-.cn { font-weight: 600; font-size: 13px; }
-.en { font-size: 11px; color: #7a9abb; }
-.sym { font-size: 10px; color: #aabccc; font-family: monospace; }
-.pos { color: #2e7d32; } .neg { color: #c62828; }
-.na  { color: #bbb; }
-.mcu-cell { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
-.dot { font-size: 12px; flex-shrink: 0; }
-
+/* ── Charts ── */
 .chart-full {
-  margin: 0 24px 16px; background: #fff; border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 16px;
+  background:var(--bg-1); border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:32px 1fr; overflow:hidden;
 }
-.chart-full h3 { font-size: 13px; color: #1a2e4a; margin-bottom: 12px; font-weight: 600; }
-.chart-full canvas { max-height: 340px; }
-.charts {
-  margin: 0 24px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+.chart-axis-lbl {
+  display:flex; align-items:center; justify-content:center;
+  font:600 8px/1 sans-serif; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-faint); border-right:1px solid var(--border);
+  writing-mode:vertical-rl; transform:rotate(180deg);
 }
-@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
-.chart-box {
-  background: #fff; border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 16px;
+.chart-inner { padding:10px 16px 6px; min-height:0; position:relative; }
+.chart-row {
+  display:grid; grid-template-columns:1fr 1fr;
+  background:var(--bg-1); border-bottom:1px solid var(--border); overflow:hidden;
 }
-.chart-box h3 { font-size: 13px; color: #1a2e4a; margin-bottom: 12px; font-weight: 600; }
-.chart-box canvas { max-height: 300px; }
+.chart-box { padding:10px 16px 6px; min-height:0; border-right:1px solid var(--border); }
+.chart-box:last-child { border-right:0; }
+.chart-ttl {
+  font:600 9px/1 sans-serif; color:var(--text-faint);
+  letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px;
+}
+canvas { display:block; width:100% !important; }
 
-footer { text-align: center; padding: 16px; color: #aab; font-size: 11px; }
+/* ── Table ── */
+.table-wrap { overflow:auto; background:var(--bg-1); }
+table { width:100%; border-collapse:collapse; white-space:nowrap; }
+thead th {
+  background:var(--navy-1); color:#fff; padding:6px 8px;
+  border-right:1px solid var(--navy-2); font:600 9px/1 sans-serif;
+  letter-spacing:.07em; text-transform:uppercase;
+  text-align:center; vertical-align:bottom;
+}
+thead th.sortable { cursor:pointer; user-select:none; }
+thead th.sortable:hover { background:var(--navy-2); }
+thead th .si { margin-left:3px; font-size:8px; opacity:.4; }
+thead th.sort-asc  .si::after { content:"▲"; opacity:1; }
+thead th.sort-desc .si::after { content:"▼"; opacity:1; }
+thead th:not(.sort-asc):not(.sort-desc) .si::after { content:"⇅"; }
+th.sticky { position:sticky; left:0; z-index:3; background:var(--navy-1); }
+th.g-rev  { background:#0b2d5e !important; }
+th.g-mcu  { background:#093852 !important; }
+th.g-rd   { background:#0b3b3b !important; }
+th.g-etc  { background:#1c2a38 !important; }
+td {
+  padding:5px 8px; border-bottom:1px solid var(--border);
+  border-right:1px solid var(--bg-3);
+  vertical-align:middle; text-align:right; color:var(--text); font-size:11px;
+}
+td.l { text-align:left; } td.c { text-align:center; }
+td.sticky {
+  position:sticky; left:0; z-index:2; background:var(--bg-1);
+  border-right:2px solid var(--border-b);
+}
+tbody tr:hover td          { background:var(--bg-2); }
+tbody tr:hover td.sticky   { background:var(--bg-2); }
+.na   { color:var(--text-faint); }
+.pos  { color:var(--pos); }
+.neg  { color:var(--neg); }
+.co-cn  { font:600 12px/1.3 sans-serif; }
+.co-en  { font:10px/1 sans-serif; color:var(--text-faint); }
+.co-tag { font:8px/1 monospace; color:var(--text-faint); }
+.mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:3px; }
+
+/* ── Footer ── */
+footer {
+  display:flex; align-items:center; justify-content:center;
+  font:9px/1 sans-serif; color:var(--text-faint); border-top:1px solid var(--border);
+}
+
+/* ── Detail Panel ── */
+.detail-panel {
+  position:fixed; top:0; right:0; bottom:0; width:300px; z-index:100;
+  background:var(--bg-1); border-left:1px solid var(--border-b);
+  display:flex; flex-direction:column;
+  transform:translateX(100%); transition:transform .2s ease;
+  box-shadow:-4px 0 24px rgba(0,0,0,.12);
+}
+.detail-panel.open { transform:translateX(0); }
+.dp-head {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:12px 14px 10px; background:var(--navy-1); flex-shrink:0;
+}
+.dp-co-name { font:700 14px/1.3 sans-serif; color:#fff; }
+.dp-co-en   { font:10px/1.4 sans-serif; color:var(--cyan-2); margin-top:2px; }
+.dp-co-tag  { font:10px/1 monospace; color:var(--navy-3); margin-top:4px; }
+.dp-close {
+  background:transparent; border:none; color:var(--navy-3);
+  font:16px/1 sans-serif; cursor:pointer; padding:2px 4px; flex-shrink:0;
+  line-height:1;
+}
+.dp-close:hover { color:#fff; }
+.dp-body { flex:1; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:14px; }
+.dp-section-ttl {
+  font:700 8px/1 sans-serif; color:var(--text-faint);
+  text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;
+  display:flex; align-items:center; gap:6px;
+}
+.dp-section-ttl::after { content:""; flex:1; height:1px; background:var(--border); }
+.dp-strat-box {
+  background:var(--bg-2); border:1px solid var(--border); border-radius:3px;
+  padding:8px 10px; font:11px/1.5 sans-serif; color:var(--text-dim);
+}
+.dp-strat-badge {
+  display:inline-block; font:600 9px/1 monospace; letter-spacing:.06em;
+  text-transform:uppercase; padding:2px 5px; border-radius:2px;
+  background:var(--bg-3); color:var(--text); margin-bottom:6px;
+}
+.dp-strat-note { font:10px/1.5 sans-serif; color:var(--text-dim); }
+.dp-chart-wrap { position:relative; height:110px; }
+.dp-metrics {
+  display:grid; grid-template-columns:1fr 1fr; gap:6px;
+}
+.dp-metric {
+  background:var(--bg-2); border:1px solid var(--border); border-radius:3px;
+  padding:6px 8px;
+}
+.dp-metric-lbl { font:600 8px/1 sans-serif; color:var(--text-faint); text-transform:uppercase; letter-spacing:.07em; }
+.dp-metric-val { font:700 14px/1.3 sans-serif; color:var(--text); margin-top:3px; }
+.dp-metric-sub { font:9px/1.2 sans-serif; color:var(--text-dim); margin-top:2px; }
+.dp-metric-pos  { color:var(--pos); }
+.dp-metric-neg  { color:var(--neg); }
+.dp-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.18);
+  z-index:99; cursor:pointer;
+}
+.dp-overlay.open { display:block; }
+/* Shrink table when panel is open */
+body.panel-open .table-wrap { padding-right:308px; }
 </style>
 </head>
 <body>
+<div class="frame">
 
-<header>
-  <div>
-    <h1>MCU Regional Competitor Dashboard</h1>
-    <div class="sub">中国大陆MCU竞争格局 · 11家上市公司 · AKShare + 年报 + 招股书</div>
+<!-- ── Header ── -->
+<header class="hdr">
+  <div class="brand">
+    <span class="mark">M</span>
+    <span class="ttl">MCU.CN</span>
+    <span class="sep">/</span>
+    <span class="sub">中国大陆 MCU 上市公司 · 年报与推算</span>
   </div>
-  <div id="gen-date"></div>
+  <div class="hdr-r">
+    <span class="hdr-meta" id="hdr-meta"></span>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">◑ Dark</button>
+  </div>
 </header>
 
+<!-- ── Pipeline strip ── -->
+<div class="pipeline">
+  <div class="pipe-lbl">FY&nbsp;<span id="pipe-year">2024</span></div>
+  <div id="pipe-cards" style="display:contents"></div>
+</div>
+
+<!-- ── Controls ── -->
 <div class="controls">
-  <label>显示年份：<select id="year-sel"></select></label>
+  <div class="ctrl-grp">
+    <label>年份</label>
+    <select class="ctrl-sel" id="year-sel"></select>
+  </div>
+  <div class="ctrl-grp">
+    <label>搜索</label>
+    <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…">
+  </div>
   <div class="legend">
     <span><span class="dot dc">●</span>已填入（有来源）</span>
     <span><span class="dot dd">●</span>推算（高置信）</span>
-    <span><span class="dot dp">●</span>需补充历史</span>
-    <span><span class="dot du">●</span>无法直接获取</span>
-    <span><span class="dot dn">●</span>不适用</span>
+    <span><span class="dot dp">●</span>待补充</span>
+    <span><span class="dot du">●</span>缺失</span>
   </div>
 </div>
 
+<!-- ── MCU Stacked Chart ── -->
+<div class="chart-full">
+  <div class="chart-axis-lbl">MCU Rev M$</div>
+  <div class="chart-inner"><canvas id="c-mcu"></canvas></div>
+</div>
+
+<!-- ── Rev + RD Charts ── -->
+<div class="chart-row">
+  <div class="chart-box">
+    <div class="chart-ttl">总营收 vs MCU 营收（M$）&nbsp;·&nbsp;<span id="lbl-rev">2024</span></div>
+    <canvas id="c-rev"></canvas>
+  </div>
+  <div class="chart-box">
+    <div class="chart-ttl">研发费用占营收比（%）&nbsp;·&nbsp;<span id="lbl-rd">2024</span></div>
+    <canvas id="c-rd"></canvas>
+  </div>
+</div>
+
+<!-- ── Table ── -->
 <div class="table-wrap">
-<table id="main-table">
+<table id="tbl">
 <thead>
   <tr>
     <th class="sticky" rowspan="2">公司</th>
-    <th rowspan="2">成立 / 上市</th>
+    <th rowspan="2">成立/上市</th>
     <th rowspan="2">核心架构</th>
-    <th colspan="3" class="g-rev">总营收</th>
-    <th colspan="3" class="g-mcu">MCU 营收</th>
-    <th rowspan="2" class="g-rd">代工厂</th>
-    <th colspan="2" class="g-rd">研发</th>
-    <th rowspan="2" class="g-etc">员工数</th>
-    <th rowspan="2" class="g-etc">MCU数据说明</th>
-    <th rowspan="2" class="g-etc">更新日期</th>
-  </tr>
-  <tr>
-    <th class="g-rev">M$</th><th class="g-rev">YoY%</th><th class="g-rev">CAGR</th>
-    <th class="g-mcu">M$</th><th class="g-mcu">YoY%</th><th class="g-mcu">占比%</th>
-    <th class="g-rd">M$</th><th class="g-rd">占收%</th>
+    <th class="g-rev sortable" data-col="rev" rowspan="1">总营收 M$<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="cagr">CAGR<span class="si"></span></th>
+    <th class="g-mcu" rowspan="2" style="min-width:80px">MCU&nbsp;8年</th>
+    <th class="g-mcu sortable" data-col="mcu">MCU M$<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
+    <th class="g-etc" rowspan="2">代工厂</th>
+    <th class="g-rd sortable" data-col="rd">研发 M$<span class="si"></span></th>
+    <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
+    <th class="g-etc sortable" data-col="emp">员工<span class="si"></span></th>
   </tr>
 </thead>
 <tbody id="tbody">
-  <tr><td colspan="15" style="text-align:center;padding:32px;color:#aaa;">
-    加载中… 如长时间无响应，请先运行 <code>python fetch_mcu_data.py</code>
+  <tr><td colspan="14" style="text-align:center;padding:48px;color:var(--text-faint)">
+    加载中…&ensp;如数据为空请先运行 <code>python fetch_mcu_data.py</code>
   </td></tr>
 </tbody>
 </table>
 </div>
 
-<div class="chart-full">
-  <h3>MCU 营收规模（M$）· 堆叠柱状图 · 2018–2025</h3>
-  <canvas id="c-mcu"></canvas>
-</div>
-
-<div class="charts">
-  <div class="chart-box">
-    <h3>总营收 vs MCU营收（M$）· <span id="lbl-rev">2024</span></h3>
-    <canvas id="c-rev"></canvas>
-  </div>
-  <div class="chart-box">
-    <h3>研发费用占营收比（%）· <span id="lbl-rd">2024</span></h3>
-    <canvas id="c-rd"></canvas>
-  </div>
-</div>
-
+<!-- ── Footer ── -->
 <footer>
-  数据来源：AKShare 东方财富接口 · 公司年报 · IPO招股书 ·
-  MCU推算方法详见 companies_meta.json / mcu_known_data.json
+  AKShare · 东方财富 · 公司年报 · IPO招股书 — MCU推算方法见 companies_meta.json / mcu_known_data.json
 </footer>
 
+</div>
+
+<!-- ── Detail Panel ── -->
+<div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
+<aside class="detail-panel" id="detail-panel">
+  <div class="dp-head">
+    <div>
+      <div class="dp-co-name" id="dp-name">—</div>
+      <div class="dp-co-en"  id="dp-en"></div>
+      <div class="dp-co-tag" id="dp-tag"></div>
+    </div>
+    <button class="dp-close" onclick="closeDetail()" title="关闭">✕</button>
+  </div>
+  <div class="dp-body">
+
+    <div>
+      <div class="dp-section-ttl">MCU 口径策略</div>
+      <div class="dp-strat-box">
+        <div class="dp-strat-badge" id="dp-strat-badge">—</div>
+        <div class="dp-strat-note" id="dp-strat-note"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="dp-section-ttl">8年 总营收 vs MCU 营收 (M$)</div>
+      <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
+    </div>
+
+    <div>
+      <div class="dp-section-ttl">关键指标 · <span id="dp-metric-year">2024</span></div>
+      <div class="dp-metrics" id="dp-metrics"></div>
+    </div>
+
+  </div>
+</aside>
+
 <script>
-const COLORS = [
-  '#1565c0','#2e7d32','#e65100','#6a1b9a','#c62828',
-  '#00838f','#ef6c00','#283593','#00695c','#f9a825','#ad1457'
-];
 const ORDER = [
   '603986','300327','688380','300077','688279',
-  '002180','688385','688694','688595','688391','688018'
+  '002180','688385','688694','688595','688391','688018',
 ];
+const STRAT_LBL = {
+  segment_reported:'SEG·RPT', total_proxy:'TOTAL×k',
+  total_revenue:'TOTAL=MCU', subsidiary_geehy:'SUBSID.',
+  segment_estimated:'SEG·EST', estimated:'ESTIM.',
+};
+const CONF_BORDER = {
+  high:'var(--pos)', medium:'var(--yel-1)', low:'var(--neg)', na:'var(--text-faint)',
+};
 const DOT = {
-  reported:'dc', derived:'dd', estimated:'dp', unavailable:'du', na:'dn'
+  reported:'dc', derived:'dd', estimated:'dp', unavailable:'du', na:'dn',
+};
+const CO_COLORS = [
+  '#03234b','#3cb4e6','#ffd200','#e6007e','#425a78',
+  '#6dc7ec','#ec409e','#8191a5','#9dd9f2','#ffe87f','#f27fbe',
+];
+
+let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
+const $ = id => document.getElementById(id);
+
+// ── Theme ─────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  $('theme-btn').textContent = dark ? '◑ Dark' : '☀ Light';
+  localStorage.setItem('mcu-theme', dark ? 'light' : 'dark');
+  applyChartTheme();
+}
+function applyChartTheme() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+  const tick = dark ? '#7d94b3' : '#8191a5';
+  Object.values(charts).forEach(c => {
+    if (!c) return;
+    ['x','y'].forEach(ax => {
+      if (c.options.scales?.[ax]) {
+        c.options.scales[ax].ticks.color = tick;
+        if (c.options.scales[ax].grid) c.options.scales[ax].grid.color = grid;
+      }
+    });
+    if (c.options.plugins?.legend?.labels) c.options.plugins.legend.labels.color = tick;
+    c.update('none');
+  });
+  // also update the detail panel mini chart
+  if (dpChart) {
+    ['x','y'].forEach(ax => {
+      if (dpChart.options.scales?.[ax]) {
+        dpChart.options.scales[ax].ticks.color = tick;
+        if (dpChart.options.scales[ax].grid) dpChart.options.scales[ax].grid.color = grid;
+      }
+    });
+    if (dpChart.options.plugins?.legend?.labels) dpChart.options.plugins.legend.labels.color = tick;
+    dpChart.update('none');
+  }
+}
+// Restore saved theme on load
+(function () {
+  if (localStorage.getItem('mcu-theme') === 'dark') {
+    document.documentElement.dataset.theme = 'dark';
+    document.addEventListener('DOMContentLoaded', () => {
+      $('theme-btn').textContent = '☀ Light';
+    });
+  }
+})();
+
+// ── Formatters ────────────────────────────────────────────────────────────
+const fN   = (v, d=1) => v != null ? Number(v).toFixed(d) : '<span class="na">—</span>';
+const fYoY = v => {
+  if (v == null) return '<span class="na">—</span>';
+  return `<span class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${v.toFixed(1)}%</span>`;
+};
+const fEmp = v => v != null ? Number(v).toLocaleString('zh-CN') : '<span class="na">—</span>';
+const mcuN = (v, dt) =>
+  `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fN(v)}</div>`;
+const mcuY = (v, dt) =>
+  `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fYoY(v)}</div>`;
+const mcuW = (v, dt) => {
+  const s = v != null ? v.toFixed(1) + '%' : '<span class="na">—</span>';
+  return `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
 };
 
-let G = null, charts = {};
-
-function dc(v) { return DOT[v] || 'dn'; }
-
-function fNum(v, d=1) {
-  return v != null ? Number(v).toFixed(d) : '<span class="na">—</span>';
-}
-function fYoY(v) {
-  if (v == null) return '<span class="na">—</span>';
-  return `<span class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
-}
-function fEmp(v) {
-  return v != null ? Number(v).toLocaleString('zh-CN') : '<span class="na">—</span>';
-}
-function mcuNum(v, dt) {
-  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${fNum(v)}</div>`;
-}
-function mcuYoY(v, dt) {
-  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${fYoY(v)}</div>`;
-}
-function mcuWt(v, dt) {
-  const s = v != null ? v.toFixed(1)+'%' : '<span class="na">—</span>';
-  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${s}</div>`;
+// ── Sparkline ─────────────────────────────────────────────────────────────
+function sparkline(values, w=76, h=22) {
+  const pts = values.map((v, i) => v != null ? {i, v} : null).filter(Boolean);
+  if (pts.length < 2) return '<span class="na" style="font-size:9px">—</span>';
+  const hi = Math.max(...pts.map(p => p.v));
+  const lo = Math.min(...pts.map(p => p.v));
+  const span = hi - lo || 1;
+  const n = values.length - 1;
+  const coords = pts.map(({i, v}) =>
+    `${(i / n * w).toFixed(1)},${((1 - (v - lo) / span) * (h - 5) + 2.5).toFixed(1)}`
+  ).join(' ');
+  const last = pts[pts.length - 1];
+  const lx = (last.i / n * w).toFixed(1);
+  const ly = ((1 - (last.v - lo) / span) * (h - 5) + 2.5).toFixed(1);
+  const col = last.v >= pts[0].v ? 'var(--pos)' : 'var(--neg)';
+  return `<svg width="${w}" height="${h}" style="display:block;overflow:visible">
+    <polyline fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" points="${coords}"/>
+    <circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/>
+  </svg>`;
 }
 
-function symbols(data) {
-  return ORDER.filter(s => data.companies && data.companies[s]);
-}
-
-function renderTable(data, year) {
-  ['lbl-rev','lbl-rd'].forEach(id => document.getElementById(id).textContent = year);
-  const rows = symbols(data).map(sym => {
+// ── Pipeline ──────────────────────────────────────────────────────────────
+function renderPipeline(data, year) {
+  $('pipe-year').textContent = year;
+  $('pipe-cards').innerHTML = ORDER.filter(s => data.companies[s]).map(sym => {
     const co = data.companies[sym];
-    const m = co.meta || {};
-    const f = (co.financials || {})[String(year)] || {};
+    const m  = co.meta || {};
+    const f  = (co.financials || {})[String(year)] || {};
+    const conf = m.mcu_confidence || 'na';
+    const strat = STRAT_LBL[m.mcu_strategy] || '?';
+    const border = CONF_BORDER[conf] || CONF_BORDER.na;
+    return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}">
+      <span class="fp-sym">${sym}</span>
+      <span class="fp-name">${m.name_cn || sym}</span>
+      <span class="fp-badge">${strat}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Table sort helper ─────────────────────────────────────────────────────
+function sortVal(sym, year, col) {
+  const f = (G.companies[sym].financials || {})[String(year)] || {};
+  switch (col) {
+    case 'rev':     return f.total_revenue_musd;
+    case 'rev_yoy': return f.revenue_yoy_pct;
+    case 'cagr':    return f.cagr_pct;
+    case 'mcu':     return f.mcu_revenue_musd;
+    case 'mcu_yoy': return f.mcu_yoy_pct;
+    case 'wt':      return f.mcu_weight_pct;
+    case 'rd':      return f.rd_expense_musd;
+    case 'rd_pct':  return f.rd_pct;
+    case 'emp':     return f.employee_count;
+    default:        return null;
+  }
+}
+
+// ── Table render ──────────────────────────────────────────────────────────
+function renderTable(year, query) {
+  ['lbl-rev', 'lbl-rd'].forEach(id => $(id).textContent = year);
+  const q = (query || '').toLowerCase();
+
+  let syms = ORDER.filter(s => G.companies[s]).filter(s => {
+    if (!q) return true;
+    const m = G.companies[s].meta || {};
+    return s.includes(q)
+      || (m.name_cn || '').toLowerCase().includes(q)
+      || (m.name_en || '').toLowerCase().includes(q)
+      || (m.foundry_fab || '').toLowerCase().includes(q)
+      || (m.core_license || '').toLowerCase().includes(q);
+  });
+
+  if (sortState.col) {
+    syms = [...syms].sort((a, b) => {
+      const va = sortVal(a, year, sortState.col);
+      const vb = sortVal(b, year, sortState.col);
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      return sortState.dir === 'asc' ? va - vb : vb - va;
+    });
+  }
+
+  const allYears = G.years || [];
+  const rows = syms.map(sym => {
+    const co = G.companies[sym];
+    const m  = co.meta || {};
+    const f  = (co.financials || {})[String(year)] || {};
     const dt = f.mcu_data_type || 'unavailable';
     const cagr = f.cagr_pct != null
-      ? `<span title="${f.cagr_label||''}">${f.cagr_pct.toFixed(1)}%</span>`
+      ? `<span title="${f.cagr_label || ''}">${f.cagr_pct.toFixed(1)}%</span>`
       : '<span class="na">—</span>';
-    const note = (f.mcu_source || m.mcu_note || '—').replace(/</g,'&lt;');
-    return `<tr>
+    const spkVals = allYears.map(y => (co.financials[y] || {}).mcu_revenue_musd ?? null);
+    return `<tr style="cursor:pointer" onclick="openDetail('${sym}')">
       <td class="sticky l">
-        <div class="cn">${m.name_cn||sym}</div>
-        <div class="en">${m.name_en||''}</div>
-        <div class="sym">${sym}·${m.market||''}</div>
+        <div class="co-cn">${m.name_cn || sym}</div>
+        <div class="co-en">${m.name_en || ''}</div>
+        <div class="co-tag">${sym}&nbsp;·&nbsp;${m.market || ''}</div>
       </td>
-      <td class="c">${m.founded_year||'—'} / ${m.listed_year||'—'}</td>
-      <td class="l" style="max-width:150px;white-space:normal;font-size:11px">${m.core_license||'—'}</td>
-      <td>${fNum(f.total_revenue_musd)}</td>
+      <td class="c" style="font-size:10px">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
+      <td class="l" style="max-width:130px;white-space:normal;font-size:10px;color:var(--text-dim)">${m.core_license || '—'}</td>
+      <td>${fN(f.total_revenue_musd)}</td>
       <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="c">${cagr}</td>
-      <td>${mcuNum(f.mcu_revenue_musd, dt)}</td>
-      <td class="c">${mcuYoY(f.mcu_yoy_pct, dt)}</td>
-      <td class="c">${mcuWt(f.mcu_weight_pct, dt)}</td>
-      <td class="l" style="font-size:11px">${m.foundry_fab||'—'}</td>
-      <td>${fNum(f.rd_expense_musd)}</td>
-      <td class="c">${f.rd_pct!=null ? f.rd_pct.toFixed(1)+'%' : '<span class="na">—</span>'}</td>
+      <td class="c" style="padding:4px 8px">${sparkline(spkVals)}</td>
+      <td>${mcuN(f.mcu_revenue_musd, dt)}</td>
+      <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
+      <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
+      <td class="l" style="font-size:10px;color:var(--text-dim);max-width:120px;white-space:normal">${m.foundry_fab || '—'}</td>
+      <td>${fN(f.rd_expense_musd)}</td>
+      <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
-      <td class="l" style="font-size:10px;max-width:140px;white-space:normal;color:#7a9abb">${note}</td>
-      <td class="c" style="font-size:11px">${data.generated_at||'—'}</td>
     </tr>`;
   });
-  document.getElementById('tbody').innerHTML = rows.join('') ||
-    '<tr><td colspan="15" style="text-align:center;color:#aaa;padding:24px">暂无数据</td></tr>';
+
+  $('tbody').innerHTML = rows.join('') ||
+    '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--text-faint)">无匹配结果</td></tr>';
+
+  document.querySelectorAll('thead th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === sortState.col) th.classList.add('sort-' + sortState.dir);
+  });
 }
 
-function renderMCU(data) {
-  const syms = symbols(data);
-  const years = (data.years||[]).filter(y => y>=2018 && y<=2025);
-  const datasets = syms.map((sym, i) => {
-    const co = data.companies[sym];
-    return {
-      label: (co.meta||{}).name_cn || sym,
-      data: years.map(y => ((co.financials||{})[String(y)]||{}).mcu_revenue_musd ?? null),
-      backgroundColor: COLORS[i % COLORS.length],
-      stack: 'mcu',
-    };
-  });
-  const ctx = document.getElementById('c-mcu').getContext('2d');
+// ── Chart helpers ─────────────────────────────────────────────────────────
+function cOpts(extra = {}) {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const tick = dark ? '#7d94b3' : '#8191a5';
+  const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+  return {
+    responsive:true, maintainAspectRatio:false, animation:false,
+    plugins:{ legend:{ position:'bottom', labels:{ font:{size:10}, boxWidth:10, color:tick, padding:6 } } },
+    scales:{
+      x:{ ticks:{ font:{size:10}, color:tick }, grid:{ color:grid } },
+      y:{ ticks:{ font:{size:10}, color:tick }, grid:{ color:grid } },
+    },
+    ...extra,
+  };
+}
+
+function syms() { return ORDER.filter(s => G.companies[s]); }
+
+function renderMCU() {
+  const years = (G.years || []).filter(y => y >= 2018);
+  const datasets = syms().map((s, i) => ({
+    label: (G.companies[s].meta || {}).name_cn || s,
+    data: years.map(y => (G.companies[s].financials[y] || {}).mcu_revenue_musd ?? null),
+    backgroundColor: CO_COLORS[i % CO_COLORS.length],
+    stack:'mcu', spanGaps:false,
+  }));
+  const ctx = $('c-mcu').getContext('2d');
   if (charts.mcu) charts.mcu.destroy();
   charts.mcu = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: years.map(String), datasets },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { font:{size:10}, boxWidth:10 } },
-        tooltip: { callbacks: { label: c =>
-          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}` } }
+    type:'bar', data:{ labels:years.map(String), datasets },
+    options: cOpts({
+      scales:{
+        x:{ stacked:true, ticks:{font:{size:10}} },
+        y:{ stacked:true, ticks:{font:{size:10}},
+            title:{display:true, text:'M$', font:{size:9}} },
       },
-      scales: {
-        x: { stacked:true, ticks:{font:{size:11}} },
-        y: { stacked:true, title:{display:true,text:'M$',font:{size:11}}, ticks:{font:{size:11}} }
-      }
-    }
+      plugins:{
+        legend:{ position:'bottom', labels:{font:{size:10},boxWidth:10,padding:5} },
+        tooltip:{ callbacks:{ label:c =>
+          `${c.dataset.label}: ${c.parsed.y != null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}` } },
+      },
+    }),
   });
 }
 
-function renderRev(data, year) {
-  const syms = symbols(data);
-  const labels = syms.map(s => (data.companies[s].meta||{}).name_cn || s);
-  const ctx = document.getElementById('c-rev').getContext('2d');
+function renderRev(year) {
+  const ss = syms();
+  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
+  const ctx = $('c-rev').getContext('2d');
   if (charts.rev) charts.rev.destroy();
   charts.rev = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label:'总营收', data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).total_revenue_musd ?? null), backgroundColor:'#90bce8' },
-        { label:'MCU营收', data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).mcu_revenue_musd ?? null), backgroundColor:'#1565c0' },
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position:'bottom', labels:{font:{size:10},boxWidth:10} },
-        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } }
-      },
-      scales: {
-        x: { ticks:{font:{size:10}} },
-        y: { title:{display:true,text:'M$',font:{size:11}}, ticks:{font:{size:11}} }
-      }
-    }
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'总营收', data:ss.map(s => (G.companies[s].financials[year]||{}).total_revenue_musd??null),
+        backgroundColor:'#9dd9f2', spanGaps:false },
+      { label:'MCU营收', data:ss.map(s => (G.companies[s].financials[year]||{}).mcu_revenue_musd??null),
+        backgroundColor:'#03234b', spanGaps:false },
+    ]},
+    options: cOpts({
+      plugins:{ tooltip:{ callbacks:{ label:c =>
+        `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } } },
+    }),
   });
 }
 
-function renderRD(data, year) {
-  const syms = symbols(data);
-  const labels = syms.map(s => (data.companies[s].meta||{}).name_cn || s);
-  const ctx = document.getElementById('c-rd').getContext('2d');
+function renderRD(year) {
+  const ss = syms();
+  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
+  const ctx = $('c-rd').getContext('2d');
   if (charts.rd) charts.rd.destroy();
   charts.rd = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label:'研发占营收%',
-        data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).rd_pct ?? null),
-        backgroundColor:'#2e7d32',
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend:{display:false},
-        tooltip:{ callbacks:{ label: c => `研发率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } }
-      },
-      scales: {
-        x: { ticks:{font:{size:10}} },
-        y: { title:{display:true,text:'%',font:{size:11}}, ticks:{font:{size:11},callback:v=>v+'%'} }
-      }
-    }
+    type:'bar',
+    data:{ labels, datasets:[{
+      label:'研发率%',
+      data:ss.map(s => (G.companies[s].financials[year]||{}).rd_pct??null),
+      backgroundColor:'#1a8a4e', spanGaps:false,
+    }]},
+    options: cOpts({
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c =>
+        `研发率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } } },
+      scales:{ y:{ ticks:{ callback:v => v+'%' } } },
+    }),
   });
 }
 
+// ResizeObserver wiring
+function watchResize(canvasId, key) {
+  const el = $(canvasId)?.parentElement;
+  if (!el) return;
+  new ResizeObserver(() => { if (charts[key]) charts[key].resize(); }).observe(el);
+}
+
+// ── Detail Panel ─────────────────────────────────────────────────────────
+function openDetail(sym) {
+  if (!G || !G.companies[sym]) return;
+  const co = G.companies[sym];
+  const m  = co.meta || {};
+  const fin = co.financials || {};
+  const allYears = G.years || [];
+
+  // Header
+  $('dp-name').textContent = m.name_cn || sym;
+  $('dp-en').textContent   = m.name_en || '';
+  $('dp-tag').textContent  = `${sym} · ${m.market || ''} · 成立${m.founded_year||'?'} / 上市${m.listed_year||'?'}`;
+
+  // Strategy
+  $('dp-strat-badge').textContent = STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '?';
+  const confColor = CONF_BORDER[m.mcu_confidence || 'na'];
+  $('dp-strat-badge').style.borderLeft = `3px solid ${confColor}`;
+  let noteText = m.mcu_note || '';
+  if (m.mcu_multiplier != null && m.mcu_strategy === 'total_proxy') {
+    noteText = `MCU ≈ 总营收 × ${m.mcu_multiplier}` + (noteText ? `\n${noteText}` : '');
+  } else if (m.mcu_strategy === 'total_revenue') {
+    noteText = 'MCU 营收 = 总营收（纯MCU公司）' + (noteText ? `\n${noteText}` : '');
+  }
+  $('dp-strat-note').textContent = noteText;
+
+  // Mini chart
+  const labels = allYears.map(String);
+  const revData = allYears.map(y => (fin[y] || {}).total_revenue_musd ?? null);
+  const mcuData = allYears.map(y => (fin[y] || {}).mcu_revenue_musd ?? null);
+
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const tick = dark ? '#7d94b3' : '#8191a5';
+  const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  if (dpChart) { dpChart.destroy(); dpChart = null; }
+  dpChart = new Chart($('dp-chart').getContext('2d'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'总营收', data:revData, backgroundColor:'rgba(61,180,230,.35)', spanGaps:false },
+      { label:'MCU', data:mcuData, backgroundColor:'#03234b', spanGaps:false },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:9}, boxWidth:8, color:tick, padding:5 } },
+        tooltip:{ callbacks:{ label:c =>
+          `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } },
+      },
+      scales:{
+        x:{ ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+        y:{ ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+      },
+    },
+  });
+
+  // Metrics — use the currently selected year
+  const selYear = +$('year-sel').value || 2024;
+  $('dp-metric-year').textContent = selYear;
+  const f = (fin[selYear] || {});
+  const metrics = [
+    { lbl:'总营收', val: f.total_revenue_musd != null ? f.total_revenue_musd.toFixed(1)+' M$' : '—', sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '', cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+    { lbl:'MCU 营收', val: f.mcu_revenue_musd != null ? f.mcu_revenue_musd.toFixed(1)+' M$' : '—', sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '', cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+    { lbl:'MCU 占比', val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—', sub: (STRAT_LBL[m.mcu_strategy]||'') },
+    { lbl:'研发费用', val: f.rd_expense_musd != null ? f.rd_expense_musd.toFixed(1)+' M$' : '—', sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+'% of Rev' : '' },
+    { lbl:'毛利率', val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—', sub: '' },
+    { lbl:'员工人数', val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—', sub: '' },
+  ];
+  $('dp-metrics').innerHTML = metrics.map(me => `
+    <div class="dp-metric">
+      <div class="dp-metric-lbl">${me.lbl}</div>
+      <div class="dp-metric-val">${me.val}</div>
+      ${me.sub ? `<div class="dp-metric-sub ${me.cls}">${me.sub}</div>` : ''}
+    </div>`).join('');
+
+  // Open
+  $('detail-panel').classList.add('open');
+  $('dp-overlay').classList.add('open');
+  document.body.classList.add('panel-open');
+}
+
+function closeDetail() {
+  $('detail-panel').classList.remove('open');
+  $('dp-overlay').classList.remove('open');
+  document.body.classList.remove('panel-open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch('/data.json');
     if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
     G = await res.json();
 
-    document.getElementById('gen-date').textContent =
-      G.generated_at ? '数据日期：' + G.generated_at : '';
+    $('hdr-meta').innerHTML = G.generated_at
+      ? `数据日期&nbsp;<b>${G.generated_at}</b>`
+      : '<span style="color:var(--neg)">请运行 fetch_mcu_data.py</span>';
 
-    const years = (G.years || [2018,2019,2020,2021,2022,2023,2024,2025]).slice().reverse();
-    const sel = document.getElementById('year-sel');
+    // Year selector
+    const years = (G.years || []).slice().reverse();
+    const sel = $('year-sel');
     years.forEach(y => {
       const o = document.createElement('option');
       o.value = y; o.textContent = y;
       if (y === 2024) o.selected = true;
       sel.appendChild(o);
     });
-
     const defYear = years.includes(2024) ? 2024 : years[0];
-    renderTable(G, defYear);
-    renderMCU(G);
-    renderRev(G, defYear);
-    renderRD(G, defYear);
 
+    // Sort header clicks
+    document.querySelectorAll('thead th.sortable').forEach(th =>
+      th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        sortState = (sortState.col === col && sortState.dir === 'desc')
+          ? { col, dir:'asc' } : { col, dir:'desc' };
+        renderTable(+sel.value, $('search').value);
+      })
+    );
+
+    // Search
+    $('search').addEventListener('input', e =>
+      renderTable(+sel.value, e.target.value)
+    );
+
+    // Year change
     sel.addEventListener('change', () => {
       const y = +sel.value;
-      renderTable(G, y);
-      renderRev(G, y);
-      renderRD(G, y);
+      renderPipeline(G, y);
+      renderTable(y, $('search').value);
+      renderRev(y); renderRD(y);
     });
-  } catch (e) {
-    document.getElementById('tbody').innerHTML =
-      `<tr><td colspan="15" style="text-align:center;color:#c62828;padding:32px">
-        数据加载失败：${e.message}<br><br>
-        <small>请先运行 <code>python fetch_mcu_data.py</code> 生成 data.json</small>
-      </td></tr>`;
+
+    // Initial render
+    renderPipeline(G, defYear);
+    renderTable(defYear, '');
+    renderMCU();
+    renderRev(defYear);
+    renderRD(defYear);
+
+    watchResize('c-mcu', 'mcu');
+    watchResize('c-rev', 'rev');
+    watchResize('c-rd', 'rd');
+
+    applyChartTheme();
+
+  } catch (err) {
+    $('tbody').innerHTML = `<tr><td colspan="14"
+      style="text-align:center;padding:48px;color:var(--neg)">
+      数据加载失败：${err.message}<br><br>
+      <small style="color:var(--text-faint)">请先运行 <code>python fetch_mcu_data.py</code></small>
+    </td></tr>`;
   }
 }
 

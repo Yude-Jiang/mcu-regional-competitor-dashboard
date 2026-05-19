@@ -217,6 +217,20 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
         row["rd_expense_musd"] = to_musd(rd, yr)
         row["mcu_revenue_musd"] = to_musd(mcu, yr)
 
+        # Filing metadata (for UI pipeline strip)
+        dt = row.get("mcu_data_type", "unavailable")
+        row["filing_status"] = (
+            "reported"  if dt == "reported"
+            else "derived"   if dt == "derived"
+            else "estimated" if mcu is not None
+            else "pending"
+        )
+        row["filing_date"] = f"{yr}-04-30"
+        row["data_coverage"] = round(
+            sum(1 for k in ["total_revenue_yuan", "rd_expense_yuan", "mcu_revenue_yuan"]
+                if row.get(k) is not None) / 3, 2
+        )
+
     # CAGR over available revenue range
     rev_map = {
         y: financials[y]["total_revenue_yuan"]
