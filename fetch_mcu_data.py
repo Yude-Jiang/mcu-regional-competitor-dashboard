@@ -20,6 +20,8 @@ try:
 except ImportError as e:
     sys.exit(f"Missing dependency: {e}\nInstall: pip install akshare pandas")
 
+import bq_writer
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-5s  %(message)s",
@@ -268,6 +270,16 @@ def process_symbol(symbol: str, meta: dict, known_mcu: dict) -> dict:
 
     fin = apply_mcu_strategy(fin, meta, known_mcu)
     fin = compute_metrics(fin)
+
+    # ── BigQuery sync (graceful no-op if BQ not configured) ──────────────────
+    if bq_writer.is_available():
+        written = 0
+        for yr, row in fin.items():
+            ok = bq_writer.write_financials(symbol, yr, row, meta, period="年报")
+            if ok:
+                written += 1
+        log.info("  BQ: wrote %d/%d rows for %s", written, len(fin), symbol)
+    # ─────────────────────────────────────────────────────────────────────────
 
     return {
         "meta": meta,

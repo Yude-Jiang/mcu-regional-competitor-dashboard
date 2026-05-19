@@ -16,6 +16,7 @@ Usage:
 """
 
 import json
+import logging
 import sys
 from pathlib import Path
 from datetime import date
@@ -25,6 +26,10 @@ try:
     import pandas as pd
 except ImportError as e:
     sys.exit(f"Missing dependency: {e}\nInstall: pip install akshare pandas")
+
+import bq_writer
+
+log = logging.getLogger(__name__)
 
 HERE = Path(__file__).parent
 
@@ -220,6 +225,53 @@ def merge_into_data_json(records: list[dict]) -> None:
     print(f"Merged {merged} record(s) into data.json")
 
 
+def sync_to_bigquery(records: list[dict]) -> None:
+    """Upsert yjbb fields (gross_margin_pct, net_income_yoy_pct) into BigQuery."""
+    if not bq_writer.is_available():
+        return
+
+    from google.cloud.bigquery import ScalarQueryParameter, QueryJobConfig
+
+    bq = bq_writer._get_client()
+    written = 0
+    for r in records:
+        sym = r["symbol"]
+        yr  = r["year"]
+
+        # Partial update: only overwrite yjbb fields, leave everything else alone
+        sql = f"""
+        MERGE `{bq_writer._PROJECT}.{bq_writer._DATASET}.financials` T
+        USING (SELECT @symbol AS symbol, @year AS year, @period AS period) S
+        ON T.symbol = S.symbol AND T.year = S.year AND T.period = S.period
+        WHEN MATCHED THEN UPDATE SET
+            gross_margin_pct   = COALESCE(@gross_margin_pct,   T.gross_margin_pct),
+            net_income_yoy_pct = COALESCE(@net_income_yoy_pct, T.net_income_yoy_pct),
+            revenue_yoy_pct    = COALESCE(@revenue_yoy_pct,    T.revenue_yoy_pct),
+            updated_at         = CURRENT_TIMESTAMP()
+        WHEN NOT MATCHED THEN INSERT
+            (symbol, year, period, gross_margin_pct, net_income_yoy_pct,
+             revenue_yoy_pct, updated_at)
+        VALUES
+            (@symbol, @year, @period, @gross_margin_pct, @net_income_yoy_pct,
+             @revenue_yoy_pct, CURRENT_TIMESTAMP())
+        """
+        params = [
+            ScalarQueryParameter("symbol",            "STRING",  sym),
+            ScalarQueryParameter("year",              "INT64",   yr),
+            ScalarQueryParameter("period",            "STRING",  "年报"),
+            ScalarQueryParameter("gross_margin_pct",  "FLOAT64", r.get("gross_margin_pct")),
+            ScalarQueryParameter("net_income_yoy_pct","FLOAT64", r.get("net_income_yoy_pct")),
+            ScalarQueryParameter("revenue_yoy_pct",   "FLOAT64", r.get("revenue_yoy_pct")),
+        ]
+        try:
+            bq.query(sql, job_config=QueryJobConfig(query_parameters=params)).result()
+            written += 1
+        except Exception as exc:
+            log.warning("BQ yjbb write failed %s %s: %s", sym, yr, exc)
+
+    print(f"BQ: synced {written}/{len(records)} yjbb record(s)")
+
+
 def main() -> None:
     no_merge = "--no-merge" in sys.argv
 
@@ -259,6 +311,8 @@ def main() -> None:
 
     if not no_merge:
         merge_into_data_json(all_records)
+
+    sync_to_bigquery(all_records)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,20 @@
 steps:
-- name: "gcr.io/cloud-builders/docker" 
-  args: ["build", "-t", "gcr.io/$PROJECT_ID/analog-pd-dashboard", "."]
-- name: "gcr.io/google.com/cloudsdktool/cloud-sdk" 
+- name: "gcr.io/cloud-builders/docker"
+  args: ["build", "-t", "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard", "."]
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
   entrypoint: "gcloud"
-  args: ["run", "deploy", "analog-pd-dashboard", "--image", "gcr.io/$PROJECT_ID/analog-pd-dashboard", "--region", "us-central1", "--platform", "managed", "--allow-unauthenticated"]
+  args:
+    - "run"
+    - "deploy"
+    - "mcu-regional-competitor-dashboard"
+    - "--image"
+    - "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard"
+    - "--region"
+    - "asia-east1"
+    - "--platform"
+    - "managed"
+    - "--allow-unauthenticated"
+    - "--set-env-vars"
+    - "GCP_PROJECT=$PROJECT_ID,BQ_DATASET=mcu,GCS_BUCKET=mcu-annual-reports"
+    - "--set-secrets"
+    - "DEEPSEEK_API_KEY=deepseek-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest"
