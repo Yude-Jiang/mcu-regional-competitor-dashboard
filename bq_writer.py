@@ -19,7 +19,9 @@ from typing import Any
 log = logging.getLogger(__name__)
 
 _BQ_DISABLED = os.environ.get("MCU_BQ_DISABLED", "").strip() == "1"
-_PROJECT     = os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+_PROJECT     = (os.environ.get("GCP_PROJECT")
+                or os.environ.get("GOOGLE_CLOUD_PROJECT")
+                or "st-china-ai-force")
 _DATASET     = os.environ.get("BQ_DATASET", "mcu")
 
 _client = None   # lazy-init

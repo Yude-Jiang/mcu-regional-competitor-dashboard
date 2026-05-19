@@ -15,6 +15,6 @@ steps:
     - "managed"
     - "--allow-unauthenticated"
     - "--set-env-vars"
-    - "GCP_PROJECT=$PROJECT_ID,BQ_DATASET=mcu,GCS_BUCKET=mcu-annual-reports"
+    - "GCP_PROJECT=$PROJECT_ID,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports"
     - "--set-secrets"
     - "DEEPSEEK_API_KEY=deepseek-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest"

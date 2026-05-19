@@ -30,8 +30,10 @@ import bq_writer
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-PROJECT   = os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT", "")
-BUCKET    = os.environ.get("GCS_BUCKET", "mcu-annual-reports")
+PROJECT   = (os.environ.get("GCP_PROJECT")
+             or os.environ.get("GOOGLE_CLOUD_PROJECT")
+             or "st-china-ai-force")
+BUCKET    = os.environ.get("GCS_BUCKET", "st-finance-reports")
 
 STOCK_MAP = {
     "603986": "兆易创新",

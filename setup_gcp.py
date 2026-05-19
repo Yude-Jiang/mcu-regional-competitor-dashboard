@@ -21,9 +21,9 @@ except ImportError:
 HERE = Path(__file__).parent
 
 BQ_DATASET    = "mcu"
-BQ_LOCATION   = "asia-east2"   # Hong Kong — accessible from mainland China
-GCS_BUCKET    = "mcu-annual-reports"
-GCS_LOCATION  = "asia-east2"
+BQ_LOCATION   = "asia-east1"   # Taiwan — accessible from mainland China
+GCS_BUCKET    = "st-finance-reports"   # shared bucket with st-china-ai-force project
+GCS_LOCATION  = "asia-east1"
 
 TABLES = [
     "financials",
@@ -33,14 +33,13 @@ TABLES = [
 ]
 
 
+DEFAULT_PROJECT = "st-china-ai-force"
+
 def get_project(args) -> str:
-    p = args.project or os.environ.get("GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
-    if not p:
-        sys.exit(
-            "GCP project not set. Use --project or set GCP_PROJECT env var.\n"
-            "  export GCP_PROJECT=your-project-id"
-        )
-    return p
+    return (args.project
+            or os.environ.get("GCP_PROJECT")
+            or os.environ.get("GOOGLE_CLOUD_PROJECT")
+            or DEFAULT_PROJECT)
 
 
 def create_dataset(bq: bigquery.Client, project: str, dry_run: bool) -> None:
