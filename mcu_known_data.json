@@ -1,0 +1,21 @@
+{
+  "_comment": "手工录入的MCU营收数据（M$）。优先级高于自动推算。来源：年报、招股书、投资者关系。",
+  "603986": {
+    "2024": {
+      "mcu_revenue_musd": 237.0,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新2024年报 分产品营业收入"
+    },
+    "_todo_2018_2023": "年报分产品表有MCU收入，待手工录入6个数字后补全YoY序列"
+  },
+  "688694": {
+    "2024": {
+      "mcu_revenue_musd": 72.9,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "普冉股份2024年报"
+    },
+    "_todo_2018_2021": "2022年招股书含2018-2021历史MCU数据，价值最高，待录入"
+  }
+}

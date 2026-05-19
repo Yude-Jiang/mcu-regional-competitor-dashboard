@@ -1,11 +1,376 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>Analog PD Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCU Regional Competitor Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #f0f2f5; color: #1a2e4a; font-size: 13px; }
+
+header {
+  background: #1a2e4a; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+}
+header h1 { font-size: 18px; font-weight: 700; }
+header .sub { font-size: 12px; color: #90aacb; margin-top: 3px; }
+#gen-date { font-size: 11px; color: #90aacb; }
+
+.controls {
+  background: #fff; border-bottom: 1px solid #dde3ec;
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.controls label { font-size: 12px; color: #5a7a9a; }
+.controls select {
+  margin-left: 6px; padding: 4px 8px; border: 1px solid #c0cfe0;
+  border-radius: 4px; font-size: 12px; color: #1a2e4a;
+}
+.legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11px; }
+.legend span { display: flex; align-items: center; gap: 4px; }
+.dc { color: #2e7d32; } .dd { color: #1565c0; }
+.dp { color: #e65100; } .du { color: #c62828; } .dn { color: #9e9e9e; }
+
+.table-wrap {
+  margin: 16px 24px; background: #fff; border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+thead tr:first-child th {
+  background: #1a2e4a; color: #fff; padding: 8px 10px;
+  font-size: 11px; font-weight: 600; border-right: 1px solid #2d4a7a; text-align: center;
+}
+thead tr:last-child th {
+  background: #2d4a7a; color: #c8ddf5; padding: 6px 10px;
+  font-size: 11px; font-weight: 500; border-right: 1px solid #3a5a8a; text-align: center;
+}
+th.g-rev { background: #1e3a6e !important; }
+th.g-mcu { background: #0d3b5e !important; }
+th.g-rd  { background: #1d4e4e !important; }
+th.g-etc { background: #2d3436 !important; }
+
+.sticky { position: sticky; left: 0; z-index: 2; }
+thead .sticky { background: #1a2e4a; }
+tbody .sticky { background: #fff; border-right: 2px solid #dde3ec; }
+tbody tr:hover .sticky { background: #f0f5ff; }
+
+td {
+  padding: 7px 10px; border-bottom: 1px solid #eef1f6;
+  border-right: 1px solid #f0f2f5; vertical-align: middle; text-align: right;
+}
+td.l { text-align: left; } td.c { text-align: center; }
+tbody tr:hover td { background: #f5f8ff; }
+
+.cn { font-weight: 600; font-size: 13px; }
+.en { font-size: 11px; color: #7a9abb; }
+.sym { font-size: 10px; color: #aabccc; font-family: monospace; }
+.pos { color: #2e7d32; } .neg { color: #c62828; }
+.na  { color: #bbb; }
+.mcu-cell { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.dot { font-size: 12px; flex-shrink: 0; }
+
+.chart-full {
+  margin: 0 24px 16px; background: #fff; border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 16px;
+}
+.chart-full h3 { font-size: 13px; color: #1a2e4a; margin-bottom: 12px; font-weight: 600; }
+.chart-full canvas { max-height: 340px; }
+.charts {
+  margin: 0 24px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+.chart-box {
+  background: #fff; border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 16px;
+}
+.chart-box h3 { font-size: 13px; color: #1a2e4a; margin-bottom: 12px; font-weight: 600; }
+.chart-box canvas { max-height: 300px; }
+
+footer { text-align: center; padding: 16px; color: #aab; font-size: 11px; }
+</style>
 </head>
 <body>
-  <h1>Analog PD Dashboard</h1>
-  <div id="content">Dashboard content goes here.</div>
+
+<header>
+  <div>
+    <h1>MCU Regional Competitor Dashboard</h1>
+    <div class="sub">中国大陆MCU竞争格局 · 11家上市公司 · AKShare + 年报 + 招股书</div>
+  </div>
+  <div id="gen-date"></div>
+</header>
+
+<div class="controls">
+  <label>显示年份：<select id="year-sel"></select></label>
+  <div class="legend">
+    <span><span class="dot dc">●</span>已填入（有来源）</span>
+    <span><span class="dot dd">●</span>推算（高置信）</span>
+    <span><span class="dot dp">●</span>需补充历史</span>
+    <span><span class="dot du">●</span>无法直接获取</span>
+    <span><span class="dot dn">●</span>不适用</span>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table id="main-table">
+<thead>
+  <tr>
+    <th class="sticky" rowspan="2">公司</th>
+    <th rowspan="2">成立 / 上市</th>
+    <th rowspan="2">核心架构</th>
+    <th colspan="3" class="g-rev">总营收</th>
+    <th colspan="3" class="g-mcu">MCU 营收</th>
+    <th rowspan="2" class="g-rd">代工厂</th>
+    <th colspan="2" class="g-rd">研发</th>
+    <th rowspan="2" class="g-etc">员工数</th>
+    <th rowspan="2" class="g-etc">MCU数据说明</th>
+    <th rowspan="2" class="g-etc">更新日期</th>
+  </tr>
+  <tr>
+    <th class="g-rev">M$</th><th class="g-rev">YoY%</th><th class="g-rev">CAGR</th>
+    <th class="g-mcu">M$</th><th class="g-mcu">YoY%</th><th class="g-mcu">占比%</th>
+    <th class="g-rd">M$</th><th class="g-rd">占收%</th>
+  </tr>
+</thead>
+<tbody id="tbody">
+  <tr><td colspan="15" style="text-align:center;padding:32px;color:#aaa;">
+    加载中… 如长时间无响应，请先运行 <code>python fetch_mcu_data.py</code>
+  </td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="chart-full">
+  <h3>MCU 营收规模（M$）· 堆叠柱状图 · 2018–2025</h3>
+  <canvas id="c-mcu"></canvas>
+</div>
+
+<div class="charts">
+  <div class="chart-box">
+    <h3>总营收 vs MCU营收（M$）· <span id="lbl-rev">2024</span></h3>
+    <canvas id="c-rev"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>研发费用占营收比（%）· <span id="lbl-rd">2024</span></h3>
+    <canvas id="c-rd"></canvas>
+  </div>
+</div>
+
+<footer>
+  数据来源：AKShare 东方财富接口 · 公司年报 · IPO招股书 ·
+  MCU推算方法详见 companies_meta.json / mcu_known_data.json
+</footer>
+
+<script>
+const COLORS = [
+  '#1565c0','#2e7d32','#e65100','#6a1b9a','#c62828',
+  '#00838f','#ef6c00','#283593','#00695c','#f9a825','#ad1457'
+];
+const ORDER = [
+  '603986','300327','688380','300077','688279',
+  '002180','688385','688694','688595','688391','688018'
+];
+const DOT = {
+  reported:'dc', derived:'dd', estimated:'dp', unavailable:'du', na:'dn'
+};
+
+let G = null, charts = {};
+
+function dc(v) { return DOT[v] || 'dn'; }
+
+function fNum(v, d=1) {
+  return v != null ? Number(v).toFixed(d) : '<span class="na">—</span>';
+}
+function fYoY(v) {
+  if (v == null) return '<span class="na">—</span>';
+  return `<span class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
+}
+function fEmp(v) {
+  return v != null ? Number(v).toLocaleString('zh-CN') : '<span class="na">—</span>';
+}
+function mcuNum(v, dt) {
+  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${fNum(v)}</div>`;
+}
+function mcuYoY(v, dt) {
+  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${fYoY(v)}</div>`;
+}
+function mcuWt(v, dt) {
+  const s = v != null ? v.toFixed(1)+'%' : '<span class="na">—</span>';
+  return `<div class="mcu-cell"><span class="dot ${dc(dt)}">●</span>${s}</div>`;
+}
+
+function symbols(data) {
+  return ORDER.filter(s => data.companies && data.companies[s]);
+}
+
+function renderTable(data, year) {
+  ['lbl-rev','lbl-rd'].forEach(id => document.getElementById(id).textContent = year);
+  const rows = symbols(data).map(sym => {
+    const co = data.companies[sym];
+    const m = co.meta || {};
+    const f = (co.financials || {})[String(year)] || {};
+    const dt = f.mcu_data_type || 'unavailable';
+    const cagr = f.cagr_pct != null
+      ? `<span title="${f.cagr_label||''}">${f.cagr_pct.toFixed(1)}%</span>`
+      : '<span class="na">—</span>';
+    const note = (f.mcu_source || m.mcu_note || '—').replace(/</g,'&lt;');
+    return `<tr>
+      <td class="sticky l">
+        <div class="cn">${m.name_cn||sym}</div>
+        <div class="en">${m.name_en||''}</div>
+        <div class="sym">${sym}·${m.market||''}</div>
+      </td>
+      <td class="c">${m.founded_year||'—'} / ${m.listed_year||'—'}</td>
+      <td class="l" style="max-width:150px;white-space:normal;font-size:11px">${m.core_license||'—'}</td>
+      <td>${fNum(f.total_revenue_musd)}</td>
+      <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
+      <td class="c">${cagr}</td>
+      <td>${mcuNum(f.mcu_revenue_musd, dt)}</td>
+      <td class="c">${mcuYoY(f.mcu_yoy_pct, dt)}</td>
+      <td class="c">${mcuWt(f.mcu_weight_pct, dt)}</td>
+      <td class="l" style="font-size:11px">${m.foundry_fab||'—'}</td>
+      <td>${fNum(f.rd_expense_musd)}</td>
+      <td class="c">${f.rd_pct!=null ? f.rd_pct.toFixed(1)+'%' : '<span class="na">—</span>'}</td>
+      <td class="c">${fEmp(f.employee_count)}</td>
+      <td class="l" style="font-size:10px;max-width:140px;white-space:normal;color:#7a9abb">${note}</td>
+      <td class="c" style="font-size:11px">${data.generated_at||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('tbody').innerHTML = rows.join('') ||
+    '<tr><td colspan="15" style="text-align:center;color:#aaa;padding:24px">暂无数据</td></tr>';
+}
+
+function renderMCU(data) {
+  const syms = symbols(data);
+  const years = (data.years||[]).filter(y => y>=2018 && y<=2025);
+  const datasets = syms.map((sym, i) => {
+    const co = data.companies[sym];
+    return {
+      label: (co.meta||{}).name_cn || sym,
+      data: years.map(y => ((co.financials||{})[String(y)]||{}).mcu_revenue_musd ?? null),
+      backgroundColor: COLORS[i % COLORS.length],
+      stack: 'mcu',
+    };
+  });
+  const ctx = document.getElementById('c-mcu').getContext('2d');
+  if (charts.mcu) charts.mcu.destroy();
+  charts.mcu = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: years.map(String), datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font:{size:10}, boxWidth:10 } },
+        tooltip: { callbacks: { label: c =>
+          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}` } }
+      },
+      scales: {
+        x: { stacked:true, ticks:{font:{size:11}} },
+        y: { stacked:true, title:{display:true,text:'M$',font:{size:11}}, ticks:{font:{size:11}} }
+      }
+    }
+  });
+}
+
+function renderRev(data, year) {
+  const syms = symbols(data);
+  const labels = syms.map(s => (data.companies[s].meta||{}).name_cn || s);
+  const ctx = document.getElementById('c-rev').getContext('2d');
+  if (charts.rev) charts.rev.destroy();
+  charts.rev = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'总营收', data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).total_revenue_musd ?? null), backgroundColor:'#90bce8' },
+        { label:'MCU营收', data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).mcu_revenue_musd ?? null), backgroundColor:'#1565c0' },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position:'bottom', labels:{font:{size:10},boxWidth:10} },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } }
+      },
+      scales: {
+        x: { ticks:{font:{size:10}} },
+        y: { title:{display:true,text:'M$',font:{size:11}}, ticks:{font:{size:11}} }
+      }
+    }
+  });
+}
+
+function renderRD(data, year) {
+  const syms = symbols(data);
+  const labels = syms.map(s => (data.companies[s].meta||{}).name_cn || s);
+  const ctx = document.getElementById('c-rd').getContext('2d');
+  if (charts.rd) charts.rd.destroy();
+  charts.rd = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label:'研发占营收%',
+        data: syms.map(s => ((data.companies[s].financials||{})[String(year)]||{}).rd_pct ?? null),
+        backgroundColor:'#2e7d32',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend:{display:false},
+        tooltip:{ callbacks:{ label: c => `研发率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } }
+      },
+      scales: {
+        x: { ticks:{font:{size:10}} },
+        y: { title:{display:true,text:'%',font:{size:11}}, ticks:{font:{size:11},callback:v=>v+'%'} }
+      }
+    }
+  });
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('/data.json');
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    G = await res.json();
+
+    document.getElementById('gen-date').textContent =
+      G.generated_at ? '数据日期：' + G.generated_at : '';
+
+    const years = (G.years || [2018,2019,2020,2021,2022,2023,2024,2025]).slice().reverse();
+    const sel = document.getElementById('year-sel');
+    years.forEach(y => {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y;
+      if (y === 2024) o.selected = true;
+      sel.appendChild(o);
+    });
+
+    const defYear = years.includes(2024) ? 2024 : years[0];
+    renderTable(G, defYear);
+    renderMCU(G);
+    renderRev(G, defYear);
+    renderRD(G, defYear);
+
+    sel.addEventListener('change', () => {
+      const y = +sel.value;
+      renderTable(G, y);
+      renderRev(G, y);
+      renderRD(G, y);
+    });
+  } catch (e) {
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="15" style="text-align:center;color:#c62828;padding:32px">
+        数据加载失败：${e.message}<br><br>
+        <small>请先运行 <code>python fetch_mcu_data.py</code> 生成 data.json</small>
+      </td></tr>`;
+  }
+}
+
+loadData();
+</script>
 </body>
 </html>
