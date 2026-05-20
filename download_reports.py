@@ -38,17 +38,19 @@ OUTPUT_DIR = Path(os.environ.get("LOCAL_REPORTS_DIR", "/content/finance_reports"
 #             ?keyWord=603986&maxNum=5
 
 COMPANY_INFO = {
-    "603986": {"name": "兆易创新", "orgId": "9900016927", "sse": "sh"},
-    "300327": {"name": "中颖电子", "orgId": "9900008973", "sse": "sz"},
-    "688380": {"name": "中微半导", "orgId": "9900034278", "sse": "sh"},
-    "300077": {"name": "国民技术", "orgId": "9900004862", "sse": "sz"},
-    "688279": {"name": "峰岹科技", "orgId": "9900031897", "sse": "sh"},
-    "002180": {"name": "纳思达",   "orgId": "9900003561", "sse": "sz"},
-    "688385": {"name": "复旦微电", "orgId": "9900029477", "sse": "sh"},
-    "688766": {"name": "普冉股份", "orgId": "9900037014", "sse": "sh"},
-    "688595": {"name": "芯海科技", "orgId": "9900030716", "sse": "sh"},
-    "688391": {"name": "钜泉科技", "orgId": "9900030963", "sse": "sh"},
-    "688018": {"name": "乐鑫科技", "orgId": "9900025958", "sse": "sh"},
+    # orgIds verified from CNINFO browser session (cninfo_user_browse cookie)
+    # 002180 displays as 奔图科技 on CNINFO (纳思达's Pantum-rebranded entity)
+    "603986": {"name": "兆易创新", "orgId": "9900026561"},
+    "300327": {"name": "中颖电子", "orgId": "9900022000"},
+    "688380": {"name": "中微半导", "orgId": "9900047331"},
+    "300077": {"name": "国民技术", "orgId": "9900011747"},
+    "688279": {"name": "峰岹科技", "orgId": "9900046501"},
+    "002180": {"name": "纳思达",   "orgId": "9900003822"},
+    "688385": {"name": "复旦微电", "orgId": "gshk0008102"},
+    "688766": {"name": "普冉股份", "orgId": "nssc1000720"},
+    "688595": {"name": "芯海科技", "orgId": "gfbj0837517"},
+    "688391": {"name": "钜泉科技", "orgId": "9900023098"},
+    "688018": {"name": "乐鑫科技", "orgId": "9900039017"},
 }
 
 # Report type categories on CNINFO
@@ -195,7 +197,7 @@ def download_pdf(session: requests.Session, ann: dict,
 
 def fetch_company(session: requests.Session, stock_id: str, info: dict,
                   category: str, years: list[int], dry_run: bool) -> dict:
-    """Fetch all matching reports for one company/category combo."""
+    """Collect all announcements for a company/category, then download one per year."""
     org_id = info["orgId"]
     name   = info["name"]
     folder = OUTPUT_DIR / f"{stock_id}_{name}"
@@ -204,8 +206,8 @@ def fetch_company(session: requests.Session, stock_id: str, info: dict,
 
     print(f"\n  [{stock_id}] {name}  ({period_label})")
 
-    # Paginate until we've seen all years or run out of pages
-    seen_years: set[int] = set()
+    # Phase 1: paginate and collect all announcements
+    all_announcements: list[dict] = []
     page = 1
     while True:
         try:
@@ -217,32 +219,41 @@ def fetch_company(session: requests.Session, stock_id: str, info: dict,
         announcements = data.get("announcements") or []
         if not announcements:
             break
-
-        for ann in announcements:
-            title = ann.get("announcementTitle", "")
-            yr = detect_year(title, ann.get("adjunctUrl", ""))
-            if yr is not None and yr in years:
-                seen_years.add(yr)
-
-        # Try to download for each requested year from this page batch
-        for year in [y for y in years if y not in seen_years or True]:
-            best = select_best_pdf(announcements, year)
-            if best is None:
-                continue
-            yr = detect_year(best.get("announcementTitle", ""), "")
-            if yr not in years:
-                continue
-            path = download_pdf(session, best, folder, dry_run)
-            if path:
-                results["downloaded"].append(f"{yr}{period_label}")
-            else:
-                results["failed"].append(f"{yr}{period_label}")
+        all_announcements.extend(announcements)
 
         total_pages = data.get("totalPages", 1)
         if page >= total_pages:
             break
         page += 1
-        time.sleep(0.5)  # polite rate-limit
+        time.sleep(0.4)
+
+    if not all_announcements:
+        print("    no announcements found")
+        return results
+
+    print(f"    {len(all_announcements)} announcement(s) found — selecting best per year…")
+
+    # Phase 2: for each target year pick the best PDF and download it
+    years_set = set(years)
+    downloaded_years: set[int] = set()
+
+    for year in sorted(years_set, reverse=True):
+        best = select_best_pdf(all_announcements, year)
+        if best is None:
+            continue
+        if year in downloaded_years:
+            continue
+        path = download_pdf(session, best, folder, dry_run)
+        if path:
+            results["downloaded"].append(f"{year}{period_label}")
+            downloaded_years.add(year)
+        else:
+            results["failed"].append(f"{year}{period_label}")
+
+    missing = years_set - downloaded_years - {y for y in years_set
+                                              if select_best_pdf(all_announcements, y) is None}
+    for y in sorted(missing):
+        results["failed"].append(f"{y}{period_label} (no PDF found)")
 
     return results
 
