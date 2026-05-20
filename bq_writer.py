@@ -35,7 +35,21 @@ def _get_client():
         return None
     try:
         from google.cloud import bigquery
-        _client = bigquery.Client(project=_PROJECT)
+        import google.auth
+
+        # Explicitly resolve credentials so init errors surface here, not
+        # later during the first query (which gives a cryptic metadata error
+        # in Cloud Shell when only `gcloud auth login` — not
+        # `gcloud auth application-default login` — has been run).
+        try:
+            creds, _ = google.auth.default(
+                scopes=["https://www.googleapis.com/auth/bigquery"]
+            )
+        except Exception as cred_exc:
+            log.debug("BigQuery credentials unavailable (offline mode): %s", cred_exc)
+            return None
+
+        _client = bigquery.Client(project=_PROJECT, credentials=creds)
         return _client
     except Exception as exc:
         log.debug("BigQuery client init failed (offline mode): %s", exc)

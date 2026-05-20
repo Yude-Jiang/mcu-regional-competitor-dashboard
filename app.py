@@ -257,9 +257,9 @@ def _build_context() -> str:
             mcu  = f.get("mcu_revenue_musd")
             gm   = f.get("gross_margin_pct")
             rd   = f.get("rd_expense_musd")
-            rd_r = f.get("rd_ratio_pct")
+            rd_r = f.get("rd_pct")
             ni_y = f.get("net_income_yoy_pct")
-            emp  = f.get("employees")
+            emp  = f.get("employee_count")
 
             parts = [f"{yr}年:"]
             if rev  is not None: parts.append(f"总营收${rev:.1f}M")
