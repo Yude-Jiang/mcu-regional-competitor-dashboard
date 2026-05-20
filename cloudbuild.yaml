@@ -1,20 +1,20 @@
+# cloudbuild.yaml — Build Docker image only.
+# Deploy via Cloud Shell (avoids Compute SA actAs permission issue):
+#
+#   gcloud run deploy mcu-regional-competitor-dashboard \
+#     --image gcr.io/st-china-ai-force/mcu-regional-competitor-dashboard \
+#     --region asia-east1 --platform managed --allow-unauthenticated \
+#     --set-env-vars "GCP_PROJECT=st-china-ai-force,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports" \
+#     --set-secrets "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest" \
+#     --project st-china-ai-force
+
 steps:
 - name: "gcr.io/cloud-builders/docker"
-  args: ["build", "-t", "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard", "."]
-- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-  entrypoint: "gcloud"
   args:
-    - "run"
-    - "deploy"
-    - "mcu-regional-competitor-dashboard"
-    - "--image"
+    - "build"
+    - "-t"
     - "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard"
-    - "--region"
-    - "asia-east1"
-    - "--platform"
-    - "managed"
-    - "--allow-unauthenticated"
-    - "--set-env-vars"
-    - "GCP_PROJECT=$PROJECT_ID,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports"
-    - "--set-secrets"
-    - "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest"
+    - "."
+
+images:
+- "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard"
