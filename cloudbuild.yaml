@@ -1,0 +1,6 @@
+steps:
+- name: "gcr.io/cloud-builders/docker"
+  args: ["build", "-t", "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard", "."]
+- name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  entrypoint: "gcloud"
+  args: ["run", "deploy", "mcu-regional-competitor-dashboard", "--image", "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard", "--region", "us-central1", "--platform", "managed", "--allow-unauthenticated"]

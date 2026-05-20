@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:emweb.securities.eastmoney.com)",
+      "WebSearch",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

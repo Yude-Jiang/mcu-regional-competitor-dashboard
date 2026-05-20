@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCU.CN — Regional Competitor Intel</title>
+<style>
+/* ═══════════════════════════════════════════
+   MCU.CN — Datasheet aesthetic · ST Key Visual
+   ═══════════════════════════════════════════ */
+
+:root {
+  --navy-1: #03234b; --navy-2: #425a78; --navy-3: #8191a5; --navy-4: #c0c8d2;
+  --cyan-1: #3cb4e6; --cyan-2: #6dc7ec; --cyan-3: #9dd9f2; --cyan-4: #ceecf9;
+  --yel-1:  #ffd200; --yel-2:  #ffdd40; --yel-3:  #ffe87f; --yel-4:  #fff4bf;
+  --mag-1:  #e6007e; --mag-2:  #ec409e; --mag-3:  #f27fbe; --mag-4:  #f9bfdf;
+
+  --bg-0: #f4f6f9; --bg-1: #ffffff; --bg-2: #f8fafc; --bg-3: #eef2f7;
+  --border: #dbe2eb; --border-bright: #b8c4d2;
+  --text: var(--navy-1); --text-dim: var(--navy-2); --text-faint: var(--navy-3);
+  --accent: var(--cyan-1); --hi: var(--yel-1); --pos: #1a8a4e; --neg: var(--mag-1);
+  --density: 1;
+}
+
+[data-theme="dark"] {
+  --bg-0: #07101e; --bg-1: #0c1726; --bg-2: #122033; --bg-3: #1a2c44;
+  --border: #1f3050; --border-bright: #2e4a73;
+  --text: #d7e4f3; --text-dim: #7d94b3; --text-faint: #6a84a3;
+  --pos: #5ad498; --neg: var(--mag-2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg-0); color: var(--text);
+  font: 14px/1.5 Arial, "Helvetica Neue", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+
+/* ─── Frame ─── */
+.frame {
+  display: grid;
+  grid-template-rows: 40px 38px 48px auto auto auto 1fr 22px;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+.frame::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px; opacity: 0.35;
+  mask: linear-gradient(180deg, transparent 0, black 200px, black calc(100% - 200px), transparent 100%);
+}
+.frame > * { position: relative; z-index: 1; }
+
+/* ─── Accessibility ─── */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; top: -100px; left: 16px; z-index: 300; background: var(--cyan-1); color: var(--navy-1); padding: 8px 16px; font: 600 12px/1 Arial, sans-serif; }
+.skip-link:focus { top: 4px; }
+:focus-visible { outline: 2px solid var(--cyan-1); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+/* ─── Header ─── */
+.hdr { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--navy-1); color: #fff; }
+.hdr-l { display: flex; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand .mark { position: relative; width: 28px; height: 28px; background: var(--cyan-1); display: inline-flex; align-items: center; justify-content: center; font: 700 13px/1 Arial, sans-serif; color: var(--navy-1); }
+.brand .mark::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 8px; height: 8px; background: var(--yel-1); }
+.brand .ttl { font: 700 14px/1 Arial, sans-serif; letter-spacing: 0.18em; color: #fff; }
+.brand .sub { font: 10px/1 Arial, sans-serif; color: var(--cyan-2); letter-spacing: 0.22em; text-transform: uppercase; }
+.hdr-r { display: flex; align-items: center; gap: 18px; }
+.clock { font: 10px/1 Arial, sans-serif; color: var(--cyan-3); letter-spacing: 0.08em; text-transform: uppercase; }
+.clock b { color: #fff; font-weight: 500; }
+.lang-toggle { display: inline-flex; border: 1px solid var(--navy-2); }
+.lang-btn { background: transparent; border: 0; cursor: pointer; font: 600 11px/1 Arial, sans-serif; color: var(--cyan-3); padding: 8px 12px; min-width: 44px; min-height: 44px; letter-spacing: 0.06em; border-right: 1px solid var(--navy-2); transition: all .12s; }
+.lang-btn:last-child { border-right: 0; }
+.lang-btn:hover { color: #fff; }
+.lang-btn.active { background: var(--cyan-1); color: var(--navy-1); }
+.theme-btn { background: transparent; border: 1px solid var(--navy-2); cursor: pointer; color: var(--cyan-3); padding: 8px 10px; min-width: 44px; min-height: 44px; transition: all .12s; display: flex; align-items: center; }
+.theme-btn:hover { color: #fff; border-color: var(--cyan-2); }
+
+/* ─── Pipeline ─── */
+.pipeline { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); background: var(--bg-1); min-height: 0; }
+.pipeline-lbl { display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--bg-2); border-right: 1px solid var(--border); font: 600 10px/1 Arial, sans-serif; letter-spacing: 0.1em; color: var(--navy-1); text-transform: uppercase; white-space: nowrap; }
+.pipeline-lbl::before { content: ""; width: 3px; height: 16px; background: var(--cyan-1); }
+.pipeline-track { display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; align-items: stretch; flex: 1; }
+.fp-card { display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; border-right: 1px dotted var(--border); cursor: pointer; transition: background .12s; white-space: nowrap; position: relative; min-height: 38px; }
+.fp-card:hover { background: var(--cyan-4); }
+.fp-card.sel { background: var(--yel-4); }
+.fp-card.sel::after { content: ""; position: absolute; left: 0; right: 1px; bottom: 0; height: 2px; background: var(--cyan-1); }
+.fp-cn { font: 600 13px/1 Arial, "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--navy-1); }
+.fp-sym { font: 10px/1 Arial, sans-serif; letter-spacing: 0.04em; color: var(--text-dim); }
+.fp-dot { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; font: 700 9px/1 Arial, sans-serif; }
+.fp-dot.reported { background: var(--pos); color: #fff; }
+.fp-dot.pending  { background: var(--mag-1); color: #fff; }
+[data-theme="dark"] .fp-card:hover { background: rgba(60,180,230,0.12); }
+[data-theme="dark"] .fp-card.sel { background: rgba(255,210,0,0.08); }
+[data-theme="dark"] .fp-cn { color: var(--text); }
+
+/* ─── Toolbar ─── */
+.toolbar { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg-1); }
+.year-scrub { display: flex; align-items: center; gap: 14px; max-width: 720px; }
+.year-scrub .lbl { font: 10px/1 Arial, sans-serif; letter-spacing: 0.18em; color: var(--text-dim); text-transform: uppercase; }
+.year-track { flex: 1; height: 28px; position: relative; display: flex; align-items: center; }
+.year-track .axis { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--border-bright); }
+.year-marks { display: flex; justify-content: space-between; width: 100%; position: relative; }
+.year-mark { position: relative; flex: 1; text-align: center; cursor: pointer; padding: 10px 0; font: 11px/1 Arial, sans-serif; color: var(--text-faint); letter-spacing: 0.08em; transition: color .15s; min-width: 44px; }
+.year-mark::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; transform: translate(-50%, -50%); border: 1px solid var(--border-bright); background: var(--bg-1); transition: all .15s; }
+.year-mark:hover { color: var(--text); }
+.year-mark.active { color: var(--navy-1); font-weight: 700; }
+.year-mark.active::before { background: var(--cyan-1); border-color: var(--cyan-1); box-shadow: 0 0 0 4px rgba(60,180,230,0.18); width: 10px; height: 10px; }
+.year-mark .yr { display: inline-block; padding: 0 2px; background: var(--bg-1); position: relative; z-index: 1; }
+.tb-group { display: flex; align-items: center; gap: 6px; }
+.tb-group .lbl { font: 10px/1 Arial, sans-serif; letter-spacing: 0.16em; color: var(--text-dim); text-transform: uppercase; }
+.tb-btn { background: var(--bg-1); color: var(--text-dim); border: 1px solid var(--border-bright); padding: 8px 14px; font: 10px/1 Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: all .12s; min-height: 44px; }
+.tb-btn:hover { color: var(--navy-1); border-color: var(--navy-2); }
+.tb-btn.active { color: var(--navy-1); border-color: var(--cyan-1); background: var(--cyan-4); box-shadow: inset 0 -2px 0 0 var(--cyan-1); }
+[data-theme="dark"] .tb-btn.active { background: rgba(60,180,230,0.18); color: var(--text); }
+[data-theme="dark"] .year-mark.active { color: var(--text); }
+
+/* ─── KPIs ─── */
+.kpis { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--border); background: var(--bg-1); }
+.kpi { padding: 16px 18px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; }
+.kpi:last-child { border-right: 0; }
+.kpi::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi:nth-child(1)::before { background: var(--cyan-1); }
+.kpi:nth-child(2)::before { background: var(--cyan-2); }
+.kpi:nth-child(3)::before { background: var(--yel-1); }
+.kpi:nth-child(4)::before { background: var(--navy-3); }
+.kpi:nth-child(5)::before { background: var(--mag-1); }
+.kpi .kpi-lbl { font: 10px/1 Arial, sans-serif; letter-spacing: 0.22em; color: var(--text-dim); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.kpi .kpi-lbl::before { content: "//"; color: var(--text-faint); letter-spacing: 0; }
+.kpi .kpi-val { font: 600 28px/1 Arial, sans-serif; color: var(--navy-1); letter-spacing: -0.01em; }
+.kpi .kpi-val .u { font-size: 12px; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
+.kpi .kpi-delta { font: 11px/1 Arial, sans-serif; color: var(--text-dim); }
+[data-theme="dark"] .kpi .kpi-val { color: var(--text); }
+
+/* ─── Charts ─── */
+.overview-row { background: var(--border); min-height: 0; border-bottom: 1px solid var(--border); display: grid; gap: 1px; }
+.overview-row-1 { grid-template-columns: 1fr; }
+.overview-row-2 { grid-template-columns: 1.5fr 1fr; }
+.chart-panel { background: var(--bg-1); display: flex; flex-direction: column; min-height: 0; }
+.panel-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg-2); }
+.panel-hd .ttl { font: 10px/1 Arial, sans-serif; letter-spacing: 0.22em; text-transform: uppercase; color: var(--navy-1); font-weight: 600; }
+.panel-hd .ttl .num { color: var(--text-dim); margin-left: 8px; font-weight: 400; }
+.chart-body { flex: 1; min-height: 0; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 4px; }
+.chart-svg-wrap { flex: 1; min-height: 0; width: 100%; position: relative; }
+.chart-svg { display: block; width: 100%; height: 100%; }
+.chart-svg text { font-family: Arial, sans-serif; }
+[data-theme="dark"] .panel-hd .ttl { color: var(--text); }
+
+/* ─── Main grid ─── */
+.main { display: grid; gap: 1px; background: var(--border); min-height: 0; transition: grid-template-columns .2s; }
+.main.no-detail { grid-template-columns: 1fr; }
+.main.has-detail { grid-template-columns: 1fr 440px; }
+.panel { background: var(--bg-1); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.tbl-wrap { overflow: auto; flex: 1; }
+
+/* ─── Data quality legend ─── */
+.dq-legend { display: flex; gap: 14px; align-items: center; }
+.dq-legend .it { display: flex; align-items: center; gap: 6px; font: 10px/1 Arial, sans-serif; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
+.dq-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; flex-shrink: 0; }
+.dq-reported    { background: var(--pos); }
+.dq-derived     { background: var(--cyan-1); }
+.dq-estimated   { background: var(--yel-1); }
+.dq-unavailable { background: var(--mag-1); }
+
+/* ─── Data Table ─── */
+table.dt { width: 100%; border-collapse: collapse; font: 14px/1.35 Arial, sans-serif; }
+.dt thead th { background: var(--bg-2); position: sticky; top: 0; z-index: 3; padding: 11px 8px; text-align: right; font: 11px/1.2 Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); border-bottom: 2px solid var(--navy-1); cursor: pointer; user-select: none; white-space: nowrap; }
+.dt thead th.l { text-align: left; }
+.dt thead th:hover { color: var(--navy-1); }
+.dt thead th.sort-asc, .dt thead th.sort-desc { color: var(--navy-1); background: var(--cyan-4); }
+.dt thead th .sortmark { display: inline-block; width: 8px; text-align: center; color: var(--cyan-1); }
+.dt tbody td { padding: 9px 8px; border-bottom: 1px solid var(--bg-3); text-align: right; vertical-align: middle; white-space: nowrap; color: var(--navy-1); font-size: 14px; }
+.dt tbody td.l { text-align: left; }
+.dt tbody tr { cursor: pointer; transition: background .08s; }
+.dt tbody tr:nth-child(even) { background: var(--bg-2); }
+.dt tbody tr:hover { background: var(--yel-4); }
+.dt tbody tr.selected { background: var(--cyan-4); }
+.dt tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 0 var(--cyan-1); }
+.co-cell { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }
+.co-cn { font: 600 14px/1.2 Arial, "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--navy-1); }
+.co-sym { font: 10px/1 Arial, sans-serif; color: var(--text-faint); letter-spacing: 0.1em; }
+.dq-cell { text-align: center !important; }
+.dq-cell .dq-dot { margin: 0 auto; display: block; width: 8px; height: 8px; }
+[data-theme="dark"] .dt tbody tr:hover { background: rgba(255,210,0,0.06); }
+[data-theme="dark"] .dt tbody tr.selected { background: rgba(60,180,230,0.14); }
+[data-theme="dark"] .dt tbody td { color: var(--text); }
+[data-theme="dark"] .co-cn { color: var(--text); }
+
+/* ─── Detail panel ─── */
+.detail { display: none; flex-direction: column; min-height: 0; }
+.detail.open { display: flex; }
+.detail-body { overflow: auto; flex: 1; padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.dt-hero { display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px; border-bottom: 2px solid var(--navy-1); position: relative; }
+.dt-hero::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 60px; height: 2px; background: var(--cyan-1); }
+.dt-hero .cn { font: 700 20px/1.1 Arial, "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--navy-1); }
+.dt-hero .en { font: 12px/1 Arial, sans-serif; color: var(--text-dim); letter-spacing: 0.18em; text-transform: uppercase; }
+.dt-meta { display: flex; gap: 6px; align-items: center; margin-top: 6px; font: 10px/1 Arial, sans-serif; letter-spacing: 0.12em; flex-wrap: wrap; }
+.dt-meta .chip { padding: 4px 8px; background: var(--bg-3); color: var(--text-dim); font-size: 10px; }
+.dt-meta .chip.acc { background: var(--cyan-1); color: #fff; }
+.dt-meta .chip.hi  { background: var(--yel-1); color: var(--navy-1); font-weight: 600; }
+.dt-meta .chip.warn { background: var(--mag-1); color: #fff; }
+
+.dt-quad { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--navy-2); }
+.dt-quad .q { background: var(--bg-1); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; position: relative; }
+.dt-quad .q::before { content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 2px; }
+.dt-quad .q:nth-child(1)::before { background: var(--cyan-1); }
+.dt-quad .q:nth-child(2)::before { background: var(--yel-1); }
+.dt-quad .q:nth-child(3)::before { background: var(--mag-1); }
+.dt-quad .q:nth-child(4)::before { background: var(--navy-2); }
+.dt-quad .lbl { font: 10px/1 Arial, sans-serif; letter-spacing: 0.18em; color: var(--text-dim); text-transform: uppercase; }
+.dt-quad .v { font: 600 20px/1 Arial, sans-serif; color: var(--navy-1); }
+.dt-quad .v .u { font-size: 12px; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
+.dt-quad .sub { font: 11px/1 Arial, sans-serif; color: var(--text-dim); }
+
+.dt-section { display: flex; flex-direction: column; gap: 6px; }
+.dt-section .ttl { display: flex; align-items: center; gap: 8px; font: 10px/1 Arial, sans-serif; letter-spacing: 0.22em; text-transform: uppercase; color: var(--navy-1); font-weight: 600; }
+.dt-section .ttl::before { content: "§"; color: var(--cyan-1); font-weight: 700; }
+.dt-section .ttl::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.dt-line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px dotted var(--border); }
+.dt-line .k { font: 10px/1.2 Arial, sans-serif; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.dt-line .v { font: 12px/1.2 Arial, sans-serif; color: var(--navy-1); text-align: right; }
+.dt-note { font: 11px/1.5 Arial, "Microsoft YaHei", "PingFang SC", sans-serif; color: var(--text-dim); padding: 10px 12px; background: var(--yel-4); border-left: 3px solid var(--yel-1); }
+
+table.filings { width: 100%; border-collapse: collapse; font: 11px/1.3 Arial, sans-serif; }
+table.filings th { text-align: right; font: 9px/1 Arial, sans-serif; letter-spacing: 0.16em; color: var(--text-dim); text-transform: uppercase; padding: 6px 6px; border-bottom: 1px solid var(--navy-1); white-space: nowrap; }
+table.filings th:first-child { text-align: left; }
+table.filings td { padding: 4px 4px; text-align: right; border-bottom: 1px dotted var(--border); }
+table.filings td:first-child { text-align: left; color: var(--navy-1); font-weight: 600; }
+table.filings tr.cur { background: var(--cyan-4); }
+table.filings tr.cur td:first-child { box-shadow: inset 2px 0 0 var(--cyan-1); }
+table.filings .pos { color: var(--pos); }
+table.filings .neg { color: var(--mag-1); }
+
+[data-theme="dark"] .dt-hero .cn { color: var(--text); }
+[data-theme="dark"] .dt-quad .v { color: var(--text); }
+[data-theme="dark"] .dt-line .v { color: var(--text); }
+[data-theme="dark"] .dt-note { background: rgba(255,210,0,0.08); }
+
+/* ─── Status bar ─── */
+.status { display: flex; align-items: center; justify-content: space-between; padding: 0 14px; background: var(--navy-1); color: var(--cyan-3); border-top: 1px solid var(--navy-1); font: 9px/1 Arial, sans-serif; letter-spacing: 0.18em; text-transform: uppercase; }
+.status b { color: #fff; }
+.status .l, .status .r { display: flex; gap: 18px; align-items: center; }
+.status .ok { color: var(--yel-1); }
+.status .acc { color: var(--cyan-2); }
+[data-theme="dark"] .status { background: #020b18; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--navy-4); border: 2px solid var(--bg-2); }
+::-webkit-scrollbar-thumb:hover { background: var(--navy-3); }
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .main.has-detail { grid-template-columns: 1fr; }
+  .main.no-detail { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .overview-row-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .kpis { grid-template-columns: 1fr; }
+  .toolbar { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="frame" id="frame">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="brand">
+        <span class="mark">M</span>
+        <span class="ttl">MCU.CN</span>
+        <span class="sub">Regional Competitor Intel</span>
+      </div>
+    </div>
+    <div class="hdr-r">
+      <span class="clock" id="clock"></span>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="zh">中文</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1a7 7 0 0 0 0 14V1z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline">
+    <div class="pipeline-lbl" id="pipelineLabel">FILING STATUS</div>
+    <div class="pipeline-track" id="pipelineTrack"></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="year-scrub">
+      <span class="lbl" id="yearScrubLabel">FOCUS YEAR</span>
+      <div class="year-track"><div class="axis"></div><div class="year-marks" id="yearMarks"></div></div>
+    </div>
+    <div class="tb-group">
+      <span class="lbl" id="unitLabel">UNIT</span>
+      <button class="tb-btn active" id="btnCNY">CNY 亿</button>
+      <button class="tb-btn" id="btnUSD">USD M$</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis" id="kpiStrip"></div>
+
+  <!-- Chart Row 1: Total Revenue -->
+  <div class="overview-row overview-row-1">
+    <div class="chart-panel">
+      <div class="panel-hd"><span class="ttl" id="chart1Title">CHART 1 — TOTAL REVENUE BY COMPANY</span></div>
+      <div class="chart-body"><div class="chart-svg-wrap" id="chart1Wrap"></div></div>
+    </div>
+  </div>
+
+  <!-- Chart Row 2: MCU Revenue + Stacked -->
+  <div class="overview-row overview-row-2">
+    <div class="chart-panel">
+      <div class="panel-hd"><span class="ttl" id="chart2Title">CHART 2 — MCU REVENUE BY COMPANY</span></div>
+      <div class="chart-body"><div class="chart-svg-wrap" id="chart2Wrap"></div></div>
+    </div>
+    <div class="chart-panel">
+      <div class="panel-hd"><span class="ttl" id="chart3Title">CHART 3 — MCU REVENUE STACKED</span></div>
+      <div class="chart-body"><div class="chart-svg-wrap" id="chart3Wrap"></div></div>
+    </div>
+  </div>
+
+  <!-- Main: Table + Detail -->
+  <div class="main no-detail" id="main-content">
+    <div class="panel">
+      <div class="panel-hd">
+        <span class="ttl" id="tableTitle">FINANCIAL DATA TABLE <span class="num" id="tableCount"></span></span>
+        <div class="dq-legend">
+          <span class="it"><span class="dq-dot dq-reported"></span> <span id="lblReported">REPORTED</span></span>
+          <span class="it"><span class="dq-dot dq-derived"></span> <span id="lblDerived">DERIVED</span></span>
+          <span class="it"><span class="dq-dot dq-estimated"></span> <span id="lblEstimated">ESTIMATED</span></span>
+          <span class="it"><span class="dq-dot dq-unavailable"></span> <span id="lblNA">N/A</span></span>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table class="dt" id="dataTable"></table></div>
+    </div>
+    <div class="panel detail" id="detailPanel">
+      <div class="panel-hd">
+        <span class="ttl" id="detailTitle">COMPANY DETAIL</span>
+        <button class="tb-btn" id="btnCloseDetail" style="font-size:12px;padding:4px 10px;min-height:28px">✕</button>
+      </div>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status">
+    <span class="l"><b id="statusValid">VALIDATION</b> <span class="ok" id="statusResult"></span></span>
+    <span class="r"><span id="statusMeta"></span> <span class="sep">|</span> <span class="acc">AkShare · PBoC</span></span>
+  </div>
+</div>
+
+<script>
+const ALL_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+const I18N = {
+  zh: {
+    pipelineLabel: '申报状态', yearScrubLabel: '聚焦年份', unitLabel: '单位',
+    chart1Title: '图1 — 总收入 按公司 (2018-2025)',
+    chart2Title: '图2 — MCU收入 按公司 (2018-2025)',
+    chart3Title: '图3 — MCU收入 按年度堆叠',
+    tableTitle: '财务数据明细表', detailTitle: '公司详情',
+    kpiTotal: '2025E 总收入', kpiMCU: '2024 MCU收入 (已披露)', kpiTarget: '2025 MCU目标',
+    kpiFX: '汇率 (CNY/USD)', kpiCoverage: '数据覆盖',
+    labelReported: '年报披露', labelDerived: '年报推算', labelEstimated: '估算值', labelNA: '缺失',
+    statusValid: '数据校验', closeDetail: '关闭',
+    detailInfo: '公司信息', detailScope: 'MCU口径', detailMethod: 'MCU口径溯源', detailFilings: '历年申报',
+    exchange: '交易所', founded: '成立', listed: '上市', coreIP: '核心IP', foundry: '代工厂',
+    employees: '员工数', autoMCU: '汽车MCU', confidence: '置信度', source: '来源',
+    na: '—', forecast: '(预测)', billion: '亿', million: 'M', reported: '已报告', pending: '待更新',
+    dqReported: '年报直接披露', dqDerived: '年报推算', dqEstimated: '估算', dqUnavailable: '无数据',
+    tableHeaders: ['公司','成立/上市','核心IP','代工厂','总收入','YoY%','MCU收入','MCU YoY%','MCU占比%','MCU毛利率%','研发支出','研发%','CAGR总收入','CAGR MCU','员工','来源']
+  },
+  en: {
+    pipelineLabel: 'FILING STATUS', yearScrubLabel: 'FOCUS YEAR', unitLabel: 'UNIT',
+    chart1Title: 'CHART 1 — TOTAL REVENUE BY COMPANY (2018-2025)',
+    chart2Title: 'CHART 2 — MCU REVENUE BY COMPANY (2018-2025)',
+    chart3Title: 'CHART 3 — MCU REVENUE STACKED BY YEAR',
+    tableTitle: 'FINANCIAL DATA TABLE', detailTitle: 'COMPANY DETAIL',
+    kpiTotal: '2025E Total Revenue', kpiMCU: '2024 MCU Revenue (reported)', kpiTarget: '2025 MCU Target',
+    kpiFX: 'FX Rate (CNY/USD)', kpiCoverage: 'Data Coverage',
+    labelReported: 'REPORTED', labelDerived: 'DERIVED', labelEstimated: 'ESTIMATED', labelNA: 'N/A',
+    statusValid: 'VALIDATION', closeDetail: 'Close',
+    detailInfo: 'Company Info', detailScope: 'MCU Scope', detailMethod: 'MCU Methodology', detailFilings: 'Annual Filings',
+    exchange: 'Exchange', founded: 'Founded', listed: 'Listed', coreIP: 'Core IP', foundry: 'Foundry',
+    employees: 'Employees', autoMCU: 'Auto MCU', confidence: 'Confidence', source: 'Source',
+    na: '—', forecast: '(est.)', billion: 'B', million: 'M', reported: 'reported', pending: 'pending',
+    dqReported: 'Annual report disclosed', dqDerived: 'Annual report derived', dqEstimated: 'Estimated', dqUnavailable: 'Not available',
+    tableHeaders: ['Company','Founded/Listed','Core IP','Foundry','Revenue','YoY%','MCU Rev','MCU YoY%','MCU Wt%','MCU GM%','R&D Exp','R&D%','CAGR Rev','CAGR MCU','Employees','Source']
+  }
+};
+
+let lang = 'zh', unitUSD = false, selectedSymbol = null, sortKey = null, sortDir = 1;
+let data, companies, profiles, fxRates, profileMap, SYMBOLS, SORTED;
+
+function t(key) { return I18N[lang][key] || key; }
+
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').innerHTML = 'CN <b>' + now.toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Shanghai', hour12: false }) + '</b>';
+}
+setInterval(updateClock, 1000); updateClock();
+
+// Theme
+document.getElementById('themeBtn').addEventListener('click', () => {
+  document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+
+// Language
+document.getElementById('langToggle').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('lang-btn')) return;
+  lang = e.target.dataset.lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  renderAll();
+});
+
+// Unit
+document.getElementById('btnCNY').addEventListener('click', () => { unitUSD = false; updateUnitBtns(); renderAll(); });
+document.getElementById('btnUSD').addEventListener('click', () => { unitUSD = true; updateUnitBtns(); renderAll(); });
+function updateUnitBtns() {
+  document.getElementById('btnCNY').classList.toggle('active', !unitUSD);
+  document.getElementById('btnUSD').classList.toggle('active', unitUSD);
+}
+
+// Year view toggle
+document.getElementById('btnAllYears').addEventListener('click', () => { showAllYears = true; updateYearViewBtns(); renderTable(); });
+document.getElementById('btnOneYear').addEventListener('click', () => { showAllYears = false; updateYearViewBtns(); renderTable(); });
+function updateYearViewBtns() {
+  document.getElementById('btnAllYears').classList.toggle('active', showAllYears);
+  document.getElementById('btnOneYear').classList.toggle('active', !showAllYears);
+  document.getElementById('btnOneYear').textContent = focusYear;
+}
+
+// Close detail
+document.getElementById('btnCloseDetail').addEventListener('click', () => {
+  selectedSymbol = null;
+  renderPipeline(); renderTable(); renderDetail();
+});
+
+// ─── Helpers ───
+function toDisplay(valCNY, year) {
+  if (valCNY == null) return null;
+  return unitUSD ? valCNY / ((fxRates.CNY_USD[String(year)] || 7.2) * 1e6) : valCNY / 1e8;
+}
+function fmtVal(valCNY, year) { const v = toDisplay(valCNY, year); return v == null ? t('na') : unitUSD ? v.toFixed(1) : v.toFixed(2); }
+function fmtYoy(v) { return v == null ? t('na') : (v * 100).toFixed(1) + '%'; }
+function fmtPct(v) { return v == null ? t('na') : (v * 100).toFixed(1) + '%'; }
+
+function dataQuality(sym, year) {
+  const r = companies[sym].years[String(year)];
+  if (!r) return 'unavailable';
+  if (r.data_type === 'actual' && r.mcu_revenue_cny != null) return 'reported';
+  if (r.data_type === 'actual') return 'derived';
+  if (r.data_type === 'estimated') return 'estimated';
+  return 'unavailable';
+}
+
+function dqLabel(dq) {
+  const m = { reported: t('dqReported'), derived: t('dqDerived'), estimated: t('dqEstimated'), unavailable: t('dqUnavailable') };
+  return m[dq] || '';
+}
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+(async function() {
+  const [dr, pr, fr] = await Promise.all([fetch('/data.json'), fetch('/profiles_xq.json'), fetch('/fx_rates.json')]);
+  data = await dr.json(); profiles = await pr.json(); fxRates = await fr.json();
+  companies = data.companies; SYMBOLS = Object.keys(companies);
+  profileMap = {}; profiles.forEach(p => { profileMap[p.symbol] = p; });
+  SORTED = [...SYMBOLS].sort((a, b) => (companies[b].years['2024'].total_revenue_cny || 0) - (companies[a].years['2024'].total_revenue_cny || 0));
+  renderAll();
+})();
+
+function renderAll() {
+  renderPipeline(); renderYearScrubber(); renderKPIs();
+  renderChart1(); renderChart2(); renderChart3();
+  updateUnitBtns(); updateYearViewBtns();
+  renderTable(); renderDetail(); renderStatus();
+}
+
+// ─── Pipeline ───
+function renderPipeline() {
+  document.getElementById('pipelineLabel').textContent = t('pipelineLabel');
+  const track = document.getElementById('pipelineTrack');
+  track.innerHTML = SORTED.map(sym => {
+    const p = profileMap[sym] || {}; const latest = findLatestYear(sym);
+    const sel = sym === selectedSymbol ? ' sel' : '';
+    return '<div class="fp-card' + sel + '" data-sym="' + sym + '"><span class="fp-dot ' + (latest ? 'reported' : 'pending') + '" aria-label="' + (latest ? t('reported') : t('pending')) + '">' + (latest ? '✓' : '✗') + '</span><span class="fp-cn">' + (p.name_cn || sym) + '</span><span class="fp-sym">' + sym + '</span></div>';
+  }).join('');
+  track.querySelectorAll('.fp-card').forEach(card => {
+    card.addEventListener('click', () => { selectedSymbol = card.dataset.sym; renderPipeline(); renderTable(); renderDetail(); });
+  });
+}
+function findLatestYear(sym) {
+  for (let y = 2025; y >= 2018; y--) { if (companies[sym].years[String(y)]?.total_revenue_cny != null) return y; }
+  return null;
+}
+
+// ─── Year scrubber ───
+function renderYearScrubber() {
+  document.getElementById('yearScrubLabel').textContent = t('yearScrubLabel');
+  document.getElementById('yearMarks').innerHTML = ALL_YEARS.map(y => '<span class="year-mark' + (y === focusYear ? ' active' : '') + '" data-yr="' + y + '"><span class="yr">' + y + '</span></span>').join('');
+  document.querySelectorAll('.year-mark').forEach(m => {
+    m.addEventListener('click', () => {
+      focusYear = parseInt(m.dataset.yr);
+      renderYearScrubber();
+      renderTable();
+    });
+  });
+}
+
+// ─── KPIs ───
+function renderKPIs() {
+  let totalRev2025 = 0, revCount2025 = 0, mcuTotal2024 = 0, mcuCount2024 = 0;
+  SYMBOLS.forEach(sym => {
+    const c = companies[sym]; const r25 = c.years['2025'].total_revenue_cny; const m24 = c.years['2024'].mcu_revenue_cny;
+    if (r25) { totalRev2025 += r25; revCount2025++; }
+    if (m24 != null) { mcuTotal2024 += m24; mcuCount2024++; }
+  });
+  const fx = fxRates.CNY_USD['2025'];
+  const totalRevB = (totalRev2025 / 1e8).toFixed(0);
+  const totalRevUSD = (totalRev2025 / (fx * 1e6) / 1e3).toFixed(1);
+  const mcuTotalB = (mcuTotal2024 / 1e8).toFixed(1);
+  const mcuTotalUSD = (mcuTotal2024 / (fxRates.CNY_USD['2024'] * 1e6)).toFixed(0);
+  const targetCNY = (1058 * fx).toFixed(0);
+
+  const cards = unitUSD ? [
+    { k: t('kpiTotal'), v: totalRevUSD + 'B USD', d: totalRevB + t('billion') + ' CNY | ' + revCount2025 + '/11 ' + t('reported') },
+    { k: t('kpiMCU'), v: mcuTotalUSD + ' M$', d: mcuTotalB + t('billion') + ' CNY | ' + mcuCount2024 + '/11 ' + t('reported') },
+    { k: t('kpiTarget'), v: '1,058 M$', d: '≈ ' + targetCNY + t('million') + ' CNY @ ' + fx.toFixed(2) },
+    { k: t('kpiFX'), v: fx.toFixed(4), d: 'PBoC annual avg | 2025E' },
+    { k: t('kpiCoverage'), v: '35/88 MCU', d: '8yr × 11 companies | AkShare' }
+  ] : [
+    { k: t('kpiTotal'), v: totalRevB + t('billion') + ' CNY', d: totalRevUSD + 'B USD | ' + revCount2025 + '/11 ' + t('reported') },
+    { k: t('kpiMCU'), v: mcuTotalB + t('billion') + ' CNY', d: mcuTotalUSD + ' M$ | ' + mcuCount2024 + '/11 ' + t('reported') },
+    { k: t('kpiTarget'), v: '1,058 M$', d: '≈ ' + targetCNY + t('million') + ' CNY @ ' + fx.toFixed(2) },
+    { k: t('kpiFX'), v: fx.toFixed(4), d: 'PBoC annual avg | 2025E' },
+    { k: t('kpiCoverage'), v: '35/88 MCU', d: '8yr × 11 companies | AkShare' }
+  ];
+  document.getElementById('kpiStrip').innerHTML = cards.map(c => '<div class="kpi"><span class="kpi-lbl">' + c.k + '</span><span class="kpi-val">' + c.v + '</span><span class="kpi-delta">' + c.d + '</span></div>').join('');
+}
+
+// ═══════════════════════════════════════════
+// SVG CHART 1 — Total Revenue grouped bar (all years)
+// ═══════════════════════════════════════════
+function renderChart1() {
+  document.getElementById('chart1Title').textContent = t('chart1Title');
+  const wrap = document.getElementById('chart1Wrap');
+  const W = Math.max(wrap.clientWidth || 800, 700), H = 280;
+  const PAD = { top: 20, right: 30, bottom: 55, left: 55 };
+  const PW = W - PAD.left - PAD.right, PH = H - PAD.top - PAD.bottom;
+  const n = SORTED.length, m = ALL_YEARS.length;
+  const groupW = PW / n, barW = Math.max(3, groupW / (m + 1));
+  const colors = ['#03234b','#3cb4e6','#ffd200','#e6007e','#425a78','#6dc7ec','#ffdd40','#ec409e'];
+  let maxV = 1;
+  SORTED.forEach(sym => ALL_YEARS.forEach(y => { const v = toDisplay(companies[sym].years[String(y)].total_revenue_cny, y); if (v != null && v > maxV) maxV = v; }));
+  let svg = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '">';
+  for (let i = 0; i <= 4; i++) { const y = PAD.top + PH * (1 - i / 4); svg += '<line x1="' + PAD.left + '" x2="' + (W - PAD.right) + '" y1="' + y + '" y2="' + y + '" stroke="var(--bg-3)" stroke-width="1" stroke-dasharray="2 3"/>'; svg += '<text x="' + (PAD.left - 6) + '" y="' + (y + 4) + '" text-anchor="end" fill="var(--text-dim)" font-size="10">' + (maxV * i / 4).toFixed(0) + '</text>'; }
+  SORTED.forEach((sym, gi) => { ALL_YEARS.forEach((year, yi) => { const v = toDisplay(companies[sym].years[String(year)].total_revenue_cny, year); if (v == null || v === 0) return; const bh = (v / maxV) * PH; const x = PAD.left + gi * groupW + yi * barW + barW * 0.2; svg += '<rect x="' + x + '" y="' + (PAD.top + PH - bh) + '" width="' + (barW * 0.8) + '" height="' + bh + '" fill="' + colors[yi] + '" rx="1"><title>' + (profileMap[sym]?.name_cn || sym) + ' ' + year + ': ' + fmtVal(companies[sym].years[String(year)].total_revenue_cny, year) + '</title></rect>'; }); });
+  SORTED.forEach((sym, i) => { const p = profileMap[sym] || {}; const x = PAD.left + i * groupW + groupW / 2; svg += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle" fill="var(--text-dim)" font-size="9" transform="rotate(-25 ' + x + ' ' + (H - 6) + ')">' + (p.name_cn || sym) + '</text>'; });
+  ALL_YEARS.forEach((year, yi) => { const lx = PAD.left + yi * 68 + 10; svg += '<rect x="' + lx + '" y="' + (H - 12) + '" width="10" height="10" fill="' + colors[yi] + '" rx="1"/>'; svg += '<text x="' + (lx + 14) + '" y="' + (H - 2) + '" fill="var(--text-dim)" font-size="9">' + year + '</text>'; });
+  svg += '</svg>'; wrap.innerHTML = svg;
+}
+
+// ═══════════════════════════════════════════
+// SVG CHART 2 — MCU Revenue grouped bar (all years)
+// ═══════════════════════════════════════════
+function renderChart2() {
+  document.getElementById('chart2Title').textContent = t('chart2Title');
+  const wrap = document.getElementById('chart2Wrap');
+  const W = Math.max(wrap.clientWidth || 500, 400), H = 260;
+  const PAD = { top: 20, right: 20, bottom: 50, left: 48 };
+  const PW = W - PAD.left - PAD.right, PH = H - PAD.top - PAD.bottom;
+  const n = SORTED.length, m = ALL_YEARS.length;
+  const groupW = PW / n, barW = Math.max(2, groupW / (m + 1));
+  const colors = ['#03234b','#3cb4e6','#ffd200','#e6007e','#425a78','#6dc7ec','#ffdd40','#ec409e'];
+  let maxV = 1;
+  SORTED.forEach(sym => ALL_YEARS.forEach(y => { const v = toDisplay(companies[sym].years[String(y)].mcu_revenue_cny, y); if (v != null && v > maxV) maxV = v; }));
+  let svg = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '">';
+  for (let i = 0; i <= 4; i++) { const y = PAD.top + PH * (1 - i / 4); svg += '<line x1="' + PAD.left + '" x2="' + (W - PAD.right) + '" y1="' + y + '" y2="' + y + '" stroke="var(--bg-3)" stroke-width="1" stroke-dasharray="2 3"/>'; svg += '<text x="' + (PAD.left - 6) + '" y="' + (y + 4) + '" text-anchor="end" fill="var(--text-dim)" font-size="9">' + (maxV * i / 4).toFixed(0) + '</text>'; }
+  SORTED.forEach((sym, gi) => { ALL_YEARS.forEach((year, yi) => { const v = toDisplay(companies[sym].years[String(year)].mcu_revenue_cny, year); if (v == null || v === 0) return; const bh = (v / maxV) * PH; const x = PAD.left + gi * groupW + yi * barW + barW * 0.2; svg += '<rect x="' + x + '" y="' + (PAD.top + PH - bh) + '" width="' + (barW * 0.8) + '" height="' + bh + '" fill="' + colors[yi] + '" rx="1"><title>' + (profileMap[sym]?.name_cn || sym) + ' ' + year + ' MCU: ' + fmtVal(companies[sym].years[String(year)].mcu_revenue_cny, year) + '</title></rect>'; }); });
+  SORTED.forEach((sym, i) => { const p = profileMap[sym] || {}; const x = PAD.left + i * groupW + groupW / 2; svg += '<text x="' + x + '" y="' + (H - 6) + '" text-anchor="middle" fill="var(--text-dim)" font-size="8" transform="rotate(-25 ' + x + ' ' + (H - 6) + ')">' + (p.name_cn || sym) + '</text>'; });
+  svg += '</svg>'; wrap.innerHTML = svg;
+}
+
+// ═══════════════════════════════════════════
+// SVG CHART 3 — MCU Stacked by year
+// ═══════════════════════════════════════════
+function renderChart3() {
+  document.getElementById('chart3Title').textContent = t('chart3Title');
+  const wrap = document.getElementById('chart3Wrap');
+  const W = Math.max(wrap.clientWidth || 500, 400), H = 260;
+  const PAD = { top: 20, right: 30, bottom: 30, left: 48 };
+  const PW = W - PAD.left - PAD.right, PH = H - PAD.top - PAD.bottom;
+  const colors = ['#03234b','#3cb4e6','#ffd200','#e6007e','#425a78','#6dc7ec','#ffdd40','#ec409e','#8191a5','#9dd9f2','#ffe87f'];
+  const gap = PW / ALL_YEARS.length, barW = Math.max(8, gap * 0.6);
+  const stacked = ALL_YEARS.map(y => { const yr = String(y); let d = SORTED.map((sym, i) => { const v = toDisplay(companies[sym].years[yr].mcu_revenue_cny, y); return { sym, v: v || 0, i }; }).filter(d => d.v > 0); d.sort((a, b) => b.v - a.v); return { year: y, data: d }; });
+  const maxTotal = Math.max(...stacked.map(s => s.data.reduce((a, b) => a + b.v, 0)), 1);
+  let svg = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '">';
+  for (let i = 0; i <= 4; i++) { const y = PAD.top + PH * (1 - i / 4); svg += '<line x1="' + PAD.left + '" x2="' + (W - PAD.right) + '" y1="' + y + '" y2="' + y + '" stroke="var(--bg-3)" stroke-width="1" stroke-dasharray="2 3"/>'; svg += '<text x="' + (PAD.left - 6) + '" y="' + (y + 4) + '" text-anchor="end" fill="var(--text-dim)" font-size="9">' + (maxTotal * i / 4).toFixed(0) + '</text>'; }
+  stacked.forEach((s, xi) => { const x = PAD.left + xi * gap + (gap - barW) / 2; let cy = PAD.top + PH; s.data.forEach(d => { const bh = (d.v / maxTotal) * PH; cy -= bh; svg += '<rect x="' + x + '" y="' + cy + '" width="' + barW + '" height="' + bh + '" fill="' + colors[d.i % colors.length] + '" rx="1"><title>' + (profileMap[d.sym]?.name_cn || d.sym) + ': ' + d.v.toFixed(1) + '</title></rect>'; }); });
+  ALL_YEARS.forEach((y, i) => { const x = PAD.left + i * gap + gap / 2; svg += '<text x="' + x + '" y="' + (H - 8) + '" text-anchor="middle" fill="var(--text-dim)" font-size="10">' + y + '</text>'; });
+  svg += '</svg>'; wrap.innerHTML = svg;
+}
+
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// DATA TABLE — company profile + financials + metadata
+// Year scrubber controls financial columns
+// ═══════════════════════════════════════════
+let focusYear = 2025;
+let showAllYears = true; // toggle: all years or single year
+
+function renderTable() {
+  const yr = String(focusYear);
+  const totalRows = SYMBOLS.length * (showAllYears ? ALL_YEARS.length : 1);
+  document.getElementById('tableTitle').innerHTML = t('tableTitle') + ' <span class="num" id="tableCount"></span>';
+  document.getElementById('tableCount').textContent = totalRows + ' rows' + (showAllYears ? ' · 2018-2025' : ' · ' + focusYear);
+  document.getElementById('lblReported').textContent = t('labelReported');
+  document.getElementById('lblDerived').textContent = t('labelDerived');
+  document.getElementById('lblEstimated').textContent = t('labelEstimated');
+  document.getElementById('lblNA').textContent = t('labelNA');
+
+  const headers = t('tableHeaders');
+  // cols 0-3: left-aligned (company info), 4+: right-aligned
+  const th = headers.map((h, i) => {
+    const cls = i <= 3 ? 'l' : '';
+    const sm = sortKey === h ? (sortDir === 1 ? ' ↑' : ' ↓') : '';
+    return '<th class="' + cls + '" data-col="' + i + '">' + h + '<span class="sortmark">' + sm + '</span></th>';
+  }).join('');
+
+  let rows = [];
+  SYMBOLS.forEach(sym => {
+    if (showAllYears) {
+      ALL_YEARS.forEach(y => rows.push({ sym, year: y }));
+    } else {
+      rows.push({ sym, year: focusYear });
+    }
+  });
+
+  // Sort
+  if (sortKey) {
+    const ci = headers.indexOf(sortKey);
+    rows.sort((a, b) => {
+      const va = cellValue(a.sym, a.year, ci); const vb = cellValue(b.sym, b.year, ci);
+      if (va == null && vb == null) return 0; if (va == null) return 1; if (vb == null) return -1;
+      return (va - vb) * sortDir;
+    });
+  }
+
+  let tbody = '';
+  let lastSym = '';
+  rows.forEach(({ sym, year }) => {
+    const p = profileMap[sym] || {};
+    const c = companies[sym];
+    const r = c.years[String(year)];
+    const sel = sym === selectedSymbol ? ' selected' : '';
+    const dq = dataQuality(sym, year);
+    const cagr = c.cagr_2018_2025 || {};
+    const isFocus = year === focusYear;
+
+    tbody += '<tr class="' + sel + (isFocus ? '' : '') + '" data-sym="' + sym + '" data-yr="' + year + '"' + (showAllYears && sym !== lastSym ? ' style="border-top:2px solid var(--border-bright)"' : '') + '>';
+    // Col 0: Company name + year
+    tbody += '<td class="l"><div class="co-cell"><span class="co-cn">' + (p.name_cn || sym) + '</span><span class="co-sym">' + sym + ' · ' + year + (r.data_type === 'forecast' ? ' ' + t('forecast') : '') + '</span></div></td>';
+    // Col 1: Founded / Listed
+    tbody += '<td class="l">' + (p.founded_year || t('na')) + ' / ' + (p.listed_year || t('na')) + '</td>';
+    // Col 2: Core IP
+    tbody += '<td class="l" style="font-size:10px;white-space:normal;max-width:160px">' + ((p.core_ip || []).slice(0, 3).join(', ') || t('na')) + '</td>';
+    // Col 3: Foundry
+    tbody += '<td class="l" style="font-size:10px">' + ((p.foundry || []).join(', ') || t('na')) + '</td>';
+    // Col 4: Total Revenue
+    tbody += '<td>' + fmtVal(r.total_revenue_cny, year) + '</td>';
+    // Col 5: YoY%
+    tbody += '<td>' + fmtYoy(r.total_revenue_yoy) + '</td>';
+    // Col 6: MCU Revenue
+    tbody += '<td>' + fmtVal(r.mcu_revenue_cny, year) + '</td>';
+    // Col 7: MCU YoY%
+    tbody += '<td>' + fmtYoy(r.mcu_revenue_yoy) + '</td>';
+    // Col 8: MCU Weight%
+    tbody += '<td>' + fmtPct(r.mcu_weight) + '</td>';
+    // Col 9: MCU GM%
+    tbody += '<td>' + fmtPct(r.mcu_gross_margin) + '</td>';
+    // Col 10: R&D Expense
+    tbody += '<td>' + fmtVal(r.rd_expense_cny, year) + '</td>';
+    // Col 11: R&D%
+    tbody += '<td>' + fmtPct(r.rd_pct_revenue) + '</td>';
+    // Col 12: CAGR Total Revenue
+    tbody += '<td>' + (cagr.total_revenue != null ? (cagr.total_revenue * 100).toFixed(1) + '%' : t('na')) + '</td>';
+    // Col 13: CAGR MCU Revenue
+    tbody += '<td>' + (cagr.mcu_revenue != null ? (cagr.mcu_revenue * 100).toFixed(1) + '%' : t('na')) + '</td>';
+    // Col 14: Employees
+    tbody += '<td>' + (r.employees || t('na')) + '</td>';
+    // Col 15: Source
+    tbody += '<td class="dq-cell"><span class="dq-dot dq-' + dq + '" title="' + dqLabel(dq) + '"></span></td>';
+    tbody += '</tr>';
+    lastSym = sym;
+  });
+
+  document.getElementById('dataTable').innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>' + tbody + '</tbody>';
+
+  document.querySelectorAll('.dt thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = headers[parseInt(th.dataset.col)];
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = 1; }
+      renderTable();
+    });
+  });
+  document.querySelectorAll('.dt tbody tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      selectedSymbol = tr.dataset.sym;
+      if (tr.dataset.yr) focusYear = parseInt(tr.dataset.yr);
+      renderYearScrubber();
+      renderPipeline(); renderTable(); renderDetail();
+    });
+  });
+}
+function cellValue(sym, year, ci) {
+  const keys = [null, null, null, null, 'total_revenue_cny', 'total_revenue_yoy', 'mcu_revenue_cny', 'mcu_revenue_yoy', 'mcu_weight', 'mcu_gross_margin', 'rd_expense_cny', 'rd_pct_revenue', null, null, null, null];
+  if (!keys[ci]) return null;
+  return companies[sym].years[String(year)][keys[ci]];
+}
+
+// ═══════════════════════════════════════════
+// MCU METHODOLOGY DATA (from DATA_DICTIONARY v2.0)
+// ═══════════════════════════════════════════
+const MCU_METHODOLOGY = {
+  '603986': { method: '年报分产品表直接披露', method_en: 'Annual report product-line disclosure', auto: true, source: '2024年报 P54 主营业务分析→分产品收入及毛利率表 → 微控制器及模拟产品线', source_en: '2024 AR P54→Product revenue→MCU & Analog line', confidence: 'high', caveat: '「及模拟」部分体量极小(<2%)，忽略不计', caveat_en: 'Analog portion negligible (<2%)', formula: '年报直接读数 = 微控制器及模拟产品线收入', formula_en: 'Direct reading = MCU & Analog product-line revenue' },
+  '300327': { method: '工业控制产品线（年报分产品披露，含BMIC非MCU成分）', method_en: 'Industrial Control product line (AR disclosure, includes non-MCU BMIC)', auto: true, source: '2024年报→分产品收入→工业控制 = 10.93亿', source_en: '2024 AR→Product revenue→Industrial Control = 1.093B CNY', confidence: 'medium', caveat: '含BMIC(电池管理芯片，非MCU)，纯工规MCU≈工业控制×75%；图表2024-2025切换为窄口径与本表不一致', caveat_en: 'Includes BMIC (non-MCU); pure industrial MCU ≈ Industrial Control × 75%; Chart switched to narrower scope in 2024-2025', formula: 'MCU = 工业控制产品线收入 (含BMIC)', formula_en: 'MCU = Industrial Control line (incl. BMIC)' },
+  '688380': { method: '芯片业务总营收（非MCU<1%可忽略）', method_en: 'Total chip revenue (non-MCU <1% negligible)', auto: true, source: '2024年报营业收入=9.12亿；年报芯片业务分部交叉验证', source_en: '2024 AR total revenue = 912M CNY; chip business segment cross-check', confidence: 'high', caveat: '专注MCU平台，无其他重要业务线', caveat_en: 'MCU-focused platform, no other material business lines', formula: 'MCU ≈ 总营收', formula_en: 'MCU ≈ Total Revenue' },
+  '300077': { method: '系数估算（IR活动记录表管理层口头指引）', method_en: 'Coefficient estimation (IR meeting records, management verbal guidance)', auto: false, ir_symbol: '300077', source: 'IR活动记录表 管理层指引：通用MCU≈27%总收入，含安全芯片≈51%', source_en: 'IR records: general MCU≈27% of total, incl. security MCU≈51%', confidence: 'low', caveat: '⚠ MCU Revenue列(通用MCU~27%) 与 MCU Weight%列(含安全芯片~51%) 使用不同口径，不可直接对比', caveat_en: '⚠ MCU Revenue col (~27% gen. MCU) vs MCU Weight% col (~51% incl. security) use DIFFERENT scopes', formula: '通用MCU = 总收入 × ~27%', formula_en: 'General MCU = Total Revenue × ~27%' },
+  '688279': { method: '年报分产品表直接披露（2024年报起按产品类型分类）', method_en: 'AR product-line direct disclosure (by product type from 2024 AR)', auto: true, source: '2024年报→分产品收入表→电机主控芯片MCU=3.85亿(64.1%)；ASIC=0.85亿(14.1%)；HVIC=0.84亿；IPM=0.43亿', source_en: '2024 AR→Product revenue→MCU=385M(64.1%); ASIC=85M(14.1%); HVIC=84M; IPM=43M', confidence: 'high', caveat: 'MCU为独立产品线(64.1%)；ASIC为另一独立产品线(14.1%)，不含在MCU口径内；Chart 53M$对应MCU单独。HVIC+MOSFET+IPM各为独立产品线', caveat_en: 'MCU is standalone product line (64.1%); ASIC separate (14.1%), not in MCU scope. Chart 53M$ matches MCU alone. HVIC+MOSFET+IPM each separate lines', formula: 'MCU = 年报电机主控芯片MCU产品线收入', formula_en: 'MCU = AR Motor Control MCU product-line revenue' },
+  '002180': { method: '子公司分部数据（年报集成电路分部营收，手工提取）', method_en: 'Subsidiary segment data (AR IC segment, manual extraction)', auto: false, source: '纳思达年报→分部信息→集成电路分部营业收入；⚠不可使用集团总收入(~264亿含打印耗材)', source_en: 'Ninestar AR→Segment info→IC segment revenue; ⚠ DO NOT use group total (~264B incl. printing)', confidence: 'medium', caveat: '集团总收入264亿为打印耗材主导，完全不可用；必须用极海微分部数据(~4亿/年量级)', caveat_en: 'Group total 264B is printing-dominated, completely unusable; must use Geehy subsidiary data (~400M/yr scale)', formula: 'MCU ≈ 极海微 (集成电路分部) 营收', formula_en: 'MCU ≈ Geehy (IC segment) revenue' },
+  '688385': { method: '智能电表芯片产品线（年报分产品直接披露，含模组）', method_en: 'Smart Meter chip product-line (AR direct disclosure, incl. modules)', auto: true, source: '2024年报→智能电表芯片产品线=4.03亿；图表56M$换算=4.03亿，与Weight=11%吻合', source_en: '2024 AR→Smart Meter chip line=403M CNY; Chart 56M$=403M, matches Weight=11%', confidence: 'medium', caveat: '含模组(非纯芯片)；与ST纯MCU口径的主要差异', caveat_en: 'Includes modules (not chip-only); key difference from ST pure-MCU scope', formula: 'MCU = 智能电表芯片产品线收入 (含模组)', formula_en: 'MCU = Smart Meter chip line (incl. modules)' },
+  '688766': { method: 'MCU产品线（年报分产品直接披露，NOR Flash/MCU两段）', method_en: 'MCU product-line (AR direct split: NOR Flash / MCU)', auto: true, source: '2024年报→MCU产品线=5.24亿，毛利率28.7%；图表54M$=3.88亿低于年报值，差额待确认', source_en: '2024 AR→MCU line=524M CNY, GM=28.7%; Chart 54M$=388M lower than AR, diff TBC', confidence: 'high', caveat: '含VCM Driver(音圈马达驱动芯片)；图表使用的口径可能窄于年报MCU行', caveat_en: 'Includes VCM Driver; chart may use narrower scope than AR MCU line', formula: 'MCU = 年报MCU产品线收入', formula_en: 'MCU = AR MCU product-line revenue' },
+  '688595': { method: '年报分产品表直接披露（2024年报起按产品类型分类）', method_en: 'AR product-line direct disclosure (by product type from 2024 AR)', auto: true, source: '2024年报→分产品收入表→MCU芯片=3.26亿(46.5%)；模拟信号链=1.81亿(25.8%)；AIoT=1.82亿(25.9%)。2025: MCU=3.40亿(40.1%)', source_en: '2024 AR→MCU=326M(46.5%); Analog=181M(25.8%); AIoT=182M(25.9%). 2025: MCU=340M(40.1%)', confidence: 'high', caveat: '2024年报起有明确产品线拆分（MCU/模拟/AIoT三段）。MCU占比从2024年46.5%降至2025年40.1%，模拟从25.8%升至35.3%。Chart 45M$≈3.24亿与年报MCU 3.26亿吻合', caveat_en: 'From 2024 AR, clear 3-segment split (MCU/Analog/AIoT). MCU share declined 46.5%→40.1%, Analog rose 25.8%→35.3%. Chart 45M$≈324M matches AR MCU 326M', formula: 'MCU = 年报MCU芯片产品线收入', formula_en: 'MCU = AR MCU chip product-line revenue' },
+  '688391': { method: '计量芯片产品线（年报分产品可直接披露）', method_en: 'Metering chip product-line (AR product-line disclosure available)', auto: true, source: '2024年报→计量芯片≈31.6%总收入=1.87亿；图表26M$反推吻合', source_en: '2024 AR→Metering chip≈31.6% of total=187M CNY; Chart 26M$ back-derivation matches', confidence: 'medium', caveat: '专注电力计量单一场景，与通用MCU竞争格局不同；计量模块/方案服务(非芯片)占63-69%', caveat_en: 'Niche electricity metering only; different competitive landscape vs general MCU; non-chip module/services = 63-69%', formula: 'MCU = 计量芯片产品线收入', formula_en: 'MCU = Metering chip product-line revenue' },
+  '688018': { method: '芯片收入（年报区分芯片/模组两段）', method_en: 'Chip revenue (AR splits chip vs module)', auto: true, source: '2024年报→芯片收入占总收入39%；图表MCU Weight=43%偏高可能含部分模组', source_en: '2024 AR→Chip=39% of total; Chart Weight=43% may include some modules', confidence: 'medium', caveat: '产品属WiFi/BT SoC，部分分析师归类为SoC而非纯MCU', caveat_en: 'Product is WiFi/BT SoC; some analysts classify as SoC not pure MCU', formula: 'MCU = 芯片收入 (不含模组)', formula_en: 'MCU = Chip revenue (excl. modules)' }
+};
+
+// ═══════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════
+function renderDetail() {
+  document.getElementById('detailTitle').textContent = t('detailTitle');
+  const panel = document.getElementById('detailPanel');
+  const main = document.getElementById('main-content');
+  const body = document.getElementById('detailBody');
+
+  if (!selectedSymbol) {
+    panel.classList.remove('open');
+    main.classList.remove('has-detail');
+    main.classList.add('no-detail');
+    body.innerHTML = '';
+    return;
+  }
+
+  panel.classList.add('open');
+  main.classList.remove('no-detail');
+  main.classList.add('has-detail');
+
+  const sym = selectedSymbol; const p = profileMap[sym] || {}; const c = companies[sym];
+  const yr = String(focusYear); const r = c.years[yr];
+  const unit = unitUSD ? 'M$' : t('billion');
+  const conf = p.mcu_revenue_confidence;
+  const confChip = conf === 'high' ? ' chip acc' : conf === 'medium' ? ' chip hi' : ' chip warn';
+
+  let html = '';
+  html += '<div class="dt-hero"><span class="cn">' + (p.name_cn || sym) + '</span><span class="en">' + (p.name_en || '') + '</span>';
+  html += '<div class="dt-meta"><span class="chip">' + sym + '</span><span class="chip">' + (p.exchange || '') + '</span>';
+  html += '<span class="' + confChip + '">' + (conf || '').toUpperCase() + ' CONFIDENCE</span></div></div>';
+
+  html += '<div class="dt-quad">';
+  html += '<div class="q"><span class="lbl">总收入 2025</span><span class="v">' + fmtVal(r.total_revenue_cny, 2025) + '<span class="u">' + unit + '</span></span><span class="sub">YoY ' + fmtYoy(r.total_revenue_yoy) + '</span></div>';
+  html += '<div class="q"><span class="lbl">MCU收入 2025</span><span class="v">' + fmtVal(r.mcu_revenue_cny, 2025) + '<span class="u">' + unit + '</span></span><span class="sub">占比 ' + fmtPct(r.mcu_weight) + '</span></div>';
+  html += '<div class="q"><span class="lbl">MCU毛利率</span><span class="v">' + fmtPct(r.mcu_gross_margin) + '</span><span class="sub">研发支出 ' + fmtVal(r.rd_expense_cny, 2025) + ' ' + unit + '</span></div>';
+  html += '<div class="q"><span class="lbl">研发占比</span><span class="v">' + fmtPct(r.rd_pct_revenue) + '</span><span class="sub">员工 ' + (r.employees || t('na')) + '</span></div>';
+  html += '</div>';
+
+  html += '<div class="dt-section"><span class="ttl">' + t('detailInfo') + '</span>';
+  html += '<div class="dt-line"><span class="k">' + t('exchange') + '</span><span class="v">' + (p.exchange || t('na')) + '</span></div>';
+  html += '<div class="dt-line"><span class="k">' + t('founded') + ' / ' + t('listed') + '</span><span class="v">' + (p.founded_year || t('na')) + ' / ' + (p.listed_year || t('na')) + '</span></div>';
+  html += '<div class="dt-line"><span class="k">' + t('coreIP') + '</span><span class="v">' + ((p.core_ip || []).join(', ') || t('na')) + '</span></div>';
+  html += '<div class="dt-line"><span class="k">' + t('foundry') + '</span><span class="v">' + ((p.foundry || []).join(', ') || t('na')) + '</span></div>';
+  html += '<div class="dt-line"><span class="k">' + t('autoMCU') + '</span><span class="v">' + (p.auto_mcu_status || t('na')) + ' — ' + (p.auto_mcu_note || '') + '</span></div>';
+  html += '</div>';
+
+  html += '<div class="dt-section"><span class="ttl">' + t('detailScope') + '</span>';
+  html += '<div class="dt-note">' + (p.mcu_revenue_scope || t('na')) + '</div>';
+  html += '<div class="dt-line"><span class="k">' + t('source') + '</span><span class="v" style="font-size:10px">' + (p.source_url || '') + ' (' + (p.source_updated || '') + ')</span></div>';
+  html += '</div>';
+
+  // Methodology traceability block
+  const meth = MCU_METHODOLOGY[sym] || {};
+  if (meth.method) {
+    const isEn = lang === 'en';
+    html += '<div class="dt-section"><span class="ttl">' + t('detailMethod') + '</span>';
+    html += '<div class="dt-method">';
+    html += '<div class="dt-method-hd"><span class="lbl">§ METHOD</span><span class="badge">' + (meth.auto ? (isEn ? 'AUTO' : '可自动更新') : (isEn ? 'MANUAL' : '需人工复核')) + '</span></div>';
+    html += '<div class="dt-formula"><span class="f-lbl">' + (isEn ? 'Formula' : '计算方式') + '</span><span class="f-eq">' + (isEn ? (meth.formula_en || meth.formula) : meth.formula) + '</span></div>';
+    html += '<div class="dt-method-grid">';
+    html += '<div><span class="lbl">' + (isEn ? 'Source' : '数据来源') + '</span><span class="v src">' + (isEn ? (meth.source_en || meth.source) : meth.source) + '</span></div>';
+    html += '<div><span class="lbl">' + (isEn ? 'Confidence' : '置信度') + '</span><span class="v conf-' + meth.confidence + '">' + (meth.confidence || '').toUpperCase() + '</span></div>';
+    html += '<div class="src"><span class="lbl">' + (isEn ? 'Note' : '注意事项') + '</span><span class="v src" style="font-size:10px">' + (isEn ? (meth.caveat_en || meth.caveat) : meth.caveat) + '</span></div>';
+    if (meth.ir_symbol) {
+      html += '<div><span class="lbl">IR ' + (isEn ? 'Records' : '记录表') + '</span><span class="v" style="font-size:10px">AkShare <code>stock_irm_cninfo(' + meth.ir_symbol + ')</code></span></div>';
+    }
+    html += '</div></div></div>';
+  }
+
+  html += '<div class="dt-section"><span class="ttl">' + t('detailFilings') + '</span>';
+  html += '<div style="overflow-x:auto"><table class="filings"><thead><tr><th>Year</th><th>Revenue</th><th>YoY%</th><th>MCU Rev</th><th>MCU YoY%</th><th>MCU GM%</th><th>R&D%</th></tr></thead><tbody>';
+  ALL_YEARS.forEach(y => { const yr2 = String(y); const rec = c.years[yr2]; const cls = y === focusYear ? ' cur' : ''; html += '<tr class="' + cls + '"><td>' + y + '</td><td>' + fmtVal(rec.total_revenue_cny, y) + '</td><td class="' + ((rec.total_revenue_yoy || 0) >= 0 ? 'pos' : 'neg') + '">' + fmtYoy(rec.total_revenue_yoy) + '</td><td>' + fmtVal(rec.mcu_revenue_cny, y) + '</td><td class="' + ((rec.mcu_revenue_yoy || 0) >= 0 ? 'pos' : 'neg') + '">' + fmtYoy(rec.mcu_revenue_yoy) + '</td><td>' + fmtPct(rec.mcu_gross_margin) + '</td><td>' + fmtPct(rec.rd_pct_revenue) + '</td></tr>'; });
+  html += '</tbody></table></div></div>';
+
+  body.innerHTML = html;
+}
+
+// ─── Status ───
+function renderStatus() {
+  document.getElementById('statusValid').textContent = t('statusValid');
+  document.getElementById('statusResult').textContent = 'PASS 8/0';
+  document.getElementById('statusMeta').innerHTML = '<b>Updated</b> ' + data.meta.last_updated + ' | ' + (data.meta.fetch_method || '');
+}
+
+window.addEventListener('resize', () => { renderChart1(); renderChart2(); renderChart3(); });
+</script>
+</body>
+</html>

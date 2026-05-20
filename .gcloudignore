@@ -1,0 +1,16 @@
+# Python files to upload for Cloud Run
+requirements_cloudrun.txt
+
+# Files to avoid uploading
+README.md
+Dockerfile
+.gcloudignore
+.gitignore
+.dockerignore
+__pycache__
+*.pyc
+.env
+.env.*
+.venv
+venv
+.DS_Store
