@@ -79,81 +79,69 @@ def em_symbol(code: str) -> str:
 
 # ── AKShare fetchers ──────────────────────────────────────────────────────────
 
-def _extract_pl_row(s: "pd.Series") -> dict:
-    """Extract revenue/net-income/R&D from a pandas Series indexed by item name."""
-    def pick(*keys):
-        for k in keys:
-            v = safe_float(s.get(k))
-            if v is not None:
-                return v
-        return None
+def _parse_long_df(df: "pd.DataFrame", annual_only: bool = True) -> dict[int, dict]:
+    """Parse long-format profit sheet: rows=periods, cols=English field names.
 
-    return {
-        "total_revenue_yuan": pick(
-            "营业总收入", "营业收入",
-            "一、营业总收入", "营业总收入(元)",
-        ),
-        "net_income_yuan": pick(
-            "净利润", "归属于母公司所有者的净利润",
-            "五、净利润（亏损）", "五、净利润",
-        ),
-        "rd_expense_yuan": pick(
-            "研发费用", "研发支出", "研发投入",
-            "加：研发费用", "其中：研发费用",
-        ),
-    }
-
-
-def _parse_wide_df(df: "pd.DataFrame") -> dict[int, dict]:
-    """Parse wide profit-sheet DataFrame: rows=items, cols=report-dates."""
-    try:
-        df = df.set_index(df.columns[0])
-    except Exception:
-        return {}
+    AKShare 1.18+ returns:
+      REPORT_DATE, TOTAL_OPERATE_INCOME, PARENT_NETPROFIT, RESEARCH_EXPENSE, ...
+    """
     out: dict[int, dict] = {}
-    for col in df.columns:
-        year = extract_year(col)
+    for _, row in df.iterrows():
+        date_str = str(row.get("REPORT_DATE", ""))
+        year = extract_year(date_str)
         if year not in YEARS:
             continue
-        row = _extract_pl_row(df[col])
-        if row["total_revenue_yuan"] is not None:
-            out[year] = row
+        # For quarterly endpoint filter to Q4 (annual equivalent)
+        if annual_only and not (date_str.endswith("12-31") or date_str.endswith("1231")):
+            continue
+        if year in out:
+            continue  # keep first (most recent) occurrence
+
+        revenue = safe_float(row.get("TOTAL_OPERATE_INCOME") or row.get("OPERATE_INCOME"))
+        net_inc = safe_float(row.get("PARENT_NETPROFIT") or row.get("NETPROFIT"))
+        rd      = safe_float(row.get("RESEARCH_EXPENSE") or row.get("ME_RESEARCH_EXPENSE"))
+
+        if revenue is not None:
+            out[year] = {
+                "total_revenue_yuan": revenue,
+                "net_income_yuan":    net_inc,
+                "rd_expense_yuan":    rd,
+            }
     return out
 
 
-def _fetch_by_report(symbol: str) -> dict[int, dict]:
-    """Fallback: stock_profit_sheet_by_report_em returns all periods as wide DataFrame."""
-    sym = em_symbol(symbol)
-    try:
-        df = ak.stock_profit_sheet_by_report_em(symbol=sym)
-    except Exception as exc:
-        log.debug("  [%s] report_em failed: %s", symbol, exc)
-        return {}
-    if df is None or df.empty:
-        return {}
-    return _parse_wide_df(df)
-
-
 def fetch_profit_sheet(symbol: str) -> dict[int, dict]:
-    """Annual P&L from East Money. Tries yearly then report endpoint, both need SH/SZ prefix."""
+    """Annual P&L from East Money (AKShare 1.18+).
+
+    Both endpoints return long-format DataFrames (rows=periods, cols=fields).
+    yearly_em   → 15 annual rows    (preferred, one API call)
+    report_em   → 48 quarterly rows (fallback, filter Q4)
+    """
     sym = em_symbol(symbol)
 
-    # Primary: yearly bulk (one call, all years)
+    # Primary: yearly endpoint — already filtered to annual reports
     try:
         df = ak.stock_profit_sheet_by_yearly_em(symbol=sym)
-        if df is not None and not df.empty:
-            result = _parse_wide_df(df)
+        if df is not None and not df.empty and "REPORT_DATE" in df.columns:
+            result = _parse_long_df(df, annual_only=False)
             if result:
                 return result
     except Exception as exc:
         log.debug("  [%s] yearly profit_sheet error: %s", symbol, exc)
 
-    # Fallback: report endpoint (also returns multiple periods)
-    log.info("  [%s] yearly endpoint empty/broken — trying report fallback", symbol)
-    result = _fetch_by_report(symbol)
-    if not result:
-        log.warning("  [%s] profit_sheet: no data from any source", symbol)
-    return result
+    # Fallback: report endpoint — all quarters, filter Dec-31
+    log.info("  [%s] yearly endpoint empty — trying report fallback", symbol)
+    try:
+        df = ak.stock_profit_sheet_by_report_em(symbol=sym)
+        if df is not None and not df.empty and "REPORT_DATE" in df.columns:
+            result = _parse_long_df(df, annual_only=True)
+            if result:
+                return result
+    except Exception as exc:
+        log.debug("  [%s] report_em error: %s", symbol, exc)
+
+    log.warning("  [%s] profit_sheet: no data from any source", symbol)
+    return {}
 
 
 def fetch_employee_count(symbol: str) -> dict[int, int]:
