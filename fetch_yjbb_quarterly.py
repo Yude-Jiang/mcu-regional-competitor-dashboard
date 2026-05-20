@@ -214,9 +214,9 @@ def merge_into_data_json(records: list[dict]) -> None:
             if r.get(key) is not None:
                 fin[key] = r[key]
 
-        # Convert 亿CNY revenue to yuan for consistency with fetch_mcu_data.py
+        # stock_yjbb_em returns revenue in yuan (not 亿), store directly
         if r.get("total_revenue_cny_100m") is not None and "total_revenue_yuan" not in fin:
-            fin["total_revenue_yuan"] = r["total_revenue_cny_100m"] * 1e8
+            fin["total_revenue_yuan"] = r["total_revenue_cny_100m"]
 
         merged += 1
 

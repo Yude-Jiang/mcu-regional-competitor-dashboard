@@ -70,53 +70,90 @@ def extract_year(col) -> int | None:
 
 # ── AKShare fetchers ──────────────────────────────────────────────────────────
 
-def fetch_profit_sheet(symbol: str) -> dict[int, dict]:
-    """Annual P&L from East Money. Values in yuan (元)."""
+def _extract_pl_row(s: "pd.Series") -> dict:
+    """Extract revenue/net-income/R&D from a pandas Series indexed by item name."""
+    def pick(*keys):
+        for k in keys:
+            v = safe_float(s.get(k))
+            if v is not None:
+                return v
+        return None
+
+    return {
+        "total_revenue_yuan": pick(
+            "营业总收入", "营业收入",
+            "一、营业总收入", "营业总收入(元)",
+        ),
+        "net_income_yuan": pick(
+            "净利润", "归属于母公司所有者的净利润",
+            "五、净利润（亏损）", "五、净利润",
+        ),
+        "rd_expense_yuan": pick(
+            "研发费用", "研发支出", "研发投入",
+            "加：研发费用", "其中：研发费用",
+        ),
+    }
+
+
+def _parse_wide_df(df: "pd.DataFrame") -> dict[int, dict]:
+    """Parse wide profit-sheet DataFrame: rows=items, cols=report-dates."""
     try:
-        df = ak.stock_profit_sheet_by_yearly_em(symbol=symbol)
-    except Exception as exc:
-        log.warning("  [%s] profit_sheet failed: %s", symbol, exc)
+        df = df.set_index(df.columns[0])
+    except Exception:
         return {}
-    if df is None or df.empty:
-        return {}
-
-    df = df.set_index(df.columns[0])
     out: dict[int, dict] = {}
-
     for col in df.columns:
         year = extract_year(col)
         if year not in YEARS:
             continue
-        s = df[col]
-
-        def pick(*keys):
-            for k in keys:
-                v = safe_float(s.get(k))
-                if v is not None:
-                    return v
-            return None
-
-        revenue = pick(
-            "营业总收入", "营业收入",
-            "一、营业总收入", "营业总收入(元)",
-        )
-        net_inc = pick(
-            "净利润", "归属于母公司所有者的净利润",
-            "五、净利润（亏损）", "五、净利润",
-        )
-        rd = pick(
-            "研发费用", "研发支出", "研发投入",
-            "加：研发费用", "其中：研发费用",
-        )
-
-        if revenue is not None:
-            out[year] = {
-                "total_revenue_yuan": revenue,
-                "net_income_yuan": net_inc,
-                "rd_expense_yuan": rd,
-            }
-
+        row = _extract_pl_row(df[col])
+        if row["total_revenue_yuan"] is not None:
+            out[year] = row
     return out
+
+
+def _fetch_by_report(symbol: str) -> dict[int, dict]:
+    """Fallback: call stock_profit_sheet_by_report_em once per year (Q4 ≈ annual)."""
+    out: dict[int, dict] = {}
+    for year in YEARS:
+        date_str = f"{year}1231"
+        try:
+            df = ak.stock_profit_sheet_by_report_em(symbol=symbol, date=date_str)
+        except Exception as exc:
+            log.debug("  [%s] report_em %s failed: %s", symbol, date_str, exc)
+            continue
+        if df is None or df.empty:
+            continue
+        try:
+            # Format A: first col = item names, second col = values
+            df2 = df.set_index(df.columns[0])
+            s = df2.iloc[:, 0]
+            row = _extract_pl_row(s)
+            if row["total_revenue_yuan"] is not None:
+                out[year] = row
+        except Exception as exc:
+            log.debug("  [%s] %s parse error: %s", symbol, date_str, exc)
+    return out
+
+
+def fetch_profit_sheet(symbol: str) -> dict[int, dict]:
+    """Annual P&L from East Money. Tries yearly endpoint, falls back to per-year Q4."""
+    # Primary: bulk yearly endpoint (faster, one call)
+    try:
+        df = ak.stock_profit_sheet_by_yearly_em(symbol=symbol)
+        if df is not None and not df.empty:
+            result = _parse_wide_df(df)
+            if result:
+                return result
+    except Exception as exc:
+        log.debug("  [%s] yearly profit_sheet error: %s — trying per-year fallback", symbol, exc)
+
+    # Fallback: per-year quarterly endpoint
+    log.info("  [%s] using per-year Q4 fallback for profit sheet", symbol)
+    result = _fetch_by_report(symbol)
+    if not result:
+        log.warning("  [%s] profit_sheet failed: no data from any source", symbol)
+    return result
 
 
 def fetch_employee_count(symbol: str) -> dict[int, int]:
