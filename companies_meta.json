@@ -22,10 +22,10 @@
     "listed_year": 2011,
     "core_license": "8051 (proprietary)",
     "foundry_fab": "TSMC",
-    "mcu_strategy": "total_proxy",
-    "mcu_multiplier": 0.9988,
-    "mcu_confidence": "high",
-    "mcu_note": "MCU≈总营收×0.9988，纯MCU+AMOLED驱动IC"
+    "mcu_strategy": "segment_industrial",
+    "mcu_multiplier": null,
+    "mcu_confidence": "medium",
+    "mcu_note": "工业控制芯片口径（年报分产品表直接披露，含BMIC电池管理芯片，非纯工规MCU）"
   },
   "688380": {
     "name_cn": "中微半导",
@@ -64,10 +64,10 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M3 (motor ctrl)",
     "foundry_fab": "TSMC",
-    "mcu_strategy": "total_revenue",
-    "mcu_multiplier": 1.0,
-    "mcu_confidence": "high",
-    "mcu_note": "总营收=MCU全量（电机驱动专营）"
+    "mcu_strategy": "total_proxy",
+    "mcu_multiplier": 0.67,
+    "mcu_confidence": "medium",
+    "mcu_note": "MCU/ASIC按总收入×0.67估算，不含HVIC/MOSFET/IPM（约占30-35%）"
   },
   "002180": {
     "name_cn": "纳思达",
@@ -134,10 +134,10 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M (meter MCU)",
     "foundry_fab": "SMIC",
-    "mcu_strategy": "total_revenue",
-    "mcu_multiplier": 1.0,
-    "mcu_confidence": "high",
-    "mcu_note": "总营收=MCU全量（电力计量专营）"
+    "mcu_strategy": "total_proxy",
+    "mcu_multiplier": 0.34,
+    "mcu_confidence": "medium",
+    "mcu_note": "计量MCU/SoC按总收入×0.34估算，其余为计量模块和方案服务，应用场景单一"
   },
   "688018": {
     "name_cn": "乐鑫科技",

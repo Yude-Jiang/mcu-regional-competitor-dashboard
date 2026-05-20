@@ -1,21 +1,45 @@
 {
-  "_comment": "手工录入的MCU营收数据（M$）。优先级高于自动推算。来源：年报、招股书、投资者关系。",
+  "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。",
   "603986": {
     "2024": {
-      "mcu_revenue_musd": 237.0,
+      "mcu_revenue_yuan": 1706000000,
       "data_type": "reported",
       "confidence": "high",
-      "source": "兆易创新2024年报 分产品营业收入"
+      "source": "兆易创新2024年报 分产品营业收入表"
     },
-    "_todo_2018_2023": "年报分产品表有MCU收入，待手工录入6个数字后补全YoY序列"
+    "_todo_2018_2023": "年报分产品表有MCU收入，待extract_mcu_segments.py处理后补全"
   },
   "688766": {
     "2024": {
-      "mcu_revenue_musd": 72.9,
+      "mcu_revenue_yuan": 524000000,
+      "mcu_gross_margin": 0.287,
       "data_type": "reported",
       "confidence": "high",
-      "source": "普冉股份2024年报"
+      "source": "普冉股份2024年报 MCU产品线"
     },
     "_todo_2018_2021": "2022年招股书含2018-2021历史MCU数据，价值最高，待录入 — open gs://st-finance-reports/reports/688766_普冉股份/ and read 分产品营收 table"
+  },
+  "300327": {
+    "2023": {
+      "mcu_revenue_yuan": 1013682135,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "中颖电子2023年报 工业控制芯片分产品表"
+    },
+    "2024": {
+      "mcu_revenue_yuan": 1093424644,
+      "mcu_gross_margin": 0.3684,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "中颖电子2024年报 工业控制芯片分产品表"
+    },
+    "2025": {
+      "mcu_revenue_yuan": 1032988745,
+      "mcu_gross_margin": 0.3376,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "中颖电子2025年报 工业控制芯片分产品表"
+    }
   }
 }

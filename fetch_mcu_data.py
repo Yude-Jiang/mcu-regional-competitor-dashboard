@@ -32,17 +32,18 @@ log = logging.getLogger(__name__)
 HERE = Path(__file__).parent
 YEARS = list(range(2018, 2026))  # 2018–2025 (8 years)
 
-# Annual average CNY per 1 USD (approximate mid-market)
-FX: dict[int, float] = {
-    2018: 6.617,
-    2019: 6.899,
-    2020: 6.900,
-    2021: 6.452,
-    2022: 6.737,
-    2023: 7.075,
-    2024: 7.243,
-    2025: 7.260,
-}
+# Annual average CNY per 1 USD — loaded from fx_rates.json (authoritative source)
+_fx_path = HERE / "fx_rates.json"
+if _fx_path.exists():
+    FX: dict[int, float] = {
+        int(k): v
+        for k, v in json.loads(_fx_path.read_text())["CNY_USD"].items()
+    }
+else:
+    FX = {
+        2018: 6.6174, 2019: 6.8985, 2020: 6.8976, 2021: 6.4515,
+        2022: 6.7261, 2023: 7.0809, 2024: 7.1900, 2025: 7.2200,
+    }
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -177,11 +178,20 @@ def apply_mcu_strategy(
 
     for year, row in financials.items():
         key = str(year)
-        # Manually entered data takes priority
+        # Manually entered data takes priority (supports both _yuan and legacy _musd)
         if key in known_mcu and isinstance(known_mcu[key], dict):
             k = known_mcu[key]
+            yuan = k.get("mcu_revenue_yuan")
             musd = k.get("mcu_revenue_musd")
-            if musd is not None:
+            if yuan is not None:
+                row["mcu_revenue_yuan"] = yuan
+                row["mcu_data_type"] = k.get("data_type", "reported")
+                row["mcu_confidence"] = k.get("confidence", "high")
+                row["mcu_source"] = k.get("source", "Manual entry")
+                if k.get("mcu_gross_margin") is not None:
+                    row["gross_margin_pct"] = round(k["mcu_gross_margin"] * 100, 2)
+                continue
+            elif musd is not None:
                 row["mcu_revenue_yuan"] = musd * FX.get(year, 7.2) * 1_000_000
                 row["mcu_data_type"] = k.get("data_type", "reported")
                 row["mcu_confidence"] = k.get("confidence", "high")
@@ -199,6 +209,13 @@ def apply_mcu_strategy(
                 if multiplier == 1.0
                 else f"总营收×{multiplier}"
             )
+        elif strategy == "segment_industrial":
+            # 工业控制芯片口径：数据需从年报分产品表提取，无法从总收入自动推算
+            # 有 known_mcu 手工录入时已在上方处理；此处标记为 pending 等待录入
+            row["mcu_revenue_yuan"] = None
+            row["mcu_data_type"] = "pending"
+            row["mcu_confidence"] = base_conf
+            row["mcu_source"] = "需从年报分产品表提取（stock_zygc_em 或 extract_mcu_segments.py）"
         else:
             row["mcu_revenue_yuan"] = None
             row["mcu_data_type"] = "unavailable"

@@ -63,6 +63,11 @@ def companies_meta():
     return send_from_directory(HERE, "companies_meta.json", mimetype="application/json")
 
 
+@app.route("/fx_rates.json")
+def fx_rates():
+    return send_from_directory(HERE, "fx_rates.json", mimetype="application/json")
+
+
 # ── API: document status matrix ───────────────────────────────────────────────
 
 @app.route("/api/doc-status")
