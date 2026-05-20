@@ -16,6 +16,6 @@
       "confidence": "high",
       "source": "普冉股份2024年报"
     },
-    "_todo_2018_2021": "2022年招股书含2018-2021历史MCU数据，价值最高，待录入"
+    "_todo_2018_2021": "2022年招股书含2018-2021历史MCU数据，价值最高，待录入 — open gs://st-finance-reports/reports/688766_普冉股份/ and read 分产品营收 table"
   }
 }
