@@ -68,6 +68,15 @@ def extract_year(col) -> int | None:
         return None
 
 
+def em_symbol(code: str) -> str:
+    """Add exchange prefix required by East Money AKShare functions.
+
+    SH = Shanghai (6xxxxx, 688xxx STAR)
+    SZ = Shenzhen (3xxxxx ChiNext, 0xxxxx main board)
+    """
+    return ("SH" if code.startswith("6") else "SZ") + code
+
+
 # ── AKShare fetchers ──────────────────────────────────────────────────────────
 
 def _extract_pl_row(s: "pd.Series") -> dict:
@@ -113,46 +122,37 @@ def _parse_wide_df(df: "pd.DataFrame") -> dict[int, dict]:
 
 
 def _fetch_by_report(symbol: str) -> dict[int, dict]:
-    """Fallback: call stock_profit_sheet_by_report_em once per year (Q4 ≈ annual)."""
-    out: dict[int, dict] = {}
-    for year in YEARS:
-        date_str = f"{year}1231"
-        try:
-            df = ak.stock_profit_sheet_by_report_em(symbol=symbol, date=date_str)
-        except Exception as exc:
-            log.debug("  [%s] report_em %s failed: %s", symbol, date_str, exc)
-            continue
-        if df is None or df.empty:
-            continue
-        try:
-            # Format A: first col = item names, second col = values
-            df2 = df.set_index(df.columns[0])
-            s = df2.iloc[:, 0]
-            row = _extract_pl_row(s)
-            if row["total_revenue_yuan"] is not None:
-                out[year] = row
-        except Exception as exc:
-            log.debug("  [%s] %s parse error: %s", symbol, date_str, exc)
-    return out
+    """Fallback: stock_profit_sheet_by_report_em returns all periods as wide DataFrame."""
+    sym = em_symbol(symbol)
+    try:
+        df = ak.stock_profit_sheet_by_report_em(symbol=sym)
+    except Exception as exc:
+        log.debug("  [%s] report_em failed: %s", symbol, exc)
+        return {}
+    if df is None or df.empty:
+        return {}
+    return _parse_wide_df(df)
 
 
 def fetch_profit_sheet(symbol: str) -> dict[int, dict]:
-    """Annual P&L from East Money. Tries yearly endpoint, falls back to per-year Q4."""
-    # Primary: bulk yearly endpoint (faster, one call)
+    """Annual P&L from East Money. Tries yearly then report endpoint, both need SH/SZ prefix."""
+    sym = em_symbol(symbol)
+
+    # Primary: yearly bulk (one call, all years)
     try:
-        df = ak.stock_profit_sheet_by_yearly_em(symbol=symbol)
+        df = ak.stock_profit_sheet_by_yearly_em(symbol=sym)
         if df is not None and not df.empty:
             result = _parse_wide_df(df)
             if result:
                 return result
     except Exception as exc:
-        log.debug("  [%s] yearly profit_sheet error: %s — trying per-year fallback", symbol, exc)
+        log.debug("  [%s] yearly profit_sheet error: %s", symbol, exc)
 
-    # Fallback: per-year quarterly endpoint
-    log.info("  [%s] using per-year Q4 fallback for profit sheet", symbol)
+    # Fallback: report endpoint (also returns multiple periods)
+    log.info("  [%s] yearly endpoint empty/broken — trying report fallback", symbol)
     result = _fetch_by_report(symbol)
     if not result:
-        log.warning("  [%s] profit_sheet failed: no data from any source", symbol)
+        log.warning("  [%s] profit_sheet: no data from any source", symbol)
     return result
 
 
@@ -160,7 +160,7 @@ def fetch_employee_count(symbol: str) -> dict[int, int]:
     """Best-effort annual employee head count."""
     out: dict[int, int] = {}
     try:
-        df = ak.stock_employee_em(symbol=symbol)
+        df = ak.stock_employee_em(symbol=em_symbol(symbol))
         if df is None or df.empty:
             return out
         for _, row in df.iterrows():
