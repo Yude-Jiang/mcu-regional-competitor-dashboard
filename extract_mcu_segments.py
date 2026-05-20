@@ -63,19 +63,31 @@ FX = {2018:6.617,2019:6.899,2020:6.900,2021:6.452,
 
 # ── Secret Manager ────────────────────────────────────────────────────────────
 
-def get_secret(name: str) -> str | None:
-    """Fetch secret from env var first, then Secret Manager."""
-    env_key = name.upper().replace("-", "_")
-    if v := os.environ.get(env_key):
-        return v
+def get_secret(name: str, *aliases: str) -> str | None:
+    """Fetch secret from env var first, then Secret Manager.
+
+    Checks env vars derived from `name` and any extra `aliases` before
+    falling back to Secret Manager (tries `name` then each alias as secret id).
+    """
+    # env var candidates: derived from name + explicit aliases
+    env_candidates = [name.upper().replace("-", "_")] + list(aliases)
+    for env_key in env_candidates:
+        if v := os.environ.get(env_key):
+            return v
+    # Secret Manager candidates: name + aliases as secret ids
+    secret_ids = [name] + list(aliases)
     try:
         from google.cloud import secretmanager
         client = secretmanager.SecretManagerServiceClient()
-        path   = f"projects/{PROJECT}/secrets/{name}/versions/latest"
-        return client.access_secret_version(name=path).payload.data.decode()
+        for sid in secret_ids:
+            try:
+                path = f"projects/{PROJECT}/secrets/{sid}/versions/latest"
+                return client.access_secret_version(name=path).payload.data.decode()
+            except Exception:
+                continue
     except Exception as exc:
-        log.debug("Secret Manager unavailable for %s: %s", name, exc)
-        return None
+        log.debug("Secret Manager unavailable: %s", exc)
+    return None
 
 
 # ── GCS helpers ───────────────────────────────────────────────────────────────
@@ -427,14 +439,14 @@ def main() -> None:
                         help="Skip updating mcu_known_data.json")
     args = parser.parse_args()
 
-    deepseek_key = get_secret("deepseek-api-key")
-    gemini_key   = get_secret("gemini-api-key")
+    deepseek_key = get_secret("deepseek-api-key", "VITE_DEEPSEEK_API_KEY")
+    gemini_key   = get_secret("gemini-api-key",   "VITE_GEMINI_API_KEY")
 
     if not deepseek_key and not gemini_key:
         sys.exit(
             "No API key found.\n"
-            "Set DEEPSEEK_API_KEY or GEMINI_API_KEY env var, or add to Secret Manager:\n"
-            "  export DEEPSEEK_API_KEY=sk-...\n"
+            "Set DEEPSEEK_API_KEY (or VITE_DEEPSEEK_API_KEY) env var, or Secret Manager:\n"
+            "  export VITE_DEEPSEEK_API_KEY=sk-...\n"
             "  export GEMINI_API_KEY=AIza..."
         )
 
