@@ -17,4 +17,4 @@ steps:
     - "--set-env-vars"
     - "GCP_PROJECT=$PROJECT_ID,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports"
     - "--set-secrets"
-    - "DEEPSEEK_API_KEY=deepseek-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest"
+    - "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest"

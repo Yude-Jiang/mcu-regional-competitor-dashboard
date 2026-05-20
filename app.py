@@ -3,14 +3,13 @@
 
 Routes:
   GET  /                  dashboard.html
+  GET  /admin             admin.html
   GET  /data.json         static financial data (local cache)
   GET  /companies_meta.json
-  GET  /api/doc-status    BigQuery PDF document status matrix (no auth required)
-
-Phase 3+ routes (not yet implemented):
-  POST /api/refresh       trigger CNINFO download + LLM extraction
-  GET  /api/refresh/stream  SSE progress feed
-  POST /api/ask           AI Q&A (DeepSeek / Gemini)
+  GET  /api/doc-status    BigQuery PDF document status matrix
+  POST /api/company/add   add new company to companies_meta.json
+  POST /api/ask           AI Q&A (DeepSeek V3 / Gemini 2.0 Flash)
+  POST /api/refresh       [Phase 3 stub] trigger CNINFO download pipeline
 """
 
 import json
@@ -22,6 +21,20 @@ from pathlib import Path
 from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 
 import bq_writer
+
+# ── API key helper ─────────────────────────────────────────────────────────────
+
+def _get_api_key(env_var: str, secret_id: str) -> str | None:
+    if v := os.environ.get(env_var):
+        return v
+    try:
+        from google.cloud import secretmanager
+        client = secretmanager.SecretManagerServiceClient()
+        project = os.environ.get("GCP_PROJECT", "st-china-ai-force")
+        name = f"projects/{project}/secrets/{secret_id}/versions/latest"
+        return client.access_secret_version(name=name).payload.data.decode()
+    except Exception:
+        return None
 
 log = logging.getLogger(__name__)
 app = Flask(__name__)
@@ -183,18 +196,157 @@ def api_company_add():
     }), 201
 
 
-# ── Placeholder stubs (Phase 3+) ──────────────────────────────────────────────
+# ── API: AI Q&A ───────────────────────────────────────────────────────────────
+
+_SYSTEM_PROMPT = """你是一位专注于中国大陆MCU（微控制器）上市公司的半导体行业竞争情报分析师。
+你的数据来源是11家A股MCU公司的年报财务数据（2018–2025）和AI提取的MCU分段营收。
+回答要简洁、数据驱动，尽量引用具体数字。使用中文回答。
+
+数据说明：
+- MCU营收：部分来自年报直接披露（segment_reported），部分通过系数推算（total_proxy/total_revenue）
+- 置信度：high=年报直接披露，medium=估算，low=粗估
+- 货币：USD（按当年平均汇率换算）
+
+你掌握的公司数据：
+{context}
+"""
+
+FX = {2018:6.617, 2019:6.899, 2020:6.900, 2021:6.452,
+      2022:6.737, 2023:7.075, 2024:7.243, 2025:7.260}
+
+COMPANY_ORDER = [
+    "603986","300327","688380","300077","688279",
+    "002180","688385","688766","688595","688391","688018",
+]
+
+
+def _build_context() -> str:
+    """Build a compact financial summary from data.json for the LLM context."""
+    path = HERE / "data.json"
+    meta_path = HERE / "companies_meta.json"
+    if not path.exists():
+        return "（data.json 尚未生成，请先运行 smart_sync.py）"
+
+    try:
+        data = json.loads(path.read_text())
+        meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    except Exception:
+        return "（数据文件读取失败）"
+
+    companies = data.get("companies", {})
+    lines: list[str] = []
+
+    for sym in COMPANY_ORDER:
+        co = companies.get(sym)
+        if not co:
+            continue
+        m = co.get("meta", {}) or meta.get(sym, {})
+        name = m.get("name_cn", sym)
+        name_en = m.get("name_en", "")
+        strategy = m.get("mcu_strategy", "")
+        confidence = m.get("mcu_confidence", "")
+        fin = co.get("financials", {})
+
+        lines.append(f"\n【{name} ({name_en}) · {sym}】")
+        lines.append(f"  MCU口径: {strategy}  置信度: {confidence}")
+
+        yr_rows = []
+        for yr in sorted(fin.keys(), reverse=True)[:5]:  # last 5 years
+            f = fin[yr]
+            rev  = f.get("total_revenue_musd")
+            mcu  = f.get("mcu_revenue_musd")
+            gm   = f.get("gross_margin_pct")
+            rd   = f.get("rd_expense_musd")
+            rd_r = f.get("rd_ratio_pct")
+            ni_y = f.get("net_income_yoy_pct")
+            emp  = f.get("employees")
+
+            parts = [f"{yr}年:"]
+            if rev  is not None: parts.append(f"总营收${rev:.1f}M")
+            if mcu  is not None: parts.append(f"MCU${mcu:.1f}M")
+            if gm   is not None: parts.append(f"毛利率{gm:.1f}%")
+            if rd   is not None: parts.append(f"研发${rd:.1f}M")
+            if rd_r is not None: parts.append(f"研发率{rd_r:.1f}%")
+            if ni_y is not None: parts.append(f"净利润YoY{ni_y:+.1f}%")
+            if emp  is not None: parts.append(f"员工{emp}人")
+            yr_rows.append("  " + " | ".join(parts))
+
+        lines.extend(yr_rows if yr_rows else ["  （暂无财务数据）"])
+
+    return "\n".join(lines) if lines else "（暂无数据）"
+
+
+def _call_deepseek(question: str, context: str, api_key: str) -> str:
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    resp = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": _SYSTEM_PROMPT.format(context=context)},
+            {"role": "user",   "content": question},
+        ],
+        max_tokens=1024,
+        temperature=0.3,
+    )
+    return resp.choices[0].message.content.strip()
+
+
+def _call_gemini(question: str, context: str, api_key: str) -> str:
+    import google.generativeai as genai
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    prompt = _SYSTEM_PROMPT.format(context=context) + f"\n\n用户问题：{question}"
+    resp = model.generate_content(prompt)
+    return resp.text.strip()
+
+
+@app.route("/api/ask", methods=["POST"])
+def api_ask():
+    """AI Q&A over MCU competitor financials.
+
+    Request:  {"question": "兆易创新2024年MCU营收是多少？"}
+    Response: {"answer": "...", "model": "deepseek-chat", "ok": true}
+    """
+    body = request.get_json(force=True, silent=True) or {}
+    question = str(body.get("question", "")).strip()
+    if not question:
+        return jsonify({"error": "missing_question", "message": "请提供 question 字段"}), 400
+    if len(question) > 2000:
+        return jsonify({"error": "question_too_long"}), 400
+
+    context = _build_context()
+
+    # Try DeepSeek first, Gemini fallback
+    deepseek_key = _get_api_key("VITE_DEEPSEEK_API_KEY", "VITE_DEEPSEEK_API_KEY")
+    gemini_key   = _get_api_key("VITE_GEMINI_API_KEY",   "VITE_GEMINI_API_KEY")
+
+    if deepseek_key:
+        try:
+            answer = _call_deepseek(question, context, deepseek_key)
+            return jsonify({"ok": True, "answer": answer, "model": "deepseek-chat"})
+        except Exception as exc:
+            log.warning("DeepSeek failed: %s — trying Gemini", exc)
+
+    if gemini_key:
+        try:
+            answer = _call_gemini(question, context, gemini_key)
+            return jsonify({"ok": True, "answer": answer, "model": "gemini-2.0-flash"})
+        except Exception as exc:
+            log.warning("Gemini failed: %s", exc)
+            return jsonify({"error": "llm_error", "message": str(exc)}), 502
+
+    return jsonify({
+        "error": "no_api_key",
+        "message": "未配置 VITE_DEEPSEEK_API_KEY 或 VITE_GEMINI_API_KEY",
+    }), 503
+
+
+# ── Phase 3 stub ───────────────────────────────────────────────────────────────
 
 @app.route("/api/refresh", methods=["POST"])
 def api_refresh():
     return jsonify({"error": "not_implemented",
                     "message": "Report download pipeline coming in Phase 3"}), 501
-
-
-@app.route("/api/ask", methods=["POST"])
-def api_ask():
-    return jsonify({"error": "not_implemented",
-                    "message": "AI Q&A coming in Phase 5"}), 501
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
