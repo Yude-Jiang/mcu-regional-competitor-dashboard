@@ -73,7 +73,7 @@ def extract_year(col) -> int | None:
 def fetch_profit_sheet(symbol: str) -> dict[int, dict]:
     """Annual P&L from East Money. Values in yuan (元)."""
     try:
-        df = ak.stock_profit_sheet_by_yearly_em(stock=symbol)
+        df = ak.stock_profit_sheet_by_yearly_em(symbol=symbol)
     except Exception as exc:
         log.warning("  [%s] profit_sheet failed: %s", symbol, exc)
         return {}
