@@ -57,8 +57,13 @@ EXTRACT_TARGETS = {
     "688595": "estimated",           # 芯海科技  — MCU+模拟混合
 }
 
-FX = {2018:6.617,2019:6.899,2020:6.900,2021:6.452,
-      2022:6.737,2023:7.075,2024:7.243,2025:7.260,2026:7.260}
+_fx_path = Path(__file__).parent / "fx_rates.json"
+FX: dict[int, float] = (
+    {int(k): v for k, v in json.loads(_fx_path.read_text())["CNY_USD"].items()}
+    if _fx_path.exists()
+    else {2018:6.6174,2019:6.8985,2020:6.8976,2021:6.4515,
+          2022:6.7261,2023:7.0809,2024:7.1900,2025:7.2200,2026:7.2500}
+)
 
 
 # ── Secret Manager ────────────────────────────────────────────────────────────
@@ -338,15 +343,18 @@ def update_mcu_known_data(symbol: str, year: int, result: dict) -> None:
 
     conf_map = {"high": "high", "medium": "medium", "low": "low"}
     entry = {
-        "mcu_revenue_musd": musd,
+        "mcu_revenue_yuan": mcu_yuan,
         "data_type":        "reported" if result.get("confidence") == "high" else "estimated",
         "confidence":       conf_map.get(result.get("confidence", "medium"), "medium"),
         "source":           result.get("mcu_revenue_note", f"LLM提取 {result.get('_model','')}"),
     }
+    if result.get("mcu_gross_margin") is not None:
+        entry["mcu_gross_margin"] = result["mcu_gross_margin"]
 
     data.setdefault(symbol, {})[str(year)] = entry
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-    log.info("  Updated mcu_known_data.json: %s %d → %.1f M$", symbol, year, musd)
+    log.info("  Updated mcu_known_data.json: %s %d → %.1f M$ (¥%.0f)",
+             symbol, year, musd, mcu_yuan)
 
 
 def save_to_bq(symbol: str, year: int, result: dict,

@@ -256,6 +256,7 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
         )
 
         # USD mirror fields
+        row["fx_rate_cny_usd"]   = FX.get(yr)
         row["total_revenue_musd"] = to_musd(rev, yr)
         row["net_income_musd"] = to_musd(row.get("net_income_yuan"), yr)
         row["rd_expense_musd"] = to_musd(rd, yr)
