@@ -318,14 +318,13 @@ def call_deepseek(text: str, company: str, year: int, api_key: str) -> dict | No
 def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None:
     """Gemini text-based fallback (same pipeline as DeepSeek but different model)."""
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
     except ImportError:
-        log.warning("pip install google-generativeai for Gemini fallback")
+        log.warning("pip install google-genai")
         return None
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
-
+    client = genai.Client(api_key=api_key)
     prompt = f"""{SYSTEM_PROMPT}
 
 公司：{company}  财年：{year}年
@@ -336,7 +335,15 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
 输出JSON："""
 
     try:
-        resp = model.generate_content(prompt)
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.1,
+                max_output_tokens=1000,
+                response_mime_type="application/json",
+            ),
+        )
         raw  = resp.text.strip()
         raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
         return json.loads(raw)
@@ -355,25 +362,30 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
     Also handles scanned/image-only PDFs via built-in OCR.
     """
     try:
-        import google.generativeai as genai
+        from google import genai
     except ImportError:
-        log.warning("pip install google-generativeai")
+        log.warning("pip install google-genai")
         return None
 
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
     uploaded = None
 
     try:
         log.info("  Uploading PDF to Gemini Files API…")
-        uploaded = genai.upload_file(pdf_path, mime_type="application/pdf")
+        uploaded = client.files.upload(
+            path=pdf_path,
+            config={"mime_type": "application/pdf"},
+        )
 
-        model = genai.GenerativeModel("gemini-2.0-flash")
         prompt = (
             f"{SYSTEM_PROMPT}\n\n"
             f"公司：{company}  财年：{year}年\n\n"
             "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
         )
-        resp = model.generate_content([uploaded, prompt])
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[uploaded, prompt],
+        )
         raw  = resp.text.strip()
         raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
         result = json.loads(raw)
@@ -388,7 +400,7 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
     finally:
         if uploaded:
             try:
-                genai.delete_file(uploaded.name)
+                client.files.delete(name=uploaded.name)
             except Exception:
                 pass
 

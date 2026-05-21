@@ -361,23 +361,23 @@ def call_llm_gemini(text: str, symbol: str, api_key: str) -> Optional[dict]:
     """Gemini 2.0 Flash 提取（文本路径，IR记录通常是纯文字，此路径足够）。"""
     hint   = COMPANY_HINTS.get(symbol, f"股票代码: {symbol}")
     system = SYSTEM_PROMPT.format(company_hint=hint)
-    if len(text) > 30000:   # Gemini 1M context — IR docs much shorter
+    if len(text) > 30000:
         text = text[:30000] + "\n…（已截断）"
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
         import re as _re
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            "gemini-2.0-flash",
-            system_instruction=system,
-        )
-        prompt = (
-            "以下是投资者关系文档内容，请提取MCU数据并输出JSON：\n\n" + text
-        )
-        resp = model.generate_content(
-            prompt,
-            generation_config={"response_mime_type": "application/json",
-                                "temperature": 0.1, "max_output_tokens": 1024},
+        client = genai.Client(api_key=api_key)
+        prompt = "以下是投资者关系文档内容，请提取MCU数据并输出JSON：\n\n" + text
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                temperature=0.1,
+                max_output_tokens=1024,
+                response_mime_type="application/json",
+            ),
         )
         raw = resp.text.strip()
         raw = _re.sub(r"^```json\s*|\s*```$", "", raw, flags=_re.MULTILINE)
