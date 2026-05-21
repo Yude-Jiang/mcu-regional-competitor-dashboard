@@ -370,6 +370,44 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
         return None
 
 
+def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
+    """Vertex AI Gemini — read PDF directly from GCS URI, no download needed.
+
+    Uses Application Default Credentials (ADC). In Cloud Shell, ADC is already
+    configured. This is the fastest path for large annual report PDFs in GCS.
+    """
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        log.warning("pip install google-genai")
+        return None
+
+    try:
+        client = genai.Client(vertexai=True, project=PROJECT, location="us-central1")
+        prompt = (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"公司：{company}  财年：{year}年\n\n"
+            "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
+        )
+        resp = client.models.generate_content(
+            model="gemini-2.0-flash-001",
+            contents=[
+                types.Part.from_uri(file_uri=gcs_uri, mime_type="application/pdf"),
+                prompt,
+            ],
+        )
+        raw = resp.text.strip()
+        raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
+        result = json.loads(raw)
+        result["_model"] = "gemini-2.0-flash-vertex-gcs"
+        log.info("  Vertex AI GCS URI extraction complete")
+        return result
+    except Exception as exc:
+        log.warning("  Vertex AI GCS URI failed: %s", exc)
+        return None
+
+
 def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
                             api_key: str) -> dict | None:
     """Gemini Files API — send PDF directly without pdfplumber text extraction.
@@ -426,15 +464,24 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
 def extract_with_llm(text: str, symbol: str, company_name: str,
                      year: int, pdf_path: str,
                      deepseek_key: str | None, gemini_key: str | None,
-                     model_pref: str = "deepseek") -> dict | None:
+                     model_pref: str = "deepseek",
+                     gcs_uri: str | None = None) -> dict | None:
     """Run LLM extraction. model_pref: 'deepseek' | 'gemini' | 'gemini-native'"""
 
-    if model_pref in ("gemini", "gemini-native") and gemini_key:
-        # Gemini native PDF — no pdfplumber needed
-        result = call_gemini_native_pdf(pdf_path, company_name, year, gemini_key)
-        if result:
-            return result
-        log.info("  Gemini native PDF failed, falling back to text path…")
+    if model_pref in ("gemini", "gemini-native"):
+        # Path 1: Vertex AI reads GCS URI directly — fastest, no download/upload
+        if gcs_uri:
+            result = call_gemini_gcs_uri(gcs_uri, company_name, year)
+            if result:
+                return result
+            log.info("  Vertex AI GCS path failed, falling back to Files API upload…")
+
+        # Path 2: Files API upload (local PDF)
+        if gemini_key and pdf_path:
+            result = call_gemini_native_pdf(pdf_path, company_name, year, gemini_key)
+            if result:
+                return result
+            log.info("  Gemini native PDF failed, falling back to text path…")
 
     if model_pref == "gemini" and gemini_key and text:
         result = call_gemini(text, company_name, year, gemini_key)
@@ -533,12 +580,13 @@ def save_to_bq(symbol: str, year: int, result: dict,
 def process_one(pdf_path: str, symbol: str, year: int,
                 company_name: str, report_type: str,
                 deepseek_key: str | None, gemini_key: str | None,
-                update_json: bool = True, model_pref: str = "deepseek") -> bool:
+                update_json: bool = True, model_pref: str = "deepseek",
+                gcs_uri: str | None = None) -> bool:
     log.info("Extracting: %s %s %d  [model=%s]…", company_name, report_type, year, model_pref)
 
     # Gemini native PDF skips pdfplumber entirely
     if model_pref in ("gemini", "gemini-native"):
-        text = ""   # not needed; pdf_path is passed directly
+        text = ""   # not needed; pdf_path or gcs_uri is used directly
     else:
         text = extract_relevant_pages(pdf_path)
         if not text.strip():
@@ -549,7 +597,8 @@ def process_one(pdf_path: str, symbol: str, year: int,
                                pdf_path=pdf_path,
                                deepseek_key=deepseek_key,
                                gemini_key=gemini_key,
-                               model_pref=model_pref)
+                               model_pref=model_pref,
+                               gcs_uri=gcs_uri)
     if result is None:
         log.warning("  LLM extraction failed — no API key available?")
         return False
@@ -672,10 +721,34 @@ def main() -> None:
             tmp_path = tmp.name
 
         try:
+            gcs_uri   = None
+            need_cleanup = False
+
             if source == "local":
                 tmp_path = item["local_path"]
-                need_cleanup = False
             else:
+                gcs_uri = f"gs://{BUCKET}/{item['blob_name']}"
+
+                # For gemini-native: try Vertex AI GCS path first (no download)
+                if args.model in ("gemini", "gemini-native"):
+                    log.info("Trying Vertex AI GCS URI (no download)…")
+                    success = process_one(
+                        pdf_path="",
+                        symbol=sym,
+                        year=yr,
+                        company_name=name,
+                        report_type=item["report_type"],
+                        deepseek_key=deepseek_key,
+                        gemini_key=gemini_key,
+                        update_json=not args.no_update_json,
+                        model_pref=args.model,
+                        gcs_uri=gcs_uri,
+                    )
+                    if success:
+                        ok += 1
+                        continue
+                    log.info("Vertex AI path failed — downloading PDF as fallback…")
+
                 log.info("Downloading %s…", item["gcs_path"])
                 ok_dl = download_pdf(item["blob_name"], tmp_path)
                 need_cleanup = True
@@ -693,6 +766,7 @@ def main() -> None:
                 gemini_key=gemini_key,
                 update_json=not args.no_update_json,
                 model_pref=args.model,
+                gcs_uri=gcs_uri,
             )
             if success:
                 ok += 1
