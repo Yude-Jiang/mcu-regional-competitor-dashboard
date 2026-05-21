@@ -33,7 +33,7 @@ html,body {
 /* ── Frame ── */
 .frame {
   display:grid;
-  grid-template-rows: 40px auto 44px 244px 212px 1fr 22px;
+  grid-template-rows: 40px auto 44px 244px 212px 230px 1fr 22px;
   min-height:100vh;
 }
 .frame::before {
@@ -397,6 +397,18 @@ body.panel-open .table-wrap { padding-right:308px; }
   </div>
 </div>
 
+<!-- ── Competitor Overview: MCU Rev by Year + Margin ── -->
+<div class="chart-full">
+  <div class="chart-axis-lbl">MCU Rev M$</div>
+  <div class="chart-inner">
+    <div class="chart-ttl" style="margin-bottom:4px">
+      各公司 MCU 营收（按年，2018–2025）&nbsp;+&nbsp;
+      <span style="color:#ffd200">── 毛利率%</span>
+    </div>
+    <canvas id="c-comp"></canvas>
+  </div>
+</div>
+
 <!-- ── Table ── -->
 <div class="table-wrap">
 <table id="tbl">
@@ -512,6 +524,8 @@ function applyChartTheme() {
   const dark = document.documentElement.dataset.theme === 'dark';
   const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
   const tick = dark ? '#7d94b3' : '#8191a5';
+  // Comp chart has custom axis colors — just rebuild it
+  if (G && charts.comp) renderCompChart();
   Object.values(charts).forEach(c => {
     if (!c) return;
     ['x','y'].forEach(ax => {
@@ -791,6 +805,81 @@ function renderGM(year) {
   });
 }
 
+function renderCompChart() {
+  const years = (G.years || []).filter(y => y >= 2018);
+  const ss = syms();
+  const labels = ss.map(s => {
+    const m = G.companies[s].meta || {};
+    return m.name_en || m.name_cn || s;
+  });
+
+  // One revenue bar dataset per year
+  const YEAR_PALETTE = [
+    '#9dd9f2','#6dc7ec','#3cb4e6','#0a7ec2',
+    '#03234b','#425a78','#8191a5','#c0c8d2',
+  ];
+  const revDatasets = years.map((y, i) => ({
+    type:'bar',
+    label: String(y),
+    data: ss.map(s => (G.companies[s].financials[y]||{}).mcu_revenue_musd ?? null),
+    backgroundColor: YEAR_PALETTE[i % YEAR_PALETTE.length],
+    yAxisID:'y', spanGaps:false,
+  }));
+
+  // Gross margin line: latest year with data per company
+  const gmData = ss.map(s => {
+    const fin = G.companies[s].financials || {};
+    for (const y of [...years].reverse()) {
+      const gm = (fin[y]||{}).gross_margin_pct;
+      if (gm != null) return gm;
+    }
+    return null;
+  });
+  const gmDataset = {
+    type:'line',
+    label:'毛利率% (最新年)',
+    data: gmData,
+    borderColor:'#ffd200',
+    backgroundColor:'transparent',
+    yAxisID:'y1',
+    tension:0.3, spanGaps:true,
+    pointRadius:4, pointBackgroundColor:'#ffd200', borderWidth:2,
+  };
+
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const tick = dark ? '#7d94b3' : '#8191a5';
+  const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const ctx = $('c-comp').getContext('2d');
+  if (charts.comp) charts.comp.destroy();
+  charts.comp = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[...revDatasets, gmDataset] },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:9}, boxWidth:10, color:tick, padding:5 } },
+        tooltip:{ callbacks:{ label: c => {
+          if (c.dataset.yAxisID === 'y1')
+            return `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
+          return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}`;
+        }}},
+      },
+      scales:{
+        x:{ ticks:{ font:{size:10}, color:tick }, grid:{ color:grid } },
+        y:{ ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+        y1:{
+          position:'right', display:true,
+          grid:{ drawOnChartArea:false },
+          ticks:{ font:{size:9}, color:'#ffd200', callback: v => v+'%' },
+          title:{ display:true, text:'毛利率%', font:{size:8}, color:'#ffd200' },
+          min:0, max:80,
+        },
+      },
+    },
+  });
+}
+
 // ResizeObserver wiring
 function watchResize(canvasId, key) {
   const el = $(canvasId)?.parentElement;
@@ -1001,14 +1090,16 @@ async function loadData() {
     renderPipeline(G, defYear);
     renderTable(defYear, '');
     renderMCU();
+    renderCompChart();
     renderRev(defYear);
     renderGM(defYear);
     renderRD(defYear);
 
-    watchResize('c-mcu', 'mcu');
-    watchResize('c-rev', 'rev');
-    watchResize('c-gm',  'gm');
-    watchResize('c-rd',  'rd');
+    watchResize('c-mcu',  'mcu');
+    watchResize('c-comp', 'comp');
+    watchResize('c-rev',  'rev');
+    watchResize('c-gm',   'gm');
+    watchResize('c-rd',   'rd');
 
     applyChartTheme();
 
