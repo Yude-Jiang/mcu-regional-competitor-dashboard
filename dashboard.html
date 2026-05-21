@@ -90,7 +90,7 @@ html,body {
   display:inline-flex; flex-direction:column; justify-content:center; gap:2px;
   padding:0 10px; border-right:1px solid var(--border);
   border-left:3px solid transparent; min-width:90px; flex-shrink:0;
-  cursor:default; transition:background .1s;
+  cursor:pointer; transition:background .1s;
 }
 .fp-card:hover { background:var(--bg-2); }
 .fp-sym  { font:600 8px/1 monospace; color:var(--text-faint); }
@@ -142,7 +142,7 @@ html,body {
 }
 .chart-inner { padding:10px 16px 6px; min-height:0; position:relative; }
 .chart-row {
-  display:grid; grid-template-columns:1fr 1fr;
+  display:grid; grid-template-columns:1fr 1fr 1fr;
   background:var(--bg-1); border-bottom:1px solid var(--border); overflow:hidden;
 }
 .chart-box { padding:10px 16px 6px; min-height:0; border-right:1px solid var(--border); }
@@ -381,11 +381,15 @@ body.panel-open .table-wrap { padding-right:308px; }
   <div class="chart-inner"><canvas id="c-mcu"></canvas></div>
 </div>
 
-<!-- ── Rev + RD Charts ── -->
+<!-- ── Rev + GM + RD Charts ── -->
 <div class="chart-row">
   <div class="chart-box">
     <div class="chart-ttl">总营收 vs MCU 营收（M$）&nbsp;·&nbsp;<span id="lbl-rev">2024</span></div>
     <canvas id="c-rev"></canvas>
+  </div>
+  <div class="chart-box">
+    <div class="chart-ttl">毛利率（%）&nbsp;·&nbsp;<span id="lbl-gm">2024</span></div>
+    <canvas id="c-gm"></canvas>
   </div>
   <div class="chart-box">
     <div class="chart-ttl">研发费用占营收比（%）&nbsp;·&nbsp;<span id="lbl-rd">2024</span></div>
@@ -408,6 +412,7 @@ body.panel-open .table-wrap { padding-right:308px; }
     <th class="g-mcu sortable" data-col="mcu">MCU M$<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="gm">毛利率%<span class="si"></span></th>
     <th class="g-etc" rowspan="2">代工厂</th>
     <th class="g-rd sortable" data-col="rd">研发 M$<span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
@@ -415,7 +420,7 @@ body.panel-open .table-wrap { padding-right:308px; }
   </tr>
 </thead>
 <tbody id="tbody">
-  <tr><td colspan="14" style="text-align:center;padding:48px;color:var(--text-faint)">
+  <tr><td colspan="15" style="text-align:center;padding:48px;color:var(--text-faint)">
     加载中…&ensp;如数据为空请先运行 <code>python fetch_mcu_data.py</code>
   </td></tr>
 </tbody>
@@ -492,6 +497,7 @@ const CO_COLORS = [
 ];
 
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
+let _currentDetailSym = null;
 const $ = id => document.getElementById(id);
 
 // ── Theme ─────────────────────────────────────────────────────────────────
@@ -586,7 +592,7 @@ function renderPipeline(data, year) {
     const conf = m.mcu_confidence || 'na';
     const strat = STRAT_LBL[m.mcu_strategy] || '?';
     const border = CONF_BORDER[conf] || CONF_BORDER.na;
-    return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}">
+    return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}" onclick="openDetail('${sym}')">
       <span class="fp-sym">${sym}</span>
       <span class="fp-name">${m.name_cn || sym}</span>
       <span class="fp-badge">${strat}</span>
@@ -604,6 +610,7 @@ function sortVal(sym, year, col) {
     case 'mcu':     return f.mcu_revenue_musd;
     case 'mcu_yoy': return f.mcu_yoy_pct;
     case 'wt':      return f.mcu_weight_pct;
+    case 'gm':      return f.gross_margin_pct;
     case 'rd':      return f.rd_expense_musd;
     case 'rd_pct':  return f.rd_pct;
     case 'emp':     return f.employee_count;
@@ -613,7 +620,7 @@ function sortVal(sym, year, col) {
 
 // ── Table render ──────────────────────────────────────────────────────────
 function renderTable(year, query) {
-  ['lbl-rev', 'lbl-rd'].forEach(id => $(id).textContent = year);
+  ['lbl-rev', 'lbl-gm', 'lbl-rd'].forEach(id => $(id).textContent = year);
   const q = (query || '').toLowerCase();
 
   let syms = ORDER.filter(s => G.companies[s]).filter(s => {
@@ -662,6 +669,7 @@ function renderTable(year, query) {
       <td>${mcuN(f.mcu_revenue_musd, dt)}</td>
       <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
       <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
+      <td class="c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="l" style="font-size:10px;color:var(--text-dim);max-width:120px;white-space:normal">${m.foundry_fab || '—'}</td>
       <td>${fN(f.rd_expense_musd)}</td>
       <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
@@ -670,7 +678,7 @@ function renderTable(year, query) {
   });
 
   $('tbody').innerHTML = rows.join('') ||
-    '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--text-faint)">无匹配结果</td></tr>';
+    '<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text-faint)">无匹配结果</td></tr>';
 
   document.querySelectorAll('thead th.sortable').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
@@ -763,6 +771,26 @@ function renderRD(year) {
   });
 }
 
+function renderGM(year) {
+  const ss = syms();
+  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
+  const ctx = $('c-gm').getContext('2d');
+  if (charts.gm) charts.gm.destroy();
+  charts.gm = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{
+      label:'毛利率%',
+      data:ss.map(s => (G.companies[s].financials[year]||{}).gross_margin_pct??null),
+      backgroundColor:'#ec409e', spanGaps:false,
+    }]},
+    options: cOpts({
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c =>
+        `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } } },
+      scales:{ y:{ ticks:{ callback:v => v+'%' } } },
+    }),
+  });
+}
+
 // ResizeObserver wiring
 function watchResize(canvasId, key) {
   const el = $(canvasId)?.parentElement;
@@ -771,8 +799,44 @@ function watchResize(canvasId, key) {
 }
 
 // ── Detail Panel ─────────────────────────────────────────────────────────
+
+function _updateDetailMetrics(sym, year) {
+  const co = G.companies[sym];
+  if (!co) return;
+  const m   = co.meta || {};
+  const fin = co.financials || {};
+  $('dp-metric-year').textContent = year;
+  const f = fin[year] || {};
+  const metrics = [
+    { lbl:'总营收',   val: f.total_revenue_musd != null ? f.total_revenue_musd.toFixed(1)+' M$' : '—',
+      sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '',
+      cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+    { lbl:'MCU 营收', val: f.mcu_revenue_musd != null ? f.mcu_revenue_musd.toFixed(1)+' M$' : '—',
+      sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '',
+      cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+    { lbl:'MCU 占比', val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
+      sub: STRAT_LBL[m.mcu_strategy] || '' },
+    { lbl:'毛利率',   val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
+      sub: f.mcu_confidence === 'high' ? 'MCU口径' : (f.gross_margin_pct != null ? '综合口径' : '') },
+    { lbl:'研发费用', val: f.rd_expense_musd != null ? f.rd_expense_musd.toFixed(1)+' M$' : '—',
+      sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+'% of Rev' : '' },
+    { lbl:'净利润',   val: f.net_income_musd != null ? f.net_income_musd.toFixed(1)+' M$' : '—',
+      sub: f.net_income_yoy_pct != null ? (f.net_income_yoy_pct>=0?'+':'')+f.net_income_yoy_pct.toFixed(1)+'% YoY' : '',
+      cls: f.net_income_yoy_pct!=null ? (f.net_income_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+    { lbl:'员工人数', val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—',
+      sub: '' },
+  ];
+  $('dp-metrics').innerHTML = metrics.map(me => `
+    <div class="dp-metric">
+      <div class="dp-metric-lbl">${me.lbl}</div>
+      <div class="dp-metric-val">${me.val}</div>
+      ${me.sub ? `<div class="dp-metric-sub ${me.cls||''}">${me.sub}</div>` : ''}
+    </div>`).join('');
+}
+
 function openDetail(sym) {
   if (!G || !G.companies[sym]) return;
+  _currentDetailSym = sym;
   const co = G.companies[sym];
   const m  = co.meta || {};
   const fin = co.financials || {};
@@ -812,54 +876,55 @@ function openDetail(sym) {
   if (prof.core_ip && prof.core_ip.length) profileParts.push(`核心IP: ${prof.core_ip.join(', ')}`);
   $('dp-profile-info').textContent = profileParts.join('　　');
 
-  // Mini chart
-  const labels = allYears.map(String);
+  // Mini chart — bars for revenue, line for gross margin on secondary axis
+  const labels  = allYears.map(String);
   const revData = allYears.map(y => (fin[y] || {}).total_revenue_musd ?? null);
   const mcuData = allYears.map(y => (fin[y] || {}).mcu_revenue_musd ?? null);
+  const gmData  = allYears.map(y => (fin[y] || {}).gross_margin_pct ?? null);
+  const hasGM   = gmData.some(v => v != null);
 
   const dark = document.documentElement.dataset.theme === 'dark';
   const tick = dark ? '#7d94b3' : '#8191a5';
   const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
   if (dpChart) { dpChart.destroy(); dpChart = null; }
+
+  const datasets = [
+    { type:'bar',  label:'总营收', data:revData, backgroundColor:'rgba(61,180,230,.35)', yAxisID:'y',  spanGaps:false },
+    { type:'bar',  label:'MCU',   data:mcuData, backgroundColor:'#03234b',              yAxisID:'y',  spanGaps:false },
+  ];
+  if (hasGM) datasets.push(
+    { type:'line', label:'毛利率%', data:gmData, borderColor:'#ffd200', backgroundColor:'transparent',
+      yAxisID:'y1', tension:0.3, spanGaps:true, pointRadius:3, borderWidth:2 }
+  );
+
   dpChart = new Chart($('dp-chart').getContext('2d'), {
     type:'bar',
-    data:{ labels, datasets:[
-      { label:'总营收', data:revData, backgroundColor:'rgba(61,180,230,.35)', spanGaps:false },
-      { label:'MCU', data:mcuData, backgroundColor:'#03234b', spanGaps:false },
-    ]},
+    data:{ labels, datasets },
     options:{
       responsive:true, maintainAspectRatio:false, animation:false,
       plugins:{
         legend:{ position:'bottom', labels:{ font:{size:9}, boxWidth:8, color:tick, padding:5 } },
-        tooltip:{ callbacks:{ label:c =>
-          `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } },
+        tooltip:{ callbacks:{ label:c => {
+          if (c.dataset.yAxisID === 'y1')
+            return `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
+          return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}`;
+        }}},
       },
       scales:{
-        x:{ ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
-        y:{ ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+        x:  { ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+        y:  { ticks:{ font:{size:9}, color:tick }, grid:{ color:grid } },
+        y1: hasGM ? {
+          position:'right', display:true,
+          grid:{ drawOnChartArea:false },
+          ticks:{ font:{size:9}, color:'#ffd200', callback: v => v+'%' },
+        } : { display:false },
       },
     },
   });
 
   // Metrics — use the currently selected year
-  const selYear = +$('year-sel').value || 2024;
-  $('dp-metric-year').textContent = selYear;
-  const f = (fin[selYear] || {});
-  const metrics = [
-    { lbl:'总营收', val: f.total_revenue_musd != null ? f.total_revenue_musd.toFixed(1)+' M$' : '—', sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '', cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'MCU 营收', val: f.mcu_revenue_musd != null ? f.mcu_revenue_musd.toFixed(1)+' M$' : '—', sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '', cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'MCU 占比', val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—', sub: (STRAT_LBL[m.mcu_strategy]||'') },
-    { lbl:'研发费用', val: f.rd_expense_musd != null ? f.rd_expense_musd.toFixed(1)+' M$' : '—', sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+'% of Rev' : '' },
-    { lbl:'毛利率', val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—', sub: '' },
-    { lbl:'员工人数', val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—', sub: '' },
-  ];
-  $('dp-metrics').innerHTML = metrics.map(me => `
-    <div class="dp-metric">
-      <div class="dp-metric-lbl">${me.lbl}</div>
-      <div class="dp-metric-val">${me.val}</div>
-      ${me.sub ? `<div class="dp-metric-sub ${me.cls}">${me.sub}</div>` : ''}
-    </div>`).join('');
+  _updateDetailMetrics(sym, +$('year-sel').value || 2024);
 
   // Open
   $('detail-panel').classList.add('open');
@@ -868,6 +933,7 @@ function openDetail(sym) {
 }
 
 function closeDetail() {
+  _currentDetailSym = null;
   $('detail-panel').classList.remove('open');
   $('dp-overlay').classList.remove('open');
   document.body.classList.remove('panel-open');
@@ -926,7 +992,9 @@ async function loadData() {
       const y = +sel.value;
       renderPipeline(G, y);
       renderTable(y, $('search').value);
-      renderRev(y); renderRD(y);
+      renderRev(y); renderGM(y); renderRD(y);
+      if (_currentDetailSym && $('detail-panel').classList.contains('open'))
+        _updateDetailMetrics(_currentDetailSym, y);
     });
 
     // Initial render
@@ -934,16 +1002,18 @@ async function loadData() {
     renderTable(defYear, '');
     renderMCU();
     renderRev(defYear);
+    renderGM(defYear);
     renderRD(defYear);
 
     watchResize('c-mcu', 'mcu');
     watchResize('c-rev', 'rev');
-    watchResize('c-rd', 'rd');
+    watchResize('c-gm',  'gm');
+    watchResize('c-rd',  'rd');
 
     applyChartTheme();
 
   } catch (err) {
-    $('tbody').innerHTML = `<tr><td colspan="14"
+    $('tbody').innerHTML = `<tr><td colspan="15"
       style="text-align:center;padding:48px;color:var(--neg)">
       数据加载失败：${err.message}<br><br>
       <small style="color:var(--text-faint)">请先运行 <code>python fetch_mcu_data.py</code></small>
