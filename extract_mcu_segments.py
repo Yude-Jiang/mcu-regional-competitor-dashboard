@@ -179,14 +179,42 @@ SEGMENT_KEYWORDS = [
     "智能计量", "电表", "芯片收入", "模组收入",
 ]
 
+def _page_content(page) -> str:
+    """Extract text + tables from one pdfplumber page.
+
+    Tables are formatted as TSV so column alignment survives LLM tokenisation.
+    """
+    parts: list[str] = []
+
+    # Plain text (headings, surrounding prose)
+    text = page.extract_text() or ""
+    if text.strip():
+        parts.append(text)
+
+    # Tables — TSV format preserves cell alignment far better than plain text
+    try:
+        tables = page.extract_tables() or []
+    except Exception:
+        tables = []
+    for tbl in tables:
+        rows = []
+        for row in tbl:
+            cells = [str(c or "").strip().replace("\n", " ") for c in row]
+            rows.append("\t".join(cells))
+        if rows:
+            parts.append("【表格】\n" + "\n".join(rows))
+
+    return "\n".join(parts)
+
+
 def extract_relevant_pages(pdf_path: str, max_pages: int = 30) -> str:
-    """Extract text from PDF, prioritising pages with segment revenue tables."""
+    """Extract text+tables from PDF, prioritising pages with segment revenue tables."""
     try:
         import pdfplumber
     except ImportError:
         sys.exit("pip install pdfplumber")
 
-    scored: list[tuple[int, str]] = []   # (score, text)
+    scored: list[tuple[int, int, str]] = []
 
     with pdfplumber.open(pdf_path) as pdf:
         total = len(pdf.pages)
@@ -194,21 +222,18 @@ def extract_relevant_pages(pdf_path: str, max_pages: int = 30) -> str:
 
         for i, page in enumerate(pdf.pages):
             try:
-                text = page.extract_text() or ""
+                content = _page_content(page)
             except Exception:
                 continue
-            score = sum(1 for kw in SEGMENT_KEYWORDS if kw in text)
+            score = sum(1 for kw in SEGMENT_KEYWORDS if kw in content)
             if score > 0:
-                scored.append((score, i + 1, text))
+                scored.append((score, i + 1, content))
 
-    # Sort by relevance score, take top pages
     scored.sort(key=lambda x: x[0], reverse=True)
     top = scored[:max_pages]
-    top.sort(key=lambda x: x[1])   # restore page order
+    top.sort(key=lambda x: x[1])
 
-    combined = "\n\n".join(
-        f"[第{pg}页]\n{txt}" for _, pg, txt in top
-    )
+    combined = "\n\n".join(f"[第{pg}页]\n{txt}" for _, pg, txt in top)
     log.info("  Extracted %d relevant pages (of %d total)", len(top), total)
     return combined
 
@@ -233,10 +258,13 @@ SYSTEM_PROMPT = """你是一位专业的半导体行业财务分析师。
 
 注意：
 - 营收单位通常是"元"，有时是"万元"或"亿元"，请统一转换为元
-- 兆易创新：找"微控制器"或"MCU"产品线
-- 普冉股份：找"微控制器"产品线（区别于NOR Flash、SRAM）
-- 复旦微电子：找"智能计量"或"MCU"相关芯片收入
-- 乐鑫科技：找"芯片"收入（区别于"模组"收入）
+- 【表格】标记的内容是用制表符分隔的表格，列顺序通常为：分产品/分行业 | 营业收入 | 营业成本 | 毛利率(%) | 收入同比(%) | 成本同比(%) | 毛利率变动
+- 兆易创新：在"主营业务分产品情况"表中找"微控制器"行，取第2列（营业收入）
+- 普冉股份：在"主营业务分产品情况"表中找"微控制器"行（区别于NOR Flash、SRAM）
+- 复旦微电子：找"智能计量"或"MCU"相关芯片收入行
+- 乐鑫科技：找"芯片"收入行（区别于"模组"收入）
+- 纳思达/极海：找"集成电路"分部或极海微电子相关行
+- 表格中数字含逗号（千分位）为正常格式，如"1,316,813,511.75"即1316813511.75元
 - 如果找不到MCU分段数据，返回mcu_revenue_yuan为null并说明原因"""
 
 

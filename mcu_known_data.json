@@ -1,23 +1,12 @@
 {
   "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。",
   "603986": {
-    "2021": {
-      "mcu_revenue_yuan": 3832000000,
-      "data_type": "reported",
-      "confidence": "high",
-      "source": "兆易创新2021年报 分产品营业收入表（微控制器及模拟产品线）— 待年报PDF核实"
-    },
-    "2022": {
-      "mcu_revenue_yuan": 2157000000,
-      "data_type": "reported",
-      "confidence": "high",
-      "source": "兆易创新2022年报 分产品营业收入表（微控制器及模拟产品线）— 待年报PDF核实"
-    },
     "2023": {
-      "mcu_revenue_yuan": 1198000000,
+      "mcu_revenue_yuan": 1316813511.75,
+      "mcu_gross_margin": 0.4310,
       "data_type": "reported",
-      "confidence": "medium",
-      "source": "兆易创新2023年报 分产品营业收入表（微控制器及模拟产品线）— 待年报PDF核实"
+      "confidence": "high",
+      "source": "兆易创新2023年报 主营业务分产品情况表 微控制器行"
     },
     "2024": {
       "mcu_revenue_yuan": 1706000000,
@@ -25,7 +14,7 @@
       "confidence": "high",
       "source": "兆易创新2024年报 分产品营业收入表"
     },
-    "_todo_2018_2020": "年报分产品表有MCU收入，2018-2020数据需extract_mcu_segments.py读取PDF补全"
+    "_todo_2018_2022": "年报分产品表有MCU收入，待extract_mcu_segments.py读取PDF补全"
   },
   "688766": {
     "2024": {
