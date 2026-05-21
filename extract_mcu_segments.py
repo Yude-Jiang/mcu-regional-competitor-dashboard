@@ -168,33 +168,35 @@ def list_gcs_pdfs(symbol: str | None = None, year: int | None = None) -> list[di
 
 
 def download_pdf(blob_name: str, dest_path: str) -> bool:
-    """Download a PDF from GCS. Uses gsutil when available (faster for large files)."""
+    """Download a PDF from GCS. Tries gcloud storage cp → gsutil cp → Python SDK."""
     import subprocess
     gcs_uri = f"gs://{BUCKET}/{blob_name}"
-    try:
-        # gsutil cp is more reliable for large PDFs than the Python SDK HTTP path
-        result = subprocess.run(
-            ["gsutil", "cp", gcs_uri, dest_path],
-            capture_output=True, text=True, timeout=600,
-        )
-        if result.returncode == 0:
-            return True
-        log.warning("gsutil cp failed (%d): %s", result.returncode, result.stderr.strip())
-    except FileNotFoundError:
-        pass  # gsutil not available, fall through to SDK
-    except Exception as exc:
-        log.warning("gsutil cp error: %s", exc)
 
-    # Fallback: Python GCS SDK with generous timeout
+    for cmd in (["gcloud", "storage", "cp", gcs_uri, dest_path],
+                ["gsutil", "cp", gcs_uri, dest_path]):
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            if result.returncode == 0:
+                return True
+            log.warning("%s failed (%d): %s", cmd[0], result.returncode,
+                        result.stderr.strip()[:200])
+        except FileNotFoundError:
+            continue  # CLI not available
+        except subprocess.TimeoutExpired:
+            log.warning("%s timed out after 600s", cmd[0])
+        except Exception as exc:
+            log.warning("%s error: %s", cmd[0], exc)
+
+    # Final fallback: Python GCS SDK (no timeout — let it run as long as needed)
     try:
         from google.cloud import storage
         gcs    = storage.Client(project=PROJECT)
         bucket = gcs.bucket(BUCKET)
         blob   = bucket.blob(blob_name)
-        blob.download_to_filename(dest_path, timeout=600)
+        blob.download_to_filename(dest_path, timeout=None)
         return True
     except Exception as exc:
-        log.warning("GCS download failed %s: %s", blob_name, exc)
+        log.warning("GCS SDK download failed %s: %s", blob_name, exc)
         return False
 
 
@@ -373,46 +375,53 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
 def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
     """Vertex AI Gemini — read PDF directly from GCS URI, no download needed.
 
-    Uses Application Default Credentials (ADC). In Cloud Shell, ADC is already
-    configured. This is the fastest path for large annual report PDFs in GCS.
+    Uses Application Default Credentials (ADC) via the official vertexai SDK
+    (v1 endpoint). In Cloud Shell, ADC is already configured.
     """
-    try:
-        from google import genai
-        from google.genai import types
-    except ImportError:
-        log.warning("pip install google-genai")
-        return None
-
-    # Try models in order until one is available in this project/region
-    _VERTEX_MODELS = [
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-exp",
-        "gemini-1.5-flash-002",
-        "gemini-1.5-pro-002",
-    ]
     prompt = (
         f"{SYSTEM_PROMPT}\n\n"
         f"公司：{company}  财年：{year}年\n\n"
         "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
     )
-    client = genai.Client(vertexai=True, project=PROJECT, location="us-central1")
-    for model_id in _VERTEX_MODELS:
-        try:
-            resp = client.models.generate_content(
-                model=model_id,
-                contents=[
-                    types.Part.from_uri(file_uri=gcs_uri, mime_type="application/pdf"),
-                    prompt,
-                ],
-            )
-            raw = resp.text.strip()
-            raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-            result = json.loads(raw)
-            result["_model"] = f"{model_id}-vertex-gcs"
-            log.info("  Vertex AI GCS URI extraction complete (%s)", model_id)
-            return result
-        except Exception as exc:
-            log.warning("  Vertex AI %s failed: %s", model_id, exc)
+    _VERTEX_MODELS = [
+        "gemini-2.0-flash-001",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash-002",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro-002",
+        "gemini-1.5-pro",
+    ]
+    _LOCATIONS = ["us-central1", "us-east4", "asia-east1", "asia-northeast1"]
+
+    # Try vertexai SDK first (v1 endpoint, more widely enabled)
+    try:
+        import vertexai
+        from vertexai.generative_models import GenerativeModel, Part as VPart
+        for loc in _LOCATIONS:
+            for model_id in _VERTEX_MODELS:
+                try:
+                    vertexai.init(project=PROJECT, location=loc)
+                    model = GenerativeModel(model_id)
+                    resp = model.generate_content([
+                        VPart.from_uri(gcs_uri, mime_type="application/pdf"),
+                        prompt,
+                    ])
+                    raw = resp.text.strip()
+                    raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
+                    result = json.loads(raw)
+                    result["_model"] = f"{model_id}-vertex-gcs"
+                    log.info("  Vertex AI GCS extraction complete (%s @ %s)", model_id, loc)
+                    return result
+                except Exception as exc:
+                    err = str(exc)
+                    if "NOT_FOUND" in err or "404" in err:
+                        continue   # try next model
+                    log.warning("  vertexai %s@%s: %s", model_id, loc, err[:120])
+                    break          # non-404 error — skip to next location
+    except ImportError:
+        log.warning("pip install google-cloud-aiplatform for Vertex AI path")
+
+    log.warning("  All Vertex AI model/location combos failed")
     return None
 
 
