@@ -73,6 +73,11 @@ def profiles_xq():
     return send_from_directory(HERE, "profiles_xq.json", mimetype="application/json")
 
 
+@app.route("/static_chartjs.js")
+def static_chartjs():
+    return send_from_directory(HERE, "static_chartjs.js", mimetype="application/javascript")
+
+
 # ── API: document status matrix ───────────────────────────────────────────────
 
 @app.route("/api/doc-status")
