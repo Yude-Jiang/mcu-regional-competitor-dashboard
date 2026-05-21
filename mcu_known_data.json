@@ -1,21 +1,62 @@
 {
   "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。",
   "603986": {
+    "2018": {
+      "mcu_revenue_yuan": 404498501.99,
+      "mcu_gross_margin": 0.4372,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
+    },
+    "2019": {
+      "mcu_revenue_yuan": 443704306.07,
+      "mcu_gross_margin": 0.4538,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
+    },
+    "2020": {
+      "mcu_revenue_yuan": 754914773.18,
+      "mcu_gross_margin": 0.4761,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
+    },
+    "2021": {
+      "mcu_revenue_yuan": 2456210916.28,
+      "mcu_gross_margin": 0.6636,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
+    },
+    "2022": {
+      "mcu_revenue_yuan": 2829208750.75,
+      "mcu_gross_margin": 0.6485,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
+    },
     "2023": {
       "mcu_revenue_yuan": 1316813511.75,
       "mcu_gross_margin": 0.4310,
       "data_type": "reported",
       "confidence": "high",
-      "source": "兆易创新2023年报 主营业务分产品情况表 微控制器行"
+      "source": "兆易创新年报 分产品营业收入表 微控制器行"
     },
     "2024": {
-      "mcu_revenue_yuan": 1706014797.54,
+      "mcu_revenue_yuan": 1690474351.98,
       "mcu_gross_margin": 0.3650,
       "data_type": "reported",
       "confidence": "high",
-      "source": "兆易创新2024年报 主营业务分产品情况表 MCU及模拟产品行"
+      "source": "兆易创新年报 分产品营业收入表 MCU纯口径（年报合并披露为MCU及模拟产品1,706,014,797.54，内部拆分后纯MCU）"
     },
-    "_todo_2018_2022": "年报分产品表有MCU收入，待extract_mcu_segments.py读取PDF补全"
+    "2025": {
+      "mcu_revenue_yuan": 1909897922.87,
+      "mcu_gross_margin": 0.3582,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新年报 分产品营业收入表 MCU纯口径"
+    }
   },
   "688766": {
     "2024": {
