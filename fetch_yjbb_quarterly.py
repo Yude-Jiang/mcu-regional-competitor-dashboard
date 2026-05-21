@@ -214,8 +214,11 @@ def merge_into_data_json(records: list[dict]) -> None:
             if r.get(key) is not None:
                 fin[key] = r[key]
 
-        # stock_yjbb_em returns revenue in yuan (not 亿), store directly
-        if r.get("total_revenue_cny_100m") is not None and "total_revenue_yuan" not in fin:
+        # stock_yjbb_em returns revenue in yuan; store only when not already set
+        # and never for 002180 (Ninestar) whose yjbb row = group total, not Geehy
+        if (sym != "002180"
+                and r.get("total_revenue_cny_100m") is not None
+                and "total_revenue_yuan" not in fin):
             fin["total_revenue_yuan"] = r["total_revenue_cny_100m"]
 
         merged += 1

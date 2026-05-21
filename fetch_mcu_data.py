@@ -200,7 +200,21 @@ def apply_mcu_strategy(
 
         # Derive from total revenue
         total = row.get("total_revenue_yuan")
-        if strategy in ("total_revenue", "total_proxy") and total is not None:
+        if strategy == "subsidiary_geehy":
+            # AKShare returns the Ninestar GROUP consolidated financials for 002180,
+            # which are meaningless for MCU analysis. Clear them so the validator
+            # guard doesn't trigger. Geehy subsidiary data must be entered manually.
+            row["total_revenue_yuan"] = None
+            row["total_revenue_musd"] = None
+            row["net_income_yuan"]    = None
+            row["net_income_musd"]    = None
+            row["rd_expense_yuan"]    = None
+            row["rd_expense_musd"]    = None
+            row["mcu_revenue_yuan"]   = None
+            row["mcu_data_type"]      = "unavailable"
+            row["mcu_confidence"]     = "na"
+            row["mcu_source"]         = "极海微子公司营收需手工录入（集团总收入264亿不可用）"
+        elif strategy in ("total_revenue", "total_proxy") and total is not None:
             row["mcu_revenue_yuan"] = total * multiplier
             row["mcu_data_type"] = "derived"
             row["mcu_confidence"] = base_conf
