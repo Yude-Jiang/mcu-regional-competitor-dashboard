@@ -62,8 +62,11 @@ COMPANY_INFO = {
 }
 
 # CNINFO 公告类别
-CATEGORY_IR   = "category_iractivty_szsh"   # 投资者关系活动记录
-CATEGORY_OTHER = "category_qita_szsh"        # 其他（含部分业绩说明会）
+# 正确代码：巨潮资讯网 category 字段，可通过浏览器 DevTools → XHR 确认
+CATEGORY_IR    = "category_iractivty_szsh"   # 投资者关系活动记录
+CATEGORY_OTHER = "category_qita_szsh"        # 其他公告（含部分业绩说明会）
+# 备用：直接用空 category 全量搜索，依赖 searchkey 过滤
+CATEGORY_ALL   = ""
 
 QUERY_URL = "https://www.cninfo.com.cn/new/hisAnnouncement/query"
 
@@ -135,81 +138,129 @@ def build_session() -> requests.Session:
     return s
 
 
-def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
-                            market: str, year_start: int, year_end: int) -> list[dict]:
-    """查询投资者关系活动记录公告列表。"""
+def _cninfo_query(session: requests.Session, symbol: str, org_id: str,
+                   market: str, category: str, searchkey: str,
+                   year_start: int, year_end: int,
+                   debug: bool = False) -> list[dict]:
+    """单次 CNINFO category 查询，返回公告列表。
+
+    关键参数说明：
+    - searchkey: CNINFO 仅支持单个关键词的简单子串匹配，不支持 OR/AND 语法
+      → 多关键词需调用方分次传入，或留空后客户端过滤标题
+    - seDate: 格式 "YYYY-MM-DD~YYYY-MM-DD"（无空格）
+    - tabName: "fulltext" 适用于年报等，IR 记录通常也兼容
+    """
     column = "sse" if market == "sse" else "szse"
     results = []
+    page = 1
 
-    for category in [CATEGORY_IR, CATEGORY_OTHER]:
-        page = 1
-        while True:
-            payload = {
-                "stock":     f"{symbol},{org_id}",
-                "tabName":   "fulltext",
-                "pageSize":  30,
-                "pageNum":   page,
-                "column":    column,
-                "category":  category,
-                "plate":     "",
-                "seDate":    f"{year_start}-01-01 ~ {year_end}-12-31",
-                "searchkey": "MCU OR 微控制器 OR 极海 OR Geehy",
-                "secid":     "",
-                "sortName":  "pubdate",
-                "sortType":  "desc",
-                "isHLtitle": True,
-            }
-            try:
-                resp = session.post(QUERY_URL, data=payload, timeout=30)
-                resp.raise_for_status()
-                d = resp.json()
-            except Exception as exc:
-                log.warning("  API error (cat=%s page=%d): %s", category, page, exc)
-                break
+    while page <= 10:
+        payload = {
+            "stock":     f"{symbol},{org_id}",
+            "tabName":   "fulltext",
+            "pageSize":  30,
+            "pageNum":   page,
+            "column":    column,
+            "category":  category,
+            "plate":     "",
+            "seDate":    f"{year_start}-01-01~{year_end}-12-31",  # 无空格
+            "searchkey": searchkey,
+            "secid":     "",
+            "sortName":  "pubdate",
+            "sortType":  "desc",
+            "isHLtitle": True,
+        }
+        try:
+            resp = session.post(QUERY_URL, data=payload, timeout=30)
+            resp.raise_for_status()
+            d = resp.json()
+        except Exception as exc:
+            log.warning("  API error (cat=%s key=%r page=%d): %s",
+                        category or "ALL", searchkey, page, exc)
+            break
 
-            announcements = d.get("announcements") or []
-            if not announcements:
-                break
+        if debug and page == 1:
+            total = d.get("totalAnnouncement", "?")
+            log.debug("  [DEBUG] cat=%r key=%r → totalAnnouncement=%s",
+                      category, searchkey, total)
+            sample = (d.get("announcements") or [])[:2]
+            for s in sample:
+                log.debug("    sample: %s", s.get("announcementTitle", "")[:80])
 
-            for ann in announcements:
-                title = ann.get("announcementTitle", "")
-                # 只要含关键词的记录
-                kw_hit = any(kw in title for kw in [
-                    "投资者关系", "调研", "业绩说明", "互动", "MCU", "微控制器",
-                    "Geehy", "极海", "路演",
-                ])
-                if not kw_hit:
-                    continue
-                # 过滤明显无关
-                if any(ex in title for ex in ["摘要", "英文", "更正", "取消"]):
-                    continue
-                pub_date = ann.get("announcementTime", "")
-                year_match = re.search(r"20(\d{2})", pub_date)
-                if year_match:
-                    pub_year = int("20" + year_match.group(1))
-                    if not (year_start <= pub_year <= year_end):
-                        continue
-                results.append({
-                    "title":    title,
-                    "adjunct":  ann.get("adjunctUrl", ""),
-                    "pub_date": pub_date,
-                    "category": category,
-                })
+        announcements = d.get("announcements") or []
+        if not announcements:
+            break
+        results.extend(announcements)
 
-            total_pages = d.get("totalAnnouncement", 0) // 30 + 1
-            if page >= total_pages or page >= 5:
-                break
-            page += 1
-            time.sleep(0.5)
+        total = d.get("totalAnnouncement", 0)
+        if page * 30 >= total:
+            break
+        page += 1
+        time.sleep(0.4)
 
-    # 去重（同一PDF可能出现在多次搜索）
-    seen = set()
-    unique = []
-    for r in results:
-        if r["adjunct"] not in seen:
-            seen.add(r["adjunct"])
-            unique.append(r)
-    return unique
+    return results
+
+
+def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
+                            market: str, year_start: int, year_end: int,
+                            debug: bool = False) -> list[dict]:
+    """查询投资者关系活动记录公告列表。
+
+    策略：
+    1. 用 CATEGORY_IR 拉全量 IR 记录（不限关键词），客户端过滤标题
+    2. 再用各关键词+全量 category 补充捞漏网之鱼
+    """
+    raw: list[dict] = []
+
+    # Pass 1: 全量 IR 类别（不设 searchkey，避免 OR 语法陷阱）
+    raw += _cninfo_query(session, symbol, org_id, market,
+                         category=CATEGORY_IR, searchkey="",
+                         year_start=year_start, year_end=year_end, debug=debug)
+
+    # Pass 2: 全量 category，逐个关键词搜索（单词匹配更可靠）
+    for kw in ["MCU", "微控制器", "极海", "Geehy", "调研", "投资者关系活动"]:
+        raw += _cninfo_query(session, symbol, org_id, market,
+                             category="", searchkey=kw,
+                             year_start=year_start, year_end=year_end, debug=debug)
+        time.sleep(0.3)
+
+    # 客户端过滤：标题包含 IR 相关关键词
+    IR_TITLE_KW = [
+        "投资者关系", "调研", "业绩说明", "互动", "路演",
+        "MCU", "微控制器", "Geehy", "极海",
+    ]
+    EXCLUDE_KW = ["摘要", "英文", "English", "更正", "取消", "撤销"]
+
+    results: list[dict] = []
+    seen: set[str] = set()
+
+    for ann in raw:
+        title    = ann.get("announcementTitle", "")
+        adjunct  = ann.get("adjunctUrl", "")
+        pub_date = ann.get("announcementTime", "")
+
+        if adjunct in seen:
+            continue
+        if any(ex in title for ex in EXCLUDE_KW):
+            continue
+        if not any(kw in title for kw in IR_TITLE_KW):
+            continue
+
+        yr_m = re.search(r"20(\d{2})", pub_date)
+        if yr_m:
+            pub_yr = int("20" + yr_m.group(1))
+            if not (year_start <= pub_yr <= year_end):
+                continue
+
+        seen.add(adjunct)
+        results.append({
+            "title":    title,
+            "adjunct":  adjunct,
+            "pub_date": pub_date,
+            "category": ann.get("announcementTypeName", ""),
+        })
+
+    return results
 
 
 def download_pdf(session: requests.Session, adjunct_url: str) -> Optional[bytes]:
@@ -256,33 +307,74 @@ def extract_text_from_pdf(pdf_bytes: bytes, max_pages: int = MAX_PAGES_PER_DOC) 
 
 # ── LLM 提取 ──────────────────────────────────────────────────────────────────
 
-def call_llm(text: str, symbol: str, api_key: str, model: str = "deepseek-chat") -> Optional[dict]:
-    """调用 DeepSeek 提取 MCU 数据。"""
-    hint = COMPANY_HINTS.get(symbol, f"股票代码: {symbol}")
+def call_llm_deepseek(text: str, symbol: str, api_key: str) -> Optional[dict]:
+    """DeepSeek V3 提取（文本路径）。"""
+    hint   = COMPANY_HINTS.get(symbol, f"股票代码: {symbol}")
     system = SYSTEM_PROMPT.format(company_hint=hint)
-
-    # 截断：IR记录通常较短，但仍限制token
     if len(text) > 12000:
         text = text[:12000] + "\n…（已截断）"
-
     try:
         from openai import OpenAI
         client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         resp = client.chat.completions.create(
-            model=model,
+            model="deepseek-chat",
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user",   "content": f"以下是投资者关系文档内容：\n\n{text}"},
             ],
-            max_tokens=1024,
-            temperature=0.1,
+            max_tokens=1024, temperature=0.1,
             response_format={"type": "json_object"},
         )
-        raw = resp.choices[0].message.content.strip()
+        return json.loads(resp.choices[0].message.content.strip())
+    except Exception as exc:
+        log.warning("  DeepSeek call failed: %s", exc)
+        return None
+
+
+def call_llm_gemini(text: str, symbol: str, api_key: str) -> Optional[dict]:
+    """Gemini 2.0 Flash 提取（文本路径，IR记录通常是纯文字，此路径足够）。"""
+    hint   = COMPANY_HINTS.get(symbol, f"股票代码: {symbol}")
+    system = SYSTEM_PROMPT.format(company_hint=hint)
+    if len(text) > 30000:   # Gemini 1M context — IR docs much shorter
+        text = text[:30000] + "\n…（已截断）"
+    try:
+        import google.generativeai as genai
+        import re as _re
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+            "gemini-2.0-flash",
+            system_instruction=system,
+        )
+        prompt = (
+            "以下是投资者关系文档内容，请提取MCU数据并输出JSON：\n\n" + text
+        )
+        resp = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json",
+                                "temperature": 0.1, "max_output_tokens": 1024},
+        )
+        raw = resp.text.strip()
+        raw = _re.sub(r"^```json\s*|\s*```$", "", raw, flags=_re.MULTILINE)
         return json.loads(raw)
     except Exception as exc:
-        log.warning("  LLM call failed: %s", exc)
+        log.warning("  Gemini call failed: %s", exc)
         return None
+
+
+def call_llm(text: str, symbol: str, api_key: str,
+             model: str = "deepseek") -> Optional[dict]:
+    """统一 LLM 调用接口。model: 'deepseek' | 'gemini'"""
+    if model == "gemini":
+        result = call_llm_gemini(text, symbol, api_key)
+        if result:
+            result["_model"] = "gemini-2.0-flash"
+            return result
+        return None
+    # deepseek (default)
+    result = call_llm_deepseek(text, symbol, api_key)
+    if result:
+        result["_model"] = "deepseek-chat"
+    return result
 
 
 # ── 结果写入 mcu_known_data.json ─────────────────────────────────────────────
@@ -376,24 +468,41 @@ def main():
                         help="只列出文件，不提取/写入")
     parser.add_argument("--max-docs",   type=int, default=MAX_DOCS_PER_COMPANY,
                         help="每家公司最多处理文件数 (默认30)")
+    parser.add_argument("--model", choices=["deepseek", "gemini"], default="deepseek",
+                        help="LLM 提取模型 (默认: deepseek)")
+    parser.add_argument("--debug", action="store_true",
+                        help="打印 CNINFO API 原始响应样本，用于排查 0 条问题")
     args = parser.parse_args()
 
-    # API Key
-    api_key = os.environ.get("VITE_DEEPSEEK_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
-    if not api_key and not args.dry_run:
-        # Try GCP Secret Manager
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    # API Key 解析
+    def get_key(env_var: str, secret_id: str) -> Optional[str]:
+        if v := os.environ.get(env_var):
+            return v
         try:
             from google.cloud import secretmanager
             client = secretmanager.SecretManagerServiceClient()
             project = os.environ.get("GCP_PROJECT", "st-china-ai-force")
-            name = f"projects/{project}/secrets/VITE_DEEPSEEK_API_KEY/versions/latest"
-            api_key = client.access_secret_version(name=name).payload.data.decode()
+            name = f"projects/{project}/secrets/{secret_id}/versions/latest"
+            return client.access_secret_version(name=name).payload.data.decode()
         except Exception:
-            pass
-    if not api_key and not args.dry_run:
-        log.error("未设置 VITE_DEEPSEEK_API_KEY 环境变量")
-        sys.exit(1)
+            return None
 
+    if args.model == "gemini":
+        api_key = get_key("VITE_GEMINI_API_KEY", "VITE_GEMINI_API_KEY")
+        if not api_key and not args.dry_run:
+            log.error("未设置 VITE_GEMINI_API_KEY 环境变量")
+            sys.exit(1)
+    else:
+        api_key = (get_key("VITE_DEEPSEEK_API_KEY", "VITE_DEEPSEEK_API_KEY")
+                   or get_key("DEEPSEEK_API_KEY", "DEEPSEEK_API_KEY"))
+        if not api_key and not args.dry_run:
+            log.error("未设置 VITE_DEEPSEEK_API_KEY 环境变量")
+            sys.exit(1)
+
+    log.info("模型: %s", args.model)
     session = build_session()
     total_written = 0
 
@@ -406,12 +515,13 @@ def main():
         log.info("━━ %s (%s) ━━", info["name"], symbol)
         announcements = query_ir_announcements(
             session, symbol, info["orgId"], info["market"],
-            args.year_start, args.year_end
+            args.year_start, args.year_end, debug=args.debug
         )
         log.info("  找到 %d 条 IR 公告", len(announcements))
 
         if not announcements:
-            log.info("  → 无IR记录，可尝试去掉关键词搜索限制")
+            log.info("  → 0条，建议运行: python fetch_ir_records.py --symbols %s --debug", symbol)
+            log.info("     查看 API 原始响应，确认 category/orgId 是否正确")
             continue
 
         processed = 0
@@ -444,7 +554,7 @@ def main():
                 log.info("    无MCU关键词，跳过LLM")
                 continue
 
-            result = call_llm(text, symbol, api_key)
+            result = call_llm(text, symbol, api_key, model=args.model)
             if not result or not result.get("found"):
                 reason = result.get("reason", "无数字") if result else "LLM失败"
                 log.info("    未提取到数据: %s", reason)
