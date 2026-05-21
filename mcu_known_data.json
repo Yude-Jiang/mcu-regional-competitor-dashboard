@@ -9,10 +9,11 @@
       "source": "兆易创新2023年报 主营业务分产品情况表 微控制器行"
     },
     "2024": {
-      "mcu_revenue_yuan": 1706000000,
+      "mcu_revenue_yuan": 1706014797.54,
+      "mcu_gross_margin": 0.3650,
       "data_type": "reported",
       "confidence": "high",
-      "source": "兆易创新2024年报 分产品营业收入表"
+      "source": "兆易创新2024年报 主营业务分产品情况表 MCU及模拟产品行"
     },
     "_todo_2018_2022": "年报分产品表有MCU收入，待extract_mcu_segments.py读取PDF补全"
   },
