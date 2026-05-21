@@ -168,12 +168,30 @@ def list_gcs_pdfs(symbol: str | None = None, year: int | None = None) -> list[di
 
 
 def download_pdf(blob_name: str, dest_path: str) -> bool:
+    """Download a PDF from GCS. Uses gsutil when available (faster for large files)."""
+    import subprocess
+    gcs_uri = f"gs://{BUCKET}/{blob_name}"
+    try:
+        # gsutil cp is more reliable for large PDFs than the Python SDK HTTP path
+        result = subprocess.run(
+            ["gsutil", "cp", gcs_uri, dest_path],
+            capture_output=True, text=True, timeout=600,
+        )
+        if result.returncode == 0:
+            return True
+        log.warning("gsutil cp failed (%d): %s", result.returncode, result.stderr.strip())
+    except FileNotFoundError:
+        pass  # gsutil not available, fall through to SDK
+    except Exception as exc:
+        log.warning("gsutil cp error: %s", exc)
+
+    # Fallback: Python GCS SDK with generous timeout
     try:
         from google.cloud import storage
         gcs    = storage.Client(project=PROJECT)
         bucket = gcs.bucket(BUCKET)
         blob   = bucket.blob(blob_name)
-        blob.download_to_filename(dest_path, timeout=120)
+        blob.download_to_filename(dest_path, timeout=600)
         return True
     except Exception as exc:
         log.warning("GCS download failed %s: %s", blob_name, exc)
