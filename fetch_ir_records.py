@@ -223,10 +223,11 @@ def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
     # 通用排除词（与IR无关的公司公告类型）
     NOISE_KW = [
         "担保", "法律意见书", "股东会决议", "董事会决议", "股东会的通知",
-        "董事会的通知", "股权激励", "期权", "持股计划", "质押", "解质押",
+        "董事会的通知", "股权激励", "激励权益", "期权", "持股计划", "质押", "解质押",
         "减持", "增持", "注销", "变更", "续聘", "章程", "审计", "会计师",
         "摘要", "英文", "English", "更正", "取消", "撤销", "更新",
         "独立董事", "监事", "高级管理人员", "人员调整", "离职",
+        "举办", "举行",   # "关于举办/举行...说明会的公告" = 会前通知，无财务数据
     ]
     # CATEGORY_IR 通道：需要标题含真正IR活动词（否则担保/决议等噪声全进来）
     IR_RECORD_KW = [
@@ -277,7 +278,8 @@ def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
         time.sleep(0.3)
 
     # Pass 2b: IR活动关键词命中 → 信任
-    for kw in ["调研", "投资者关系活动", "业绩说明会", "路演"]:
+    # "记录表"/"纪要" 是真实调研记录的标志性词；"业绩说明会" 只搜会后实录（"举行/举办"已排除通知）
+    for kw in ["调研", "投资者关系活动", "记录表", "调研纪要", "业绩说明会", "路演"]:
         for ann in _cninfo_query(session, symbol, org_id, market,
                                   category="", searchkey=kw,
                                   year_start=year_start, year_end=year_end, debug=debug):
