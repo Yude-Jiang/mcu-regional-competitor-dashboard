@@ -391,7 +391,7 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
     try:
         log.info("  Uploading PDF to Gemini Files API…")
         uploaded = client.files.upload(
-            path=pdf_path,
+            file=pdf_path,
             config={"mime_type": "application/pdf"},
         )
 
