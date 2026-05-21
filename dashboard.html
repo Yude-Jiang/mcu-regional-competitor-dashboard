@@ -445,9 +445,14 @@ body.panel-open .table-wrap { padding-right:308px; }
     <div>
       <div class="dp-section-ttl">MCU 口径策略</div>
       <div class="dp-strat-box">
-        <div class="dp-strat-badge" id="dp-strat-badge">—</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <div class="dp-strat-badge" id="dp-strat-badge">—</div>
+          <div class="dp-auto-status" id="dp-auto-status" style="display:none"></div>
+        </div>
         <div class="dp-strat-note" id="dp-strat-note"></div>
+        <div class="dp-scope-note" id="dp-scope-note" style="margin-top:6px;font-size:11px;color:var(--text-faint);line-height:1.5"></div>
       </div>
+      <div class="dp-profile-info" id="dp-profile-info" style="margin-top:8px;font-size:11px;color:var(--text-faint)"></div>
     </div>
 
     <div>
@@ -471,8 +476,10 @@ const ORDER = [
 const STRAT_LBL = {
   segment_reported:'SEG·RPT', total_proxy:'TOTAL×k',
   total_revenue:'TOTAL=MCU', subsidiary_geehy:'SUBSID.',
-  segment_estimated:'SEG·EST', estimated:'ESTIM.',
+  segment_estimated:'SEG·EST', segment_industrial:'SEG·IND',
+  estimated:'ESTIM.',
 };
+let PROFILES = {};
 const CONF_BORDER = {
   high:'var(--pos)', medium:'var(--yel-1)', low:'var(--neg)', na:'var(--text-faint)',
 };
@@ -783,10 +790,27 @@ function openDetail(sym) {
   let noteText = m.mcu_note || '';
   if (m.mcu_multiplier != null && m.mcu_strategy === 'total_proxy') {
     noteText = `MCU ≈ 总营收 × ${m.mcu_multiplier}` + (noteText ? `\n${noteText}` : '');
-  } else if (m.mcu_strategy === 'total_revenue') {
-    noteText = 'MCU 营收 = 总营收（纯MCU公司）' + (noteText ? `\n${noteText}` : '');
+  } else if (m.mcu_strategy === 'segment_industrial') {
+    noteText = '年报分产品表·工业控制芯片口径' + (noteText ? `\n${noteText}` : '');
   }
   $('dp-strat-note').textContent = noteText;
+
+  // profiles_xq.json enrichment
+  const prof = PROFILES[sym] || {};
+  const autoStatus = prof.auto_mcu_status || '';
+  const autoEl = $('dp-auto-status');
+  if (autoStatus) {
+    const statusColor = autoStatus === 'ok' ? 'var(--pos)' : autoStatus === 'partial' ? 'var(--yel-1)' : 'var(--neg)';
+    autoEl.textContent = autoStatus.toUpperCase();
+    autoEl.style.cssText = `display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${statusColor};color:#fff`;
+  } else {
+    autoEl.style.display = 'none';
+  }
+  $('dp-scope-note').textContent = prof.mcu_revenue_scope || '';
+  const profileParts = [];
+  if (prof.foundry && prof.foundry.length) profileParts.push(`晶圆厂: ${prof.foundry.join(' / ')}`);
+  if (prof.core_ip && prof.core_ip.length) profileParts.push(`核心IP: ${prof.core_ip.join(', ')}`);
+  $('dp-profile-info').textContent = profileParts.join('　　');
 
   // Mini chart
   const labels = allYears.map(String);
@@ -854,9 +878,18 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(
 // ── Bootstrap ─────────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const res = await fetch('/data.json');
+    const [res, profRes] = await Promise.all([
+      fetch('/data.json'),
+      fetch('/profiles_xq.json').catch(() => null),
+    ]);
     if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
     G = await res.json();
+
+    if (profRes && profRes.ok) {
+      const arr = await profRes.json();
+      PROFILES = {};
+      (Array.isArray(arr) ? arr : []).forEach(p => { if (p.symbol) PROFILES[p.symbol] = p; });
+    }
 
     $('hdr-meta').innerHTML = G.generated_at
       ? `数据日期&nbsp;<b>${G.generated_at}</b>`

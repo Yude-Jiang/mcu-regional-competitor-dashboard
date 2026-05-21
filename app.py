@@ -68,6 +68,11 @@ def fx_rates():
     return send_from_directory(HERE, "fx_rates.json", mimetype="application/json")
 
 
+@app.route("/profiles_xq.json")
+def profiles_xq():
+    return send_from_directory(HERE, "profiles_xq.json", mimetype="application/json")
+
+
 # ── API: document status matrix ───────────────────────────────────────────────
 
 @app.route("/api/doc-status")
