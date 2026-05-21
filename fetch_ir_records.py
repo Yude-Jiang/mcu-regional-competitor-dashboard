@@ -214,29 +214,37 @@ def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
                             debug: bool = False) -> list[dict]:
     """查询投资者关系活动记录公告列表。
 
-    策略：
-    1. CATEGORY_IR 拉全量 IR 记录（不限关键词）—— 该类别已保证是 IR 文档，不过滤标题
-    2. 逐个关键词全量搜索，客户端过滤标题（避免 CNINFO 不支持 OR 语法问题）
+    CNINFO category_iractivty_szsh 实际返回公司所有公告（非仅IR记录），因此：
+    - Pass 1: CATEGORY_IR + 标题含真正IR记录关键词（调研/路演/业绩说明/接待投资者）
+    - Pass 2a: MCU/极海/Geehy 关键词命中 → 直接信任（关键词即相关性证明）
+    - Pass 2b: 调研/业绩说明会 关键词命中 → 信任（关键词已足够）
+    - 全局排除：担保/法律意见书/股东会决议/董事会决议 等噪声公告
     """
-    EXCLUDE_KW = ["摘要", "英文", "English", "更正", "取消", "撤销"]
-    # 关键词搜索结果需额外标题确认（避免误收无关公告）
-    KW_TITLE_FILTER = [
-        "投资者关系", "调研", "业绩说明", "互动", "路演",
-        "MCU", "微控制器", "Geehy", "极海", "投资者", "说明会",
+    # 通用排除词（与IR无关的公司公告类型）
+    NOISE_KW = [
+        "担保", "法律意见书", "股东会决议", "董事会决议", "股东会的通知",
+        "董事会的通知", "股权激励", "期权", "持股计划", "质押", "解质押",
+        "减持", "增持", "注销", "变更", "续聘", "章程", "审计", "会计师",
+        "摘要", "英文", "English", "更正", "取消", "撤销", "更新",
+        "独立董事", "监事", "高级管理人员", "人员调整", "离职",
+    ]
+    # CATEGORY_IR 通道：需要标题含真正IR活动词（否则担保/决议等噪声全进来）
+    IR_RECORD_KW = [
+        "投资者关系活动", "调研", "路演", "业绩说明", "互动易",
+        "接待投资者", "机构投资者", "投资者问答", "网上说明会",
     ]
 
     results: list[dict] = []
     seen: set[str] = set()
 
-    def _add(ann: dict, trusted: bool = False):
-        """trusted=True 时跳过 IR 标题关键词过滤（CATEGORY_IR 已保证类别正确）。"""
+    def _add(ann: dict, require_ir_title: bool = True):
         title   = ann.get("announcementTitle", "")
         adjunct = ann.get("adjunctUrl", "")
         if not adjunct or adjunct in seen:
             return
-        if any(ex in title for ex in EXCLUDE_KW):
+        if any(n in title for n in NOISE_KW):
             return
-        if not trusted and not any(kw in title for kw in KW_TITLE_FILTER):
+        if require_ir_title and not any(kw in title for kw in IR_RECORD_KW):
             return
 
         pub_date = _parse_pub_date(ann.get("announcementTime", ""))
@@ -254,18 +262,26 @@ def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
             "category": ann.get("announcementTypeName", ""),
         })
 
-    # Pass 1: CATEGORY_IR 全量（trusted — 类别已限定 IR 文档，不强要求标题关键词）
+    # Pass 1: CATEGORY_IR + 标题过滤（category 实际返回全量公告，标题是唯一过滤手段）
     for ann in _cninfo_query(session, symbol, org_id, market,
                               category=CATEGORY_IR, searchkey="",
                               year_start=year_start, year_end=year_end, debug=debug):
-        _add(ann, trusted=True)
+        _add(ann, require_ir_title=True)
 
-    # Pass 2: 关键词搜索（全量 category），标题需含 IR 相关词
-    for kw in ["MCU", "微控制器", "极海", "Geehy", "调研", "投资者关系活动", "业绩说明会"]:
+    # Pass 2a: MCU/产品关键词命中 → 直接信任（无需标题IR过滤）
+    for kw in ["MCU", "微控制器", "极海", "Geehy"]:
         for ann in _cninfo_query(session, symbol, org_id, market,
                                   category="", searchkey=kw,
                                   year_start=year_start, year_end=year_end, debug=debug):
-            _add(ann, trusted=False)
+            _add(ann, require_ir_title=False)
+        time.sleep(0.3)
+
+    # Pass 2b: IR活动关键词命中 → 信任
+    for kw in ["调研", "投资者关系活动", "业绩说明会", "路演"]:
+        for ann in _cninfo_query(session, symbol, org_id, market,
+                                  category="", searchkey=kw,
+                                  year_start=year_start, year_end=year_end, debug=debug):
+            _add(ann, require_ir_title=False)
         time.sleep(0.3)
 
     return results
