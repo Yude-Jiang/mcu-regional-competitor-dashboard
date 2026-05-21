@@ -6,3 +6,6 @@ __pycache__
 venv
 .DS_Store
 
+node_modules/
+package.json
+package-lock.json
