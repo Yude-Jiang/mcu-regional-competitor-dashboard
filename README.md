@@ -122,6 +122,12 @@ python extract_mcu_segments.py
 - 纳思达极海MCU数据应从年报子公司披露章节提取（`extract_mcu_segments.py`）
 - 国民技术MCU比例需人工访问[互动易](https://irm.cninfo.com.cn/)查询
 
+**Gemini 模型版本（2026-05 更新）**
+- Gemini 3 系列已 GA：`gemini-3.5-flash`（2026-05-20）、`gemini-3.1-pro-preview`（2026-02-13）、`gemini-3-flash-preview`（2025-12-18）
+- 代码中所有 `gemini-2.0-flash` 已统一替换为 `gemini-3.5-flash`
+- Vertex AI 的 fallback 列表：`gemini-3.5-flash` → `gemini-3.1-pro-preview` → `gemini-3-flash-preview` → `gemini-3.1-flash-lite` → `gemini-2.0-flash-001`（兜底）
+- 判断依据：截图确认 Google AI Studio 模型列表
+
 **Gemini SDK 迁移：google-generativeai → google-genai**
 - 旧包 `google-generativeai` 已停止维护，新包是 `google-genai`
 - import 路径变化：`import google.generativeai as genai` → `from google import genai`
