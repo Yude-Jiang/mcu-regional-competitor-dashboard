@@ -32,6 +32,7 @@ import os
 import re
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -201,56 +202,49 @@ def _cninfo_query(session: requests.Session, symbol: str, org_id: str,
     return results
 
 
+def _parse_pub_date(raw_time) -> str:
+    """Convert CNINFO announcementTime (int ms or string) → 'YYYY-MM-DD'."""
+    if isinstance(raw_time, (int, float)) and raw_time > 0:
+        return datetime.fromtimestamp(raw_time / 1000, tz=timezone.utc).strftime("%Y-%m-%d")
+    return str(raw_time or "")
+
+
 def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
                             market: str, year_start: int, year_end: int,
                             debug: bool = False) -> list[dict]:
     """查询投资者关系活动记录公告列表。
 
     策略：
-    1. 用 CATEGORY_IR 拉全量 IR 记录（不限关键词），客户端过滤标题
-    2. 再用各关键词+全量 category 补充捞漏网之鱼
+    1. CATEGORY_IR 拉全量 IR 记录（不限关键词）—— 该类别已保证是 IR 文档，不过滤标题
+    2. 逐个关键词全量搜索，客户端过滤标题（避免 CNINFO 不支持 OR 语法问题）
     """
-    raw: list[dict] = []
-
-    # Pass 1: 全量 IR 类别（不设 searchkey，避免 OR 语法陷阱）
-    raw += _cninfo_query(session, symbol, org_id, market,
-                         category=CATEGORY_IR, searchkey="",
-                         year_start=year_start, year_end=year_end, debug=debug)
-
-    # Pass 2: 全量 category，逐个关键词搜索（单词匹配更可靠）
-    for kw in ["MCU", "微控制器", "极海", "Geehy", "调研", "投资者关系活动"]:
-        raw += _cninfo_query(session, symbol, org_id, market,
-                             category="", searchkey=kw,
-                             year_start=year_start, year_end=year_end, debug=debug)
-        time.sleep(0.3)
-
-    # 客户端过滤：标题包含 IR 相关关键词
-    IR_TITLE_KW = [
-        "投资者关系", "调研", "业绩说明", "互动", "路演",
-        "MCU", "微控制器", "Geehy", "极海",
-    ]
     EXCLUDE_KW = ["摘要", "英文", "English", "更正", "取消", "撤销"]
+    # 关键词搜索结果需额外标题确认（避免误收无关公告）
+    KW_TITLE_FILTER = [
+        "投资者关系", "调研", "业绩说明", "互动", "路演",
+        "MCU", "微控制器", "Geehy", "极海", "投资者", "说明会",
+    ]
 
     results: list[dict] = []
     seen: set[str] = set()
 
-    for ann in raw:
-        title    = ann.get("announcementTitle", "")
-        adjunct  = ann.get("adjunctUrl", "")
-        pub_date = ann.get("announcementTime", "")
-
-        if adjunct in seen:
-            continue
+    def _add(ann: dict, trusted: bool = False):
+        """trusted=True 时跳过 IR 标题关键词过滤（CATEGORY_IR 已保证类别正确）。"""
+        title   = ann.get("announcementTitle", "")
+        adjunct = ann.get("adjunctUrl", "")
+        if not adjunct or adjunct in seen:
+            return
         if any(ex in title for ex in EXCLUDE_KW):
-            continue
-        if not any(kw in title for kw in IR_TITLE_KW):
-            continue
+            return
+        if not trusted and not any(kw in title for kw in KW_TITLE_FILTER):
+            return
 
+        pub_date = _parse_pub_date(ann.get("announcementTime", ""))
         yr_m = re.search(r"20(\d{2})", pub_date)
         if yr_m:
             pub_yr = int("20" + yr_m.group(1))
             if not (year_start <= pub_yr <= year_end):
-                continue
+                return
 
         seen.add(adjunct)
         results.append({
@@ -259,6 +253,20 @@ def query_ir_announcements(session: requests.Session, symbol: str, org_id: str,
             "pub_date": pub_date,
             "category": ann.get("announcementTypeName", ""),
         })
+
+    # Pass 1: CATEGORY_IR 全量（trusted — 类别已限定 IR 文档，不强要求标题关键词）
+    for ann in _cninfo_query(session, symbol, org_id, market,
+                              category=CATEGORY_IR, searchkey="",
+                              year_start=year_start, year_end=year_end, debug=debug):
+        _add(ann, trusted=True)
+
+    # Pass 2: 关键词搜索（全量 category），标题需含 IR 相关词
+    for kw in ["MCU", "微控制器", "极海", "Geehy", "调研", "投资者关系活动", "业绩说明会"]:
+        for ann in _cninfo_query(session, symbol, org_id, market,
+                                  category="", searchkey=kw,
+                                  year_start=year_start, year_end=year_end, debug=debug):
+            _add(ann, trusted=False)
+        time.sleep(0.3)
 
     return results
 
