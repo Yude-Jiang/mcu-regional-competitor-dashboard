@@ -313,11 +313,14 @@ def _call_deepseek(question: str, context: str, api_key: str) -> str:
 
 
 def _call_gemini(question: str, context: str, api_key: str) -> str:
-    import google.generativeai as genai
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=api_key)
     prompt = _SYSTEM_PROMPT.format(context=context) + f"\n\n用户问题：{question}"
-    resp = model.generate_content(prompt)
+    resp = client.models.generate_content(
+        model="gemini-3.5-flash",
+        contents=prompt,
+    )
     return resp.text.strip()
 
 
@@ -351,7 +354,7 @@ def api_ask():
     if gemini_key:
         try:
             answer = _call_gemini(question, context, gemini_key)
-            return jsonify({"ok": True, "answer": answer, "model": "gemini-2.0-flash"})
+            return jsonify({"ok": True, "answer": answer, "model": "gemini-3.5-flash"})
         except Exception as exc:
             log.warning("Gemini failed: %s", exc)
             return jsonify({"error": "llm_error", "message": str(exc)}), 502

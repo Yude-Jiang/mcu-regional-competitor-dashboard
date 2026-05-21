@@ -356,7 +356,7 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
 
     try:
         resp = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.1,
@@ -384,12 +384,12 @@ def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
         "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
     )
     _VERTEX_MODELS = [
-        "gemini-2.0-flash-001",
-        "gemini-2.0-flash",
+        "gemini-3.5-flash",          # GA 2026-05-20, 推荐首选
+        "gemini-3.1-pro-preview",    # SOTA 推理，长文档
+        "gemini-3-flash-preview",    # GA 2025-12-18
+        "gemini-3.1-flash-lite",     # 高性价比
+        "gemini-2.0-flash-001",      # 旧版兜底
         "gemini-1.5-flash-002",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro-002",
-        "gemini-1.5-pro",
     ]
     _LOCATIONS = ["us-central1", "us-east4", "asia-east1", "asia-northeast1"]
 
@@ -456,7 +456,7 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
             "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
         )
         resp = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.5-flash",
             contents=[uploaded, prompt],
         )
         raw  = resp.text.strip()

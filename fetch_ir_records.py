@@ -370,7 +370,7 @@ def call_llm_gemini(text: str, symbol: str, api_key: str) -> Optional[dict]:
         client = genai.Client(api_key=api_key)
         prompt = "以下是投资者关系文档内容，请提取MCU数据并输出JSON：\n\n" + text
         resp = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=system,
