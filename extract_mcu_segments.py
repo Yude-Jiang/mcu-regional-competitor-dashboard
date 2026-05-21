@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 """extract_mcu_segments.py — Extract MCU segment revenue from annual report PDFs.
 
-Pipeline:
-  GCS PDF → pdfplumber text → DeepSeek V3 → mcu_segments (BQ) + mcu_known_data.json
+Pipeline A (default, DeepSeek):
+  GCS PDF → pdfplumber text+tables → DeepSeek V3 → mcu_known_data.json + BQ
+
+Pipeline B (--model gemini, recommended for tables):
+  GCS PDF → Gemini Files API (native PDF, no pdfplumber) → mcu_known_data.json + BQ
+
+  Advantages of Gemini native PDF:
+  - Reads visual layout directly — no column-alignment garbling from pdfplumber
+  - 1M token context = full annual report in one call (no page scoring needed)
+  - Handles scanned/image PDFs via built-in OCR
+  - Recommended for 分产品表 extraction (tables with merged cells, rotated text)
 
 Only processes companies where MCU revenue is NOT auto-derivable:
   segment_reported  : 兆易创新, 普冉股份
@@ -11,16 +20,17 @@ Only processes companies where MCU revenue is NOT auto-derivable:
   estimated         : 国民技术, 芯海科技 (best-effort)
 
 Usage:
-    python extract_mcu_segments.py                  # all eligible PDFs in GCS
-    python extract_mcu_segments.py 603986           # single company
-    python extract_mcu_segments.py 603986 2023      # single company + year
-    python extract_mcu_segments.py --local /path    # read from local dir instead of GCS
+    python extract_mcu_segments.py                       # all eligible PDFs in GCS
+    python extract_mcu_segments.py 603986                # single company
+    python extract_mcu_segments.py 603986 2023           # single company + year
+    python extract_mcu_segments.py --model gemini        # use Gemini native PDF
+    python extract_mcu_segments.py --local /path         # read from local dir
 
 Environment:
     GCP_PROJECT         default: st-china-ai-force
     GCS_BUCKET          default: st-finance-reports
-    DEEPSEEK_API_KEY    or fetched from Secret Manager
-    GEMINI_API_KEY      fallback model
+    VITE_DEEPSEEK_API_KEY  or fetched from Secret Manager
+    VITE_GEMINI_API_KEY    required for --model gemini
 """
 
 import argparse
@@ -306,6 +316,7 @@ def call_deepseek(text: str, company: str, year: int, api_key: str) -> dict | No
 
 
 def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None:
+    """Gemini text-based fallback (same pipeline as DeepSeek but different model)."""
     try:
         import google.generativeai as genai
     except ImportError:
@@ -327,25 +338,88 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
     try:
         resp = model.generate_content(prompt)
         raw  = resp.text.strip()
-        # Strip markdown code fences if present
         raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
         return json.loads(raw)
     except Exception as exc:
-        log.warning("Gemini call failed: %s", exc)
+        log.warning("Gemini text call failed: %s", exc)
         return None
 
 
+def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
+                            api_key: str) -> dict | None:
+    """Gemini Files API — send PDF directly without pdfplumber text extraction.
+
+    This is the preferred path for tables with complex layout (分产品营收表).
+    The model sees the visual rendering of the PDF, so column alignment is exact.
+    Supports up to 1M tokens = entire annual report in one call.
+    Also handles scanned/image-only PDFs via built-in OCR.
+    """
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        log.warning("pip install google-generativeai")
+        return None
+
+    genai.configure(api_key=api_key)
+    uploaded = None
+
+    try:
+        log.info("  Uploading PDF to Gemini Files API…")
+        uploaded = genai.upload_file(pdf_path, mime_type="application/pdf")
+
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        prompt = (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"公司：{company}  财年：{year}年\n\n"
+            "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
+        )
+        resp = model.generate_content([uploaded, prompt])
+        raw  = resp.text.strip()
+        raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
+        result = json.loads(raw)
+        result["_model"] = "gemini-2.0-flash-native-pdf"
+        log.info("  Gemini native PDF extraction complete")
+        return result
+
+    except Exception as exc:
+        log.warning("Gemini native PDF failed: %s", exc)
+        return None
+
+    finally:
+        if uploaded:
+            try:
+                genai.delete_file(uploaded.name)
+            except Exception:
+                pass
+
+
 def extract_with_llm(text: str, symbol: str, company_name: str,
-                     year: int, deepseek_key: str | None,
-                     gemini_key: str | None) -> dict | None:
-    if deepseek_key:
+                     year: int, pdf_path: str,
+                     deepseek_key: str | None, gemini_key: str | None,
+                     model_pref: str = "deepseek") -> dict | None:
+    """Run LLM extraction. model_pref: 'deepseek' | 'gemini' | 'gemini-native'"""
+
+    if model_pref in ("gemini", "gemini-native") and gemini_key:
+        # Gemini native PDF — no pdfplumber needed
+        result = call_gemini_native_pdf(pdf_path, company_name, year, gemini_key)
+        if result:
+            return result
+        log.info("  Gemini native PDF failed, falling back to text path…")
+
+    if model_pref == "gemini" and gemini_key and text:
+        result = call_gemini(text, company_name, year, gemini_key)
+        if result:
+            result["_model"] = "gemini-2.0-flash"
+            return result
+
+    if deepseek_key and text:
         result = call_deepseek(text, company_name, year, deepseek_key)
         if result:
             result["_model"] = "deepseek-chat"
             return result
 
-    if gemini_key:
-        log.info("  Falling back to Gemini…")
+    if gemini_key and text and model_pref == "deepseek":
+        log.info("  DeepSeek failed, falling back to Gemini text…")
         result = call_gemini(text, company_name, year, gemini_key)
         if result:
             result["_model"] = "gemini-2.0-flash"
@@ -429,16 +503,23 @@ def save_to_bq(symbol: str, year: int, result: dict,
 def process_one(pdf_path: str, symbol: str, year: int,
                 company_name: str, report_type: str,
                 deepseek_key: str | None, gemini_key: str | None,
-                update_json: bool = True) -> bool:
-    log.info("Extracting: %s %s %d…", company_name, report_type, year)
+                update_json: bool = True, model_pref: str = "deepseek") -> bool:
+    log.info("Extracting: %s %s %d  [model=%s]…", company_name, report_type, year, model_pref)
 
-    text = extract_relevant_pages(pdf_path)
-    if not text.strip():
-        log.warning("  No text extracted from PDF — skipping")
-        return False
+    # Gemini native PDF skips pdfplumber entirely
+    if model_pref in ("gemini", "gemini-native"):
+        text = ""   # not needed; pdf_path is passed directly
+    else:
+        text = extract_relevant_pages(pdf_path)
+        if not text.strip():
+            log.warning("  No text extracted from PDF — skipping")
+            return False
 
     result = extract_with_llm(text, symbol, company_name, year,
-                               deepseek_key, gemini_key)
+                               pdf_path=pdf_path,
+                               deepseek_key=deepseek_key,
+                               gemini_key=gemini_key,
+                               model_pref=model_pref)
     if result is None:
         log.warning("  LLM extraction failed — no API key available?")
         return False
@@ -473,6 +554,13 @@ def main() -> None:
                         help="Read PDFs from local directory instead of GCS")
     parser.add_argument("--no-update-json", action="store_true",
                         help="Skip updating mcu_known_data.json")
+    parser.add_argument("--model", choices=["deepseek", "gemini", "gemini-native"],
+                        default="deepseek",
+                        help=(
+                            "deepseek: pdfplumber→DeepSeek (default)  "
+                            "gemini: pdfplumber→Gemini text  "
+                            "gemini-native: Gemini Files API直接读PDF（推荐用于复杂表格）"
+                        ))
     args = parser.parse_args()
 
     deepseek_key = get_secret("deepseek-api-key", "VITE_DEEPSEEK_API_KEY")
@@ -486,9 +574,10 @@ def main() -> None:
             "  export GEMINI_API_KEY=AIza..."
         )
 
-    log.info("API: %s%s",
+    log.info("API: %s%s  model=%s",
              "DeepSeek " if deepseek_key else "",
-             "Gemini"    if gemini_key   else "")
+             "Gemini"    if gemini_key   else "",
+             args.model)
 
     # Load company names
     meta_path = HERE / "companies_meta.json"
@@ -573,6 +662,7 @@ def main() -> None:
                 deepseek_key=deepseek_key,
                 gemini_key=gemini_key,
                 update_json=not args.no_update_json,
+                model_pref=args.model,
             )
             if success:
                 ok += 1
