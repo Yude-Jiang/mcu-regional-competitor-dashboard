@@ -383,29 +383,37 @@ def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
         log.warning("pip install google-genai")
         return None
 
-    try:
-        client = genai.Client(vertexai=True, project=PROJECT, location="us-central1")
-        prompt = (
-            f"{SYSTEM_PROMPT}\n\n"
-            f"公司：{company}  财年：{year}年\n\n"
-            "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
-        )
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash-001",
-            contents=[
-                types.Part.from_uri(file_uri=gcs_uri, mime_type="application/pdf"),
-                prompt,
-            ],
-        )
-        raw = resp.text.strip()
-        raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-        result = json.loads(raw)
-        result["_model"] = "gemini-2.0-flash-vertex-gcs"
-        log.info("  Vertex AI GCS URI extraction complete")
-        return result
-    except Exception as exc:
-        log.warning("  Vertex AI GCS URI failed: %s", exc)
-        return None
+    # Try models in order until one is available in this project/region
+    _VERTEX_MODELS = [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-exp",
+        "gemini-1.5-flash-002",
+        "gemini-1.5-pro-002",
+    ]
+    prompt = (
+        f"{SYSTEM_PROMPT}\n\n"
+        f"公司：{company}  财年：{year}年\n\n"
+        "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
+    )
+    client = genai.Client(vertexai=True, project=PROJECT, location="us-central1")
+    for model_id in _VERTEX_MODELS:
+        try:
+            resp = client.models.generate_content(
+                model=model_id,
+                contents=[
+                    types.Part.from_uri(file_uri=gcs_uri, mime_type="application/pdf"),
+                    prompt,
+                ],
+            )
+            raw = resp.text.strip()
+            raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
+            result = json.loads(raw)
+            result["_model"] = f"{model_id}-vertex-gcs"
+            log.info("  Vertex AI GCS URI extraction complete (%s)", model_id)
+            return result
+        except Exception as exc:
+            log.warning("  Vertex AI %s failed: %s", model_id, exc)
+    return None
 
 
 def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
