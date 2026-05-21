@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """extract_mcu_segments.py — Extract MCU segment revenue from annual report PDFs.
 
-Pipeline A (default, DeepSeek):
-  GCS PDF → pdfplumber text+tables → DeepSeek V3 → mcu_known_data.json + BQ
+Pipeline A (default): Gemini Files API — native PDF, no pdfplumber:
+  GCS PDF → Gemini Files API → mcu_known_data.json + BQ
 
-Pipeline B (--model gemini, recommended for tables):
-  GCS PDF → Gemini Files API (native PDF, no pdfplumber) → mcu_known_data.json + BQ
+Pipeline B (--model deepseek): pdfplumber text → DeepSeek V3:
+  GCS PDF → pdfplumber text+tables → DeepSeek V3 → mcu_known_data.json + BQ
 
   Advantages of Gemini native PDF:
   - Reads visual layout directly — no column-alignment garbling from pdfplumber
@@ -555,11 +555,11 @@ def main() -> None:
     parser.add_argument("--no-update-json", action="store_true",
                         help="Skip updating mcu_known_data.json")
     parser.add_argument("--model", choices=["deepseek", "gemini", "gemini-native"],
-                        default="deepseek",
+                        default="gemini-native",
                         help=(
-                            "deepseek: pdfplumber→DeepSeek (default)  "
+                            "gemini-native: Gemini Files API直接读PDF，保留视觉布局（默认）  "
                             "gemini: pdfplumber→Gemini text  "
-                            "gemini-native: Gemini Files API直接读PDF（推荐用于复杂表格）"
+                            "deepseek: pdfplumber→DeepSeek"
                         ))
     args = parser.parse_args()
 
