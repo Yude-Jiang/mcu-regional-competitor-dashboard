@@ -59,6 +59,18 @@
     }
   },
   "688766": {
+    "2022": {
+      "mcu_revenue_yuan": 52990000,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "普冉股份2022年报 MCU产品线 — LLM提取自PDF，¥5299万"
+    },
+    "2023": {
+      "mcu_revenue_yuan": 115356800,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "普冉股份2023年报「存储+」系列合计（含MCU+VCM Driver模拟芯片合并披露，无法拆分纯MCU口径，11535.68万元，毛利率26.88%）"
+    },
     "2024": {
       "mcu_revenue_yuan": 524000000,
       "mcu_gross_margin": 0.287,
@@ -66,7 +78,13 @@
       "confidence": "high",
       "source": "普冉股份2024年报 MCU产品线"
     },
-    "_todo_2018_2021": "2022年招股书含2018-2021历史MCU数据，价值最高，待录入 — open gs://st-finance-reports/reports/688766_普冉股份/ and read 分产品营收 table"
+    "2025": {
+      "mcu_revenue_yuan": 532000000,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "普冉股份2025年报 MCU产品线 — LLM提取自PDF，¥53200万"
+    },
+    "_todo_2018_2021": "招股书（2022年上市）含2019-2021历史MCU数据，待extract_mcu_segments.py读取招股书PDF补全"
   },
   "300327": {
     "2023": {
