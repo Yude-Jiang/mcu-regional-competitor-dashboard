@@ -350,6 +350,47 @@ footer {
 .dp-overlay.open { display:block; }
 body.panel-open .table-wrap { padding-right:328px; }
 
+/* ── Chart section (cs) ── */
+.cs-wrap {
+  background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.cs-hdr {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 20px 0; background:var(--bg-2);
+  border-bottom:1px solid var(--border);
+}
+.cs-tag {
+  font:700 var(--fz-xs)/1 var(--font); color:#fff;
+  padding:3px 8px; border-radius:3px; letter-spacing:.06em;
+  text-transform:uppercase; flex-shrink:0;
+}
+.cs-title {
+  font:600 var(--fz-sm)/1 var(--font); color:var(--text); white-space:nowrap;
+}
+.cs-unit {
+  font:var(--fz-xs)/1 var(--font); color:var(--text-faint); margin-left:auto;
+  white-space:nowrap;
+}
+.cs-body {
+  padding:10px 20px 8px; min-height:200px; position:relative;
+}
+
+/* ── Dual chart row ── */
+.chart-dual {
+  display:grid; grid-template-columns:1fr 340px;
+  background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.chart-dual-main { border-right:1px solid var(--border); min-width:0; }
+.chart-dual-side  { min-width:0; }
+.chart-dual-main .cs-hdr,
+.chart-dual-side  .cs-hdr {
+  padding:8px 16px 0;
+}
+.chart-dual-main .cs-body,
+.chart-dual-side  .cs-body {
+  padding:10px 16px 8px; min-height:200px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 960px) {
   .chart-row {
@@ -362,6 +403,10 @@ body.panel-open .table-wrap { padding-right:328px; }
   }
   .chart-box:last-child { border-bottom: 0; }
   .brand .sub { display: none; }
+  .chart-dual {
+    grid-template-columns: 1fr;
+  }
+  .chart-dual-main { border-right: 0; border-bottom: 1px solid var(--border); }
 }
 @media (max-width: 680px) {
   .hdr { padding: 0 12px; }
@@ -423,37 +468,32 @@ body.panel-open .table-wrap { padding-right:328px; }
   </div>
 </div>
 
-<!-- ── MCU Stacked Chart ── -->
-<div class="chart-full">
-  <div class="chart-axis-lbl">MCU Rev M$</div>
-  <div class="chart-inner"><canvas id="c-mcu"></canvas></div>
+<!-- ── 总营收 grouped chart ── -->
+<div class="cs-wrap">
+  <div class="cs-hdr">
+    <span class="cs-tag" style="background:#1a8a4e">总营收</span>
+    <span class="cs-title">按公司 · 总营收 (来自年报)</span>
+    <span class="cs-unit">M USD</span>
+  </div>
+  <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
 </div>
 
-<!-- ── Rev + GM + RD Charts ── -->
-<div class="chart-row">
-  <div class="chart-box">
-    <div class="chart-ttl">总营收 vs MCU 营收（M$）&nbsp;·&nbsp;<span id="lbl-rev">2024</span></div>
-    <canvas id="c-rev"></canvas>
-  </div>
-  <div class="chart-box">
-    <div class="chart-ttl">毛利率（%）&nbsp;·&nbsp;<span id="lbl-gm">2024</span></div>
-    <canvas id="c-gm"></canvas>
-  </div>
-  <div class="chart-box">
-    <div class="chart-ttl">研发费用占营收比（%）&nbsp;·&nbsp;<span id="lbl-rd">2024</span></div>
-    <canvas id="c-rd"></canvas>
-  </div>
-</div>
-
-<!-- ── Competitor Overview: MCU Rev by Year + Margin ── -->
-<div class="chart-full">
-  <div class="chart-axis-lbl">MCU Rev M$</div>
-  <div class="chart-inner">
-    <div class="chart-ttl" style="margin-bottom:4px">
-      各公司 MCU 营收（按年，2018–2025）&nbsp;+&nbsp;
-      <span style="color:#ffd200">── 毛利率%</span>
+<!-- ── MCU grouped + Stacked dual row ── -->
+<div class="chart-dual">
+  <div class="chart-dual-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#03234b">MCU</span>
+      <span class="cs-title">按公司 · MCU 营收 (推算)</span>
+      <span class="cs-unit">M USD · 2018—2025</span>
     </div>
-    <canvas id="c-comp"></canvas>
+    <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
+  </div>
+  <div class="chart-dual-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#3cb4e6;color:#03234b">堆叠</span>
+      <span class="cs-title">按年度 · 公司堆叠</span>
+    </div>
+    <div class="cs-body"><canvas id="c-stacked"></canvas></div>
   </div>
 </div>
 
@@ -551,9 +591,26 @@ const CONF_BORDER = {
 const DOT = {
   reported:'dc', derived:'dd', estimated:'dp', unavailable:'du', na:'dn',
 };
+// ── Color palettes (19 non-repeating colors) ──────────────────────────────
+// Year palette: 8 colors for grouped bar charts (same across total-rev & MCU charts)
+const YEAR_PAL = {
+  2018:'#b0bec5', 2019:'#78909c', 2020:'#03234b',
+  2021:'#81d4fa', 2022:'#3cb4e6',
+  2023:'#f48fb1', 2024:'#e6007e', 2025:'#ffd200',
+};
+// Company palette: 11 colors for stacked chart — distinct from YEAR_PAL
 const CO_COLORS = [
-  '#03234b','#3cb4e6','#ffd200','#e6007e','#425a78',
-  '#6dc7ec','#ec409e','#8191a5','#9dd9f2','#ffe87f','#f27fbe',
+  '#1565c0',  // 603986 兆易创新  deep blue
+  '#00796b',  // 300327 中颖电子  teal
+  '#558b2f',  // 688380 中微半导  olive green
+  '#6a1b9a',  // 300077 国民技术  purple
+  '#bf360c',  // 688279 峰岹科技  burnt orange
+  '#0277bd',  // 002180 纳思达    ocean blue
+  '#00838f',  // 688385 复旦微电  deep cyan
+  '#c62828',  // 688766 普冉股份  deep red
+  '#f57f17',  // 688595 芯海科技  amber
+  '#4527a0',  // 688391 钜泉科技  indigo
+  '#2e7d32',  // 688018 乐鑫科技  forest green
 ];
 
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
@@ -572,8 +629,6 @@ function applyChartTheme() {
   const dark = document.documentElement.dataset.theme === 'dark';
   const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
   const tick = dark ? '#7d94b3' : '#8191a5';
-  // Comp chart has custom axis colors — just rebuild it
-  if (G && charts.comp) renderCompChart();
   Object.values(charts).forEach(c => {
     if (!c) return;
     ['x','y'].forEach(ax => {
@@ -585,7 +640,6 @@ function applyChartTheme() {
     if (c.options.plugins?.legend?.labels) c.options.plugins.legend.labels.color = tick;
     c.update('none');
   });
-  // also update the detail panel mini chart
   if (dpChart) {
     ['x','y'].forEach(ax => {
       if (dpChart.options.scales?.[ax]) {
@@ -682,7 +736,7 @@ function sortVal(sym, year, col) {
 
 // ── Table render ──────────────────────────────────────────────────────────
 function renderTable(year, query) {
-  ['lbl-rev', 'lbl-gm', 'lbl-rd'].forEach(id => $(id).textContent = year);
+  // (year labels removed — charts now show all years)
   const q = (query || '').toLowerCase();
 
   let syms = ORDER.filter(s => G.companies[s]).filter(s => {
@@ -766,163 +820,88 @@ function cOpts(extra = {}) {
 
 function syms() { return ORDER.filter(s => G.companies[s]); }
 
-function renderMCU() {
-  const years = (G.years || []).filter(y => y >= 2018);
-  const datasets = syms().map((s, i) => ({
-    label: (G.companies[s].meta || {}).name_cn || s,
-    data: years.map(y => (G.companies[s].financials[y] || {}).mcu_revenue_musd ?? null),
-    backgroundColor: CO_COLORS[i % CO_COLORS.length],
-    stack:'mcu', spanGaps:false,
-  }));
-  const ctx = $('c-mcu').getContext('2d');
-  if (charts.mcu) charts.mcu.destroy();
-  charts.mcu = new Chart(ctx, {
-    type:'bar', data:{ labels:years.map(String), datasets },
-    options: cOpts({
-      scales:{
-        x:{ stacked:true, ticks:{font:{size:11,family:'Arial'}} },
-        y:{ stacked:true, ticks:{font:{size:11,family:'Arial'}},
-            title:{display:true, text:'M$', font:{size:11,family:'Arial'}} },
-      },
-      plugins:{
-        legend:{ position:'bottom', labels:{font:{size:11,family:'Arial'},boxWidth:11,padding:6} },
-        tooltip:{ callbacks:{ label:c =>
-          `${c.dataset.label}: ${c.parsed.y != null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}` } },
-      },
-    }),
-  });
-}
+// ── Grouped chart helper: companies on X, one dataset per year ─────────────
+function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
+  const years = Object.keys(YEAR_PAL).map(Number).filter(y => (G.years||[]).includes(y));
+  const ss    = syms();
+  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const dark  = document.documentElement.dataset.theme === 'dark';
+  const tick  = dark ? '#7d94b3' : '#8191a5';
+  const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
-function renderRev(year) {
-  const ss = syms();
-  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
-  const ctx = $('c-rev').getContext('2d');
-  if (charts.rev) charts.rev.destroy();
-  charts.rev = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[
-      { label:'总营收', data:ss.map(s => (G.companies[s].financials[year]||{}).total_revenue_musd??null),
-        backgroundColor:'#9dd9f2', spanGaps:false },
-      { label:'MCU营收', data:ss.map(s => (G.companies[s].financials[year]||{}).mcu_revenue_musd??null),
-        backgroundColor:'#03234b', spanGaps:false },
-    ]},
-    options: cOpts({
-      plugins:{ tooltip:{ callbacks:{ label:c =>
-        `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}` } } },
-    }),
-  });
-}
-
-function renderRD(year) {
-  const ss = syms();
-  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
-  const ctx = $('c-rd').getContext('2d');
-  if (charts.rd) charts.rd.destroy();
-  charts.rd = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[{
-      label:'研发率%',
-      data:ss.map(s => (G.companies[s].financials[year]||{}).rd_pct??null),
-      backgroundColor:'#1a8a4e', spanGaps:false,
-    }]},
-    options: cOpts({
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c =>
-        `研发率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } } },
-      scales:{ y:{ ticks:{ callback:v => v+'%' } } },
-    }),
-  });
-}
-
-function renderGM(year) {
-  const ss = syms();
-  const labels = ss.map(s => (G.companies[s].meta || {}).name_cn || s);
-  const ctx = $('c-gm').getContext('2d');
-  if (charts.gm) charts.gm.destroy();
-  charts.gm = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[{
-      label:'毛利率%',
-      data:ss.map(s => (G.companies[s].financials[year]||{}).gross_margin_pct??null),
-      backgroundColor:'#ec409e', spanGaps:false,
-    }]},
-    options: cOpts({
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c =>
-        `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}` } } },
-      scales:{ y:{ ticks:{ callback:v => v+'%' } } },
-    }),
-  });
-}
-
-function renderCompChart() {
-  const years = (G.years || []).filter(y => y >= 2018);
-  const ss = syms();
-  const labels = ss.map(s => {
-    const m = G.companies[s].meta || {};
-    return m.name_en || m.name_cn || s;
-  });
-
-  // One revenue bar dataset per year
-  const YEAR_PALETTE = [
-    '#9dd9f2','#6dc7ec','#3cb4e6','#0a7ec2',
-    '#03234b','#425a78','#8191a5','#c0c8d2',
-  ];
-  const revDatasets = years.map((y, i) => ({
-    type:'bar',
+  const datasets = years.map(y => ({
     label: String(y),
-    data: ss.map(s => (G.companies[s].financials[y]||{}).mcu_revenue_musd ?? null),
-    backgroundColor: YEAR_PALETTE[i % YEAR_PALETTE.length],
-    yAxisID:'y', spanGaps:false,
+    data:  ss.map(s => (G.companies[s].financials[y]||{})[field] ?? null),
+    backgroundColor: YEAR_PAL[y],
+    // highlight current year with full opacity, others slightly transparent
+    borderWidth: y === 2024 ? 2 : 0,
+    borderColor: y === 2024 ? '#fff' : undefined,
+    spanGaps: false,
   }));
 
-  // Gross margin line: latest year with data per company
-  const gmData = ss.map(s => {
-    const fin = G.companies[s].financials || {};
-    for (const y of [...years].reverse()) {
-      const gm = (fin[y]||{}).gross_margin_pct;
-      if (gm != null) return gm;
-    }
-    return null;
+  const ctx = $(canvasId).getContext('2d');
+  if (charts[key]) charts[key].destroy();
+  charts[key] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:11,family:'Arial'}, boxWidth:12, color:tick, padding:8 } },
+        tooltip:{ callbacks:{ label: c =>
+          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+tooltipSuffix : 'N/A'}` } },
+      },
+      scales:{
+        x:{ ticks:{ font:{size:11,family:'Arial'}, color:tick, maxRotation:30 }, grid:{ color:grid } },
+        y:{ ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
+      },
+    },
   });
-  const gmDataset = {
-    type:'line',
-    label:'毛利率% (最新年)',
-    data: gmData,
-    borderColor:'#ffd200',
-    backgroundColor:'transparent',
-    yAxisID:'y1',
-    tension:0.3, spanGaps:true,
-    pointRadius:4, pointBackgroundColor:'#ffd200', borderWidth:2,
-  };
+}
 
-  const dark = document.documentElement.dataset.theme === 'dark';
-  const tick = dark ? '#7d94b3' : '#8191a5';
-  const grid = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+// ── Stacked chart: years on X, companies as segments ──────────────────────
+function renderStacked() {
+  const years = (G.years||[]).filter(y => y >= 2018);
+  const ss    = syms();
+  const dark  = document.documentElement.dataset.theme === 'dark';
+  const tick  = dark ? '#7d94b3' : '#8191a5';
+  const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
-  const ctx = $('c-comp').getContext('2d');
-  if (charts.comp) charts.comp.destroy();
-  charts.comp = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[...revDatasets, gmDataset] },
+  const datasets = ss.map((s, i) => ({
+    label: (G.companies[s].meta||{}).name_cn || s,
+    data:  years.map(y => (G.companies[s].financials[y]||{}).mcu_revenue_musd ?? null),
+    backgroundColor: CO_COLORS[i],
+    stack: 'a', spanGaps: false,
+  }));
+
+  // per-year totals for datalabels-style annotation via tooltip
+  const yearTotals = years.map(y =>
+    ss.reduce((sum, s) => sum + ((G.companies[s].financials[y]||{}).mcu_revenue_musd || 0), 0)
+  );
+
+  const ctx = $('c-stacked').getContext('2d');
+  if (charts.stacked) charts.stacked.destroy();
+  charts.stacked = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: years.map(String), datasets },
     options:{
       responsive:true, maintainAspectRatio:false, animation:false,
       plugins:{
-        legend:{ position:'bottom', labels:{ font:{size:11,family:'Arial'}, boxWidth:11, color:tick, padding:6 } },
-        tooltip:{ callbacks:{ label: c => {
-          if (c.dataset.yAxisID === 'y1')
-            return `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
-          return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}`;
-        }}},
+        legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:10, color:tick, padding:5 } },
+        tooltip:{
+          callbacks:{
+            label: c => `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}`,
+            afterBody: ctx2 => {
+              const yi = ctx2[0]?.dataIndex;
+              if (yi != null) return [`合计: ${yearTotals[yi].toFixed(0)} M$`];
+              return [];
+            },
+          },
+        },
       },
       scales:{
-        x:{ ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
-        y:{ ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
-        y1:{
-          position:'right', display:true,
-          grid:{ drawOnChartArea:false },
-          ticks:{ font:{size:11,family:'Arial'}, color:'#ffd200', callback: v => v+'%' },
-          title:{ display:true, text:'毛利率%', font:{size:11,family:'Arial'}, color:'#ffd200' },
-          min:0, max:80,
-        },
+        x:{ stacked:true, ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
+        y:{ stacked:true, ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
       },
     },
   });
@@ -1136,12 +1115,11 @@ async function loadData() {
       renderTable(+sel.value, e.target.value)
     );
 
-    // Year change
+    // Year change — charts are all-years so no re-render needed; only table + pipeline
     sel.addEventListener('change', () => {
       const y = +sel.value;
       renderPipeline(G, y);
       renderTable(y, $('search').value);
-      renderRev(y); renderGM(y); renderRD(y);
       if (_currentDetailSym && $('detail-panel').classList.contains('open'))
         _updateDetailMetrics(_currentDetailSym, y);
     });
@@ -1149,17 +1127,13 @@ async function loadData() {
     // Initial render
     renderPipeline(G, defYear);
     renderTable(defYear, '');
-    renderMCU();
-    renderCompChart();
-    renderRev(defYear);
-    renderGM(defYear);
-    renderRD(defYear);
+    renderGroupedByYear('c-total-rev', 'totalRev', 'total_revenue_musd', ' M$');
+    renderGroupedByYear('c-mcu-grp',   'mcuGrp',   'mcu_revenue_musd',   ' M$');
+    renderStacked();
 
-    watchResize('c-mcu',  'mcu');
-    watchResize('c-comp', 'comp');
-    watchResize('c-rev',  'rev');
-    watchResize('c-gm',   'gm');
-    watchResize('c-rd',   'rd');
+    watchResize('c-total-rev', 'totalRev');
+    watchResize('c-mcu-grp',   'mcuGrp');
+    watchResize('c-stacked',   'stacked');
 
     applyChartTheme();
 
