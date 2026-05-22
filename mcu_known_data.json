@@ -218,6 +218,43 @@
       "source": "纳思达2025年报第20页分产品营业收入表 — Gemini提取"
     }
   },
+  "300077": {
+    "_source": "国民技术港股招股书2026年3月，附录一会计师报告（审计）及附录二B初步财务数据",
+    "_note": "口径=芯片产品收入（通用MCU+专业市场芯片+BMS+RF），非纯MCU；2025年为未经审核初步数据",
+    "_mcu_estimate_2024": "灼识咨询：按2024年MCU收入，国民技术在中国平台类MCU排名第5，约5亿元，占芯片产品收入约90%",
+    "2022": {
+      "mcu_revenue_yuan": 457891000,
+      "mcu_gross_margin": 0.449,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术港股招股书2026年3月 附录一会计师报告第19-20页（审计）",
+      "note": "毛利率含存货撇减（撇减前46.4%，撇减后44.9%）；芯片产品占总收入38.3%"
+    },
+    "2023": {
+      "mcu_revenue_yuan": 416716000,
+      "mcu_gross_margin": 0.086,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术港股招股书2026年3月 附录一会计师报告第19-20页（审计）",
+      "note": "2023年存货大幅撇减（1.23亿元），导致毛利率从27%降至8.6%；芯片占总收入40.2%"
+    },
+    "2024": {
+      "mcu_revenue_yuan": 555724000,
+      "mcu_gross_margin": 0.238,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术港股招股书2026年3月 附录一及附录二B第384页（审计）",
+      "note": "附录二B直接披露：芯片产品555,724千元；芯片占总收入47.6%；灼识咨询：纯MCU约5亿≈90%"
+    },
+    "2025": {
+      "mcu_revenue_yuan": 631868000,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术港股招股书2026年3月 附录二B第384页（未经审核初步数据）",
+      "note": "未经审核初步财务数据；芯片产品631,868千元；全年净亏损1.176亿元"
+    }
+  },
   "300327": {
     "2019": {
       "mcu_revenue_yuan": 779104990.85,

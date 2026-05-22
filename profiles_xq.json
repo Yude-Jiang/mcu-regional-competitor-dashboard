@@ -68,12 +68,12 @@
     "foundry": ["SMIC"],
     "employees": null,
     "employees_year": 2024,
-    "mcu_revenue_scope": "通用MCU收入估算（约占总收入27%，来源IR活动记录表；年报未拆分MCU vs 安全芯片；注意：图表MCU Weight%列=51%为MCU+安全芯片合计，与Revenue列口径不同）",
-    "mcu_revenue_confidence": "low",
+    "mcu_revenue_scope": "芯片产品收入（港股招股书2026年3月首次审计披露；含通用MCU+专业市场芯片+BMS芯片+RF芯片；纯通用MCU约占90%；来源：灼识咨询2024年排名）",
+    "mcu_revenue_confidence": "medium",
     "auto_mcu_status": "pilot",
     "auto_mcu_note": "N32G45x系列小批量试产，车规研发投入3.5亿，无规模收入",
-    "source_updated": "2025-04-17",
-    "source_url": "https://www.cninfo.com.cn/new/disclosure/detail?stockCode=300077"
+    "source_updated": "2026-03-13",
+    "source_url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0313/2026031300050_c.pdf"
   },
   {
     "symbol": "688279",
