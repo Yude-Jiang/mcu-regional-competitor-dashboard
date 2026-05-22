@@ -145,21 +145,25 @@ def list_gcs_pdfs(symbol: str | None = None, year: int | None = None) -> list[di
             continue
 
         yr_match = re.match(r"^(20\d{2})", filename)
-        if not yr_match:
+        is_prospectus = any(k in filename for k in ["招募书", "招股书", "prospectus", "IPO"])
+        if not yr_match and not is_prospectus:
             continue
-        yr = int(yr_match.group(1))
-        if year and yr != year:
-            continue
-
-        period = "年报"
-        for p in ["一季报","半年报","三季报"]:
-            if p in filename:
-                period = p
-                break
-
-        # Skip quarterly reports for MCU extraction (annual reports have segment tables)
-        if period != "年报":
-            continue
+        if is_prospectus:
+            yr = 0  # year unknown for prospectus
+            period = "招募书"
+            if year:  # --year filter skips prospectus
+                continue
+        else:
+            yr = int(yr_match.group(1))
+            if year and yr != year:
+                continue
+            period = "年报"
+            for p in ["一季报","半年报","三季报"]:
+                if p in filename:
+                    period = p
+                    break
+            if period != "年报":
+                continue
 
         results.append({
             "symbol":      sym,
