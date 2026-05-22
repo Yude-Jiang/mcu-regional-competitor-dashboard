@@ -99,7 +99,6 @@ def _merge_financials(bq, row: dict) -> None:
         @filing_status        AS filing_status,
         @filing_date          AS filing_date,
         @data_coverage        AS data_coverage,
-        @fx_rate_cny_usd      AS fx_rate_cny_usd,
         @mcu_gross_margin     AS mcu_gross_margin,
         CAST(@akshare_updated_at AS TIMESTAMP)  AS akshare_updated_at,
         CAST(@updated_at AS TIMESTAMP)          AS updated_at
@@ -130,7 +129,6 @@ def _merge_financials(bq, row: dict) -> None:
         filing_status      = COALESCE(S.filing_status,     T.filing_status),
         filing_date        = COALESCE(S.filing_date,       T.filing_date),
         data_coverage      = COALESCE(S.data_coverage,     T.data_coverage),
-        fx_rate_cny_usd    = COALESCE(S.fx_rate_cny_usd,   T.fx_rate_cny_usd),
         mcu_gross_margin   = COALESCE(S.mcu_gross_margin,   T.mcu_gross_margin),
         akshare_updated_at = S.akshare_updated_at,
         updated_at         = S.updated_at
@@ -169,7 +167,6 @@ def _merge_financials(bq, row: dict) -> None:
         ScalarQueryParameter("filing_status",     "STRING",  row.get("filing_status")),
         ScalarQueryParameter("filing_date",       "STRING",  row.get("filing_date")),
         ScalarQueryParameter("data_coverage",     "FLOAT64", row.get("data_coverage")),
-        ScalarQueryParameter("fx_rate_cny_usd",   "FLOAT64", row.get("fx_rate_cny_usd")),
         ScalarQueryParameter("mcu_gross_margin",  "FLOAT64", row.get("mcu_gross_margin")),
         ScalarQueryParameter("akshare_updated_at","STRING",  _now()),
         ScalarQueryParameter("updated_at",        "STRING",  _now()),

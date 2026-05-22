@@ -763,6 +763,8 @@ def main() -> None:
                         help="Read PDFs from local directory instead of GCS")
     parser.add_argument("--no-update-json", action="store_true",
                         help="Skip updating mcu_known_data.json")
+    parser.add_argument("--debug", action="store_true",
+                        help="Set log level to DEBUG (shows raw LLM responses on parse failure)")
     parser.add_argument("--model", choices=["deepseek", "gemini", "gemini-native"],
                         default="gemini-native",
                         help=(
@@ -782,6 +784,9 @@ def main() -> None:
             "  export VITE_DEEPSEEK_API_KEY=sk-...\n"
             "  export GEMINI_API_KEY=AIza..."
         )
+
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     _llm_model = "gemini-3.5-flash" if args.model in ("gemini", "gemini-native") else "deepseek-chat"
     log.info("API: %s%s  pipeline=%s  llm=%s",
