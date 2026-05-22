@@ -814,31 +814,42 @@ def main() -> None:
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
 
     if args.local:
-        # Local mode: scan local directory
-        local_dir = Path(args.local)
+        local_path = Path(args.local)
         pdfs = []
-        for folder in sorted(local_dir.iterdir()):
-            if not folder.is_dir():
-                continue
-            sym_m = re.match(r"^(\d{6})", folder.name)
-            if not sym_m or sym_m.group(1) not in EXTRACT_TARGETS:
-                continue
-            sym = sym_m.group(1)
-            if args.symbol and sym != args.symbol:
-                continue
-            for pdf in sorted(folder.glob("*.pdf")) + sorted(folder.glob("*.PDF")):
-                yr_m = re.match(r"^(20\d{2})", pdf.name)
-                if not yr_m:
+
+        if local_path.is_file():
+            # Single-file mode: --local /path/to/file.pdf --symbol XXXXXX [--year YYYY]
+            if not args.symbol:
+                sys.exit("--local <file> requires --symbol XXXXXX")
+            yr = args.year or 0  # 0 = unknown year, pipeline will still run
+            pdfs.append({
+                "symbol": args.symbol, "year": yr, "report_type": "招募书",
+                "local_path": str(local_path),
+            })
+        else:
+            # Directory mode: scan subdirs named XXXXXX_*
+            for folder in sorted(local_path.iterdir()):
+                if not folder.is_dir():
                     continue
-                yr = int(yr_m.group(1))
-                if args.year and yr != args.year:
+                sym_m = re.match(r"^(\d{6})", folder.name)
+                if not sym_m or sym_m.group(1) not in EXTRACT_TARGETS:
                     continue
-                if "一季报" in pdf.name or "半年报" in pdf.name or "三季报" in pdf.name:
+                sym = sym_m.group(1)
+                if args.symbol and sym != args.symbol:
                     continue
-                pdfs.append({
-                    "symbol": sym, "year": yr, "report_type": "年报",
-                    "local_path": str(pdf),
-                })
+                for pdf in sorted(folder.glob("*.pdf")) + sorted(folder.glob("*.PDF")):
+                    yr_m = re.match(r"^(20\d{2})", pdf.name)
+                    if not yr_m:
+                        continue
+                    yr = int(yr_m.group(1))
+                    if args.year and yr != args.year:
+                        continue
+                    if "一季报" in pdf.name or "半年报" in pdf.name or "三季报" in pdf.name:
+                        continue
+                    pdfs.append({
+                        "symbol": sym, "year": yr, "report_type": "年报",
+                        "local_path": str(pdf),
+                    })
         source = "local"
     else:
         # GCS mode
