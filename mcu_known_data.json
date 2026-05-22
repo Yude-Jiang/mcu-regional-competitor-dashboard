@@ -322,22 +322,22 @@
       "source": "芯海科技2022年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
     },
     "2023": {
-      "mcu_revenue_yuan": 348405000,
-      "data_type": "reported",
-      "confidence": "medium",
-      "source": "芯海科技2023年报 MCU芯片19,461.46万 + 健康测量AIoT芯片15,379.04万（年报管理层讨论章节，两行之和）"
-    },
-    "2024": {
-      "mcu_revenue_yuan": 508264000,
+      "mcu_revenue_yuan": 194614600,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2024年报 MCU芯片32,622.84万 + AIoT芯片18,203.56万（年报管理层讨论章节，两行之和）"
+      "source": "芯海科技2023年报 管理层讨论「MCU芯片2023年实现销售19,461.46万元」"
+    },
+    "2024": {
+      "mcu_revenue_yuan": 326228400,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "芯海科技2024年报 管理层讨论「MCU芯片2024年度实现销售32,622.84万元，较上年增长67.63%」"
     },
     "2025": {
-      "mcu_revenue_yuan": 523032700,
+      "mcu_revenue_yuan": 339862396,
       "data_type": "reported",
-      "confidence": "medium",
-      "source": "芯海科技2025年报管理层讨论章节「MCU和AIoT芯片实现销售52,303.27万元，较上年增长2.91%」"
+      "confidence": "high",
+      "source": "芯海科技2025年报审计意见附注「MCU芯片业务营收339,862,395.82元，占营业收入40.05%」"
     }
   }
 }
