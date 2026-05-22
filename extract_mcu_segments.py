@@ -88,6 +88,7 @@ def get_secret(name: str, *aliases: str) -> str | None:
     env_candidates = [name.upper().replace("-", "_")] + list(aliases)
     for env_key in env_candidates:
         if v := os.environ.get(env_key):
+            log.debug("Key '%s' from env var %s (prefix: %s…)", name, env_key, v[:8])
             return v
     # Secret Manager candidates: name + aliases as secret ids
     secret_ids = [name] + list(aliases)
@@ -97,7 +98,10 @@ def get_secret(name: str, *aliases: str) -> str | None:
         for sid in secret_ids:
             try:
                 path = f"projects/{PROJECT}/secrets/{sid}/versions/latest"
-                return client.access_secret_version(name=path).payload.data.decode()
+                v = client.access_secret_version(name=path).payload.data.decode()
+                log.debug("Key '%s' from Secret Manager secret '%s' (prefix: %s…)",
+                          name, sid, v[:8])
+                return v
             except Exception:
                 continue
     except Exception as exc:
