@@ -350,6 +350,62 @@ footer {
 .dp-overlay.open { display:block; }
 body.panel-open .table-wrap { padding-right:328px; }
 
+/* ── Chart filter / sort bar ── */
+.chart-ctrl {
+  display:flex; align-items:center; gap:14px; padding:7px 20px; flex-shrink:0;
+  background:var(--bg-2); border-bottom:2px solid var(--border);
+  flex-wrap:wrap; min-height:42px;
+}
+.chart-ctrl-lbl {
+  font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
+  text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
+}
+.chart-ctrl-sep { width:1px; height:20px; background:var(--border-b); flex-shrink:0; }
+.chart-ctrl-grp { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* Year pill toggles */
+.yr-toggles, .co-toggles { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.yr-pill {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 8px; border-radius:10px; border:1px solid transparent;
+  font:600 var(--fz-2xs)/1 var(--font); cursor:pointer;
+  transition:opacity .15s, transform .1s; user-select:none;
+}
+.yr-pill:hover { transform:scale(1.06); }
+.yr-pill.off { opacity:.25; filter:grayscale(.7); }
+.yr-pill .yd { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* Company pill toggles */
+.co-pill {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 7px; border-radius:10px; border:1.5px solid transparent;
+  font:600 var(--fz-2xs)/1 var(--font); cursor:pointer;
+  transition:opacity .15s, transform .1s; user-select:none; background:var(--bg-3);
+}
+.co-pill:hover { transform:scale(1.06); }
+.co-pill.off { opacity:.25; filter:grayscale(.7); }
+.co-pill .cd { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* All/reset buttons */
+.yr-all-btn {
+  padding:3px 9px; border-radius:10px; border:1px solid var(--border-b);
+  background:var(--bg-1); color:var(--text-dim); font:600 var(--fz-2xs)/1 var(--font);
+  cursor:pointer; transition:background .1s; white-space:nowrap;
+}
+.yr-all-btn:hover { background:var(--border-b); }
+
+/* Sort direction button */
+.sort-dir-btn {
+  padding:4px 10px; border-radius:3px; border:1px solid var(--border-b);
+  background:var(--bg-1); color:var(--text-dim); font:600 var(--fz-2xs)/1 var(--font);
+  cursor:pointer; white-space:nowrap; transition:background .1s;
+}
+.sort-dir-btn:hover { background:var(--cyan-1); color:var(--navy-1); border-color:var(--cyan-1); }
+.sort-dir-btn.asc { background:rgba(60,180,230,.12); color:var(--cyan-1); border-color:var(--cyan-1); }
+
+/* Hide sort year when sorting by name */
+#chart-sort-year.hidden { display:none; }
+
 /* ── Chart section (cs) ── */
 .cs-wrap {
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
@@ -377,7 +433,7 @@ body.panel-open .table-wrap { padding-right:328px; }
 
 /* ── Dual chart row ── */
 .chart-dual {
-  display:grid; grid-template-columns:1fr 340px;
+  display:grid; grid-template-columns:1fr 1fr;
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
 }
 .chart-dual-main { border-right:1px solid var(--border); min-width:0; }
@@ -465,6 +521,32 @@ body.panel-open .table-wrap { padding-right:328px; }
     <span><span class="dot dd">●</span>推算（高置信）</span>
     <span><span class="dot dp">●</span>待补充</span>
     <span><span class="dot du">●</span>缺失</span>
+  </div>
+</div>
+
+<!-- ── Chart filter / sort bar ── -->
+<div class="chart-ctrl" id="chart-ctrl-bar">
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl">年份</span>
+    <div class="yr-toggles" id="yr-toggles"></div>
+    <button class="yr-all-btn" id="yr-all-btn">全部</button>
+  </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl">排序</span>
+    <select class="ctrl-sel" id="chart-sort-field">
+      <option value="mcu" selected>MCU 营收</option>
+      <option value="rev">总营收</option>
+      <option value="name">公司名</option>
+    </select>
+    <select class="ctrl-sel" id="chart-sort-year"></select>
+    <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向">↓ 降序</button>
+  </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl">公司</span>
+    <div class="co-toggles" id="co-toggles"></div>
+    <button class="yr-all-btn" id="co-all-btn">全部</button>
   </div>
 </div>
 
@@ -616,6 +698,126 @@ const CO_COLORS = [
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
 let _currentDetailSym = null;
 const $ = id => document.getElementById(id);
+
+// ── Chart filter state ────────────────────────────────────────────────────
+const CF = {
+  years:     new Set([2018,2019,2020,2021,2022,2023,2024,2025]),
+  companies: new Set(ORDER),
+  sortField: 'mcu',   // 'mcu' | 'rev' | 'name'
+  sortYear:  2024,
+  sortDir:   'desc',
+};
+
+function cfYears()  { return Object.keys(YEAR_PAL).map(Number).filter(y => CF.years.has(y) && (G?.years||[]).includes(y)); }
+function cfSyms()   {
+  let ss = ORDER.filter(s => G?.companies[s] && CF.companies.has(s));
+  if (CF.sortField === 'name') {
+    ss = ss.slice().sort((a,b) => {
+      const na = (G.companies[a].meta||{}).name_cn||a;
+      const nb = (G.companies[b].meta||{}).name_cn||b;
+      return CF.sortDir === 'asc' ? na.localeCompare(nb,'zh') : nb.localeCompare(na,'zh');
+    });
+  } else {
+    const field = CF.sortField === 'mcu' ? 'mcu_revenue_musd' : 'total_revenue_musd';
+    ss = ss.slice().sort((a,b) => {
+      const va = (G.companies[a].financials?.[CF.sortYear]||{})[field] ?? -1/0;
+      const vb = (G.companies[b].financials?.[CF.sortYear]||{})[field] ?? -1/0;
+      return CF.sortDir === 'asc' ? va - vb : vb - va;
+    });
+  }
+  return ss;
+}
+
+function rerenderCharts() {
+  renderGroupedByYear('c-total-rev','totalRev','total_revenue_musd',' M$');
+  renderGroupedByYear('c-mcu-grp',  'mcuGrp',  'mcu_revenue_musd',  ' M$');
+  renderStacked();
+}
+
+// ── Chart control bar init ────────────────────────────────────────────────
+function initChartCtrl() {
+  const years = Object.keys(YEAR_PAL).map(Number).filter(y => (G.years||[]).includes(y));
+
+  // Year pills
+  const yrWrap = $('yr-toggles');
+  yrWrap.innerHTML = '';
+  years.forEach(y => {
+    const col = YEAR_PAL[y];
+    const pill = document.createElement('button');
+    pill.className = 'yr-pill';
+    pill.dataset.year = y;
+    pill.style.cssText = `background:${col};color:${y===2020||y===2025?'#03234b':'#fff'};border-color:${col}`;
+    pill.innerHTML = `<span class="yd" style="background:#fff;opacity:.7"></span>${y}`;
+    pill.addEventListener('click', () => {
+      if (CF.years.has(y)) { CF.years.delete(y); pill.classList.add('off'); }
+      else                  { CF.years.add(y);    pill.classList.remove('off'); }
+      rerenderCharts();
+    });
+    yrWrap.appendChild(pill);
+  });
+  $('yr-all-btn').addEventListener('click', () => {
+    const allOn = CF.years.size === years.length;
+    if (allOn) { CF.years.clear(); document.querySelectorAll('.yr-pill').forEach(p => p.classList.add('off')); }
+    else { years.forEach(y => CF.years.add(y)); document.querySelectorAll('.yr-pill').forEach(p => p.classList.remove('off')); }
+    rerenderCharts();
+  });
+
+  // Company pills
+  const coWrap = $('co-toggles');
+  coWrap.innerHTML = '';
+  ORDER.filter(s => G.companies[s]).forEach((s, i) => {
+    const col = CO_COLORS[i];
+    const name = (G.companies[s].meta||{}).name_cn || s;
+    const pill = document.createElement('button');
+    pill.className = 'co-pill';
+    pill.dataset.sym = s;
+    pill.style.borderColor = col;
+    pill.innerHTML = `<span class="cd" style="background:${col}"></span>${name}`;
+    pill.addEventListener('click', () => {
+      if (CF.companies.has(s)) { CF.companies.delete(s); pill.classList.add('off'); }
+      else                      { CF.companies.add(s);    pill.classList.remove('off'); }
+      rerenderCharts();
+    });
+    coWrap.appendChild(pill);
+  });
+  $('co-all-btn').addEventListener('click', () => {
+    const ss = ORDER.filter(s => G.companies[s]);
+    const allOn = CF.companies.size === ss.length;
+    if (allOn) { CF.companies.clear(); document.querySelectorAll('.co-pill').forEach(p => p.classList.add('off')); }
+    else { ss.forEach(s => CF.companies.add(s)); document.querySelectorAll('.co-pill').forEach(p => p.classList.remove('off')); }
+    rerenderCharts();
+  });
+
+  // Sort year dropdown — populate with available years, descending
+  const sortYrSel = $('chart-sort-year');
+  sortYrSel.innerHTML = '';
+  [...years].reverse().forEach(y => {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    if (y === 2024) o.selected = true;
+    sortYrSel.appendChild(o);
+  });
+
+  // Sort field change
+  $('chart-sort-field').addEventListener('change', e => {
+    CF.sortField = e.target.value;
+    $('chart-sort-year').classList.toggle('hidden', CF.sortField === 'name');
+    rerenderCharts();
+  });
+  $('chart-sort-year').addEventListener('change', e => {
+    CF.sortYear = +e.target.value;
+    rerenderCharts();
+  });
+
+  // Sort direction toggle
+  const dirBtn = $('chart-sort-dir');
+  dirBtn.addEventListener('click', () => {
+    CF.sortDir = CF.sortDir === 'desc' ? 'asc' : 'desc';
+    dirBtn.textContent = CF.sortDir === 'desc' ? '↓ 降序' : '↑ 升序';
+    dirBtn.classList.toggle('asc', CF.sortDir === 'asc');
+    rerenderCharts();
+  });
+}
 
 // ── Theme ─────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -822,8 +1024,8 @@ function syms() { return ORDER.filter(s => G.companies[s]); }
 
 // ── Grouped chart helper: companies on X, one dataset per year ─────────────
 function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
-  const years = Object.keys(YEAR_PAL).map(Number).filter(y => (G.years||[]).includes(y));
-  const ss    = syms();
+  const years  = cfYears();
+  const ss     = cfSyms();
   const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
   const dark  = document.documentElement.dataset.theme === 'dark';
   const tick  = dark ? '#7d94b3' : '#8191a5';
@@ -861,16 +1063,16 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
 
 // ── Stacked chart: years on X, companies as segments ──────────────────────
 function renderStacked() {
-  const years = (G.years||[]).filter(y => y >= 2018);
-  const ss    = syms();
+  const years = cfYears();
+  const ss    = cfSyms();
   const dark  = document.documentElement.dataset.theme === 'dark';
   const tick  = dark ? '#7d94b3' : '#8191a5';
   const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
-  const datasets = ss.map((s, i) => ({
+  const datasets = ss.map(s => ({
     label: (G.companies[s].meta||{}).name_cn || s,
     data:  years.map(y => (G.companies[s].financials[y]||{}).mcu_revenue_musd ?? null),
-    backgroundColor: CO_COLORS[i],
+    backgroundColor: CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length],
     stack: 'a', spanGaps: false,
   }));
 
@@ -1127,6 +1329,7 @@ async function loadData() {
     // Initial render
     renderPipeline(G, defYear);
     renderTable(defYear, '');
+    initChartCtrl();
     renderGroupedByYear('c-total-rev', 'totalRev', 'total_revenue_musd', ' M$');
     renderGroupedByYear('c-mcu-grp',   'mcuGrp',   'mcu_revenue_musd',   ' M$');
     renderStacked();
