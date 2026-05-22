@@ -84,7 +84,6 @@
       "confidence": "high",
       "source": "普冉股份2025年报 MCU产品线 — LLM提取自PDF，¥53200万"
     },
-    "_todo_2018_2021": "招股书（2022年上市）含2019-2021历史MCU数据，待extract_mcu_segments.py读取招股书PDF补全"
   },
   "688385": {
     "2021": {
