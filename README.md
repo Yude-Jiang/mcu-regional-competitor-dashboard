@@ -96,6 +96,61 @@ python extract_mcu_segments.py
 
 ## 运维日志
 
+### 2026-05-22 — 数据覆盖扩张 + 质检脚本 + 300077港股招股书录入
+
+#### 完成内容
+
+1. **check_extraction.py**：新增自动数据质检脚本，五项检验（MCU/总营收比值、同比异常、毛利率范围、跨年变异系数、低置信度标记），exit 0=通过，exit 1=硬错误（MCU>总营收）
+2. **002180 纳思达**：从 Colab 提取 2018/2019/2021/2022/2023/2025 六年极海芯片产品线数据（2020年提取失败，暂缺）
+3. **300327 中颖电子**：从 Colab 提取 2019-2022 四年工业控制产品数据（2023/2024年提取失败，但已有手工录入，无影响）
+4. **688766 普冉股份**：确认2022年上市，放弃追溯上市前数据
+5. **688595 芯海科技**：SYSTEM_PROMPT 加专项提示，待下次 Colab 运行提取
+6. **300077 国民技术 MCU数据**：
+   - 8年年报全部确认无MCU独立分产品表（「芯片类产品」始终合并披露）
+   - 从港股招股书（2026年3月）录入2022-2025年芯片产品收入，置信度 low → medium
+   - Dashboard 口径提醒加橙色警告标注，注明来自2026年H股招股说明书
+7. **extract_mcu_segments.py 两处修复**：
+   - `--local` 支持单文件（之前只接受目录）
+   - `list_gcs_pdfs` 支持自动识别「招募书/招股书/IPO」类PDF（不过滤年份前缀）
+
+**MCU数据点总数：52 → 66（+14）**
+
+#### 经验与教训
+
+**Colab Git 操作注意事项**
+- Colab 无法直接 `git push` GitHub（HTTPS需PAT，SSH未配置）；最稳妥方式：在 Colab 里 `print(open("mcu_known_data.json").read())` 把内容复制给 Claude Code 手动合并
+- `git pull --rebase` 前必须先 `git stash`，否则报 "unstaged changes"
+- Colab 有未提交本地 commit 时执行 `git pull`，遇到分叉（divergent branches）用 `git pull --rebase origin <branch>`；若 rebase 产生冲突且该 commit 已在远端合并，用 `git rebase --skip` 跳过
+- `git checkout HEAD -- <file>` 可快速还原有冲突标记的文件
+
+**fetch_mcu_data.py 在隔离环境中的风险**
+- 远端 Claude Code 环境无法访问 AKShare（东方财富服务），`fetch_profit_sheet` 返回空 dict
+- 空结果时脚本会**清空 data.json 中的 financials**（overwrite 而非 merge）
+- 规避方法：隔离环境里用 `git checkout HEAD -- data.json` 还原，再用 Python 脚本手动 patch 字段，不要跑完整的 `fetch_mcu_data.py`
+
+**GCS 路径约定（重要）**
+- 实际文件夹命名为 `{symbol}_{company_cn}/`（如 `300077_国民技术/`），不是只有6位代码
+- 招募书文件名不以年份（`20XX`）开头，旧版 `list_gcs_pdfs` 会跳过；已修复
+
+**招股书数据单位陷阱**
+- 港股招股书附录财务数据通常以**千元（RMB thousands）**列示
+- 本次指令文件将"555,724千元"误处理为"5,557,240元×1000 = 5,557,240,000元"，多了10倍
+- **验证方法**：将 yuan 值除以汇率除以1,000,000，对比已知 M$ 数字；若相差10倍即为单位错误
+- AKShare 的 `total_revenue_yuan` 可作为总收入的交叉验证基准
+
+**validate_data.py 的 mcu_strategy 白名单**
+- `VALID_MCU_STRATEGY` 在 validate_data.py 第23行硬编码，新增策略必须同步加入白名单
+- 当前合法值：`segment_reported / segment_industrial / segment_estimated / total_proxy / estimated / subsidiary_geehy / na`
+- 建议：新口径优先复用现有策略名（如招股书数据用 `segment_reported`），避免白名单漏加导致 FAIL
+
+**300077 国民技术 MCU口径（历史结论存档）**
+- A股年报2018-2025：始终将MCU、安全芯片、BMS、RF合并为「芯片类产品」，永远不拆分
+- 2019年年报明确说明通用MCU"处于验证与测试阶段，尚未开始贡献经济效益"（即2019年MCU收入实际为零）
+- 港股招股书（2026年3月）为首次审计级披露，口径仍为「芯片产品」（非纯MCU）
+- 灼识咨询：2024年纯通用MCU约5亿元≈芯片产品收入的90%（这是目前唯一可引用的纯MCU估算）
+
+---
+
 ### 2026-05-21 — IR记录提取 + Gemini SDK迁移 + Vertex AI GCS路径
 
 #### 背景
