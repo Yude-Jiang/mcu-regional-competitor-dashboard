@@ -372,11 +372,73 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
         return None
 
 
-def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
-    """Vertex AI Gemini — read PDF directly from GCS URI, no download needed.
+def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
+                                 api_key: str) -> dict | None:
+    """GCS → BytesIO → Gemini Files API (全程Google内网，无需落盘，秒级完成).
 
-    Uses Application Default Credentials (ADC) via the official vertexai SDK
-    (v1 endpoint). In Cloud Shell, ADC is already configured.
+    适用于超大年报PDF：避免下载到Cloud Shell磁盘的慢速网络问题。
+    """
+    try:
+        import io
+        from google import genai
+        from google.cloud import storage
+    except ImportError:
+        return None
+
+    # Parse bucket + blob from gs:// URI
+    if not gcs_uri.startswith("gs://"):
+        return None
+    path = gcs_uri[5:]  # strip gs://
+    bucket_name, _, blob_name = path.partition("/")
+
+    prompt = (
+        f"{SYSTEM_PROMPT}\n\n"
+        f"公司：{company}  财年：{year}年\n\n"
+        "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
+    )
+    uploaded = None
+    try:
+        log.info("  Streaming PDF: GCS → BytesIO → Gemini Files API…")
+        gcs_client = storage.Client(project=PROJECT)
+        buf = io.BytesIO()
+        gcs_client.bucket(bucket_name).blob(blob_name).download_to_file(
+            buf, timeout=None
+        )
+        buf.seek(0)
+        log.info("  GCS download complete (%.1f MB)", buf.getbuffer().nbytes / 1e6)
+
+        client = genai.Client(api_key=api_key)
+        uploaded = client.files.upload(
+            file=buf,
+            config={"mime_type": "application/pdf"},
+        )
+        resp = client.models.generate_content(
+            model="gemini-3.5-flash",
+            contents=[uploaded, prompt],
+        )
+        raw = resp.text.strip()
+        raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
+        result = json.loads(raw)
+        result["_model"] = "gemini-3.5-flash-gcs-stream"
+        log.info("  GCS stream extraction complete")
+        return result
+
+    except Exception as exc:
+        log.warning("  GCS stream failed: %s", exc)
+        return None
+
+    finally:
+        if uploaded:
+            try:
+                genai.Client(api_key=api_key).files.delete(name=uploaded.name)
+            except Exception:
+                pass
+
+
+def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
+    """Vertex AI Gemini — read PDF directly from GCS URI via ADC (v1 endpoint).
+
+    Fallback for projects where Vertex AI Generative AI is enabled.
     """
     prompt = (
         f"{SYSTEM_PROMPT}\n\n"
@@ -486,14 +548,21 @@ def extract_with_llm(text: str, symbol: str, company_name: str,
     """Run LLM extraction. model_pref: 'deepseek' | 'gemini' | 'gemini-native'"""
 
     if model_pref in ("gemini", "gemini-native"):
-        # Path 1: Vertex AI reads GCS URI directly — fastest, no download/upload
+        # Path 1: GCS → BytesIO → Gemini Files API (Developer API key, 全程Google内网)
+        if gcs_uri and gemini_key:
+            result = call_gemini_stream_from_gcs(gcs_uri, company_name, year, gemini_key)
+            if result:
+                return result
+            log.info("  GCS stream failed, trying Vertex AI GCS URI…")
+
+        # Path 2: Vertex AI GCS URI (ADC, requires Vertex AI API enabled)
         if gcs_uri:
             result = call_gemini_gcs_uri(gcs_uri, company_name, year)
             if result:
                 return result
-            log.info("  Vertex AI GCS path failed, falling back to Files API upload…")
+            log.info("  Vertex AI GCS path failed, trying local Files API upload…")
 
-        # Path 2: Files API upload (local PDF)
+        # Path 3: Files API upload (local PDF already on disk)
         if gemini_key and pdf_path:
             result = call_gemini_native_pdf(pdf_path, company_name, year, gemini_key)
             if result:
@@ -738,43 +807,26 @@ def main() -> None:
             tmp_path = tmp.name
 
         try:
-            gcs_uri   = None
+            gcs_uri      = None
             need_cleanup = False
 
             if source == "local":
                 tmp_path = item["local_path"]
             else:
                 gcs_uri = f"gs://{BUCKET}/{item['blob_name']}"
-
-                # For gemini-native: try Vertex AI GCS path first (no download)
-                if args.model in ("gemini", "gemini-native"):
-                    log.info("Trying Vertex AI GCS URI (no download)…")
-                    success = process_one(
-                        pdf_path="",
-                        symbol=sym,
-                        year=yr,
-                        company_name=name,
-                        report_type=item["report_type"],
-                        deepseek_key=deepseek_key,
-                        gemini_key=gemini_key,
-                        update_json=not args.no_update_json,
-                        model_pref=args.model,
-                        gcs_uri=gcs_uri,
-                    )
-                    if success:
-                        ok += 1
+                # gemini-native: extract_with_llm will stream GCS→Gemini internally
+                # (Path 1: GCS stream; Path 2: Vertex AI; Path 3: local Files API)
+                # Only download to disk if text-based models (deepseek/gemini-text) are needed
+                if args.model not in ("gemini", "gemini-native"):
+                    log.info("Downloading %s…", item["gcs_path"])
+                    ok_dl = download_pdf(item["blob_name"], tmp_path)
+                    need_cleanup = True
+                    if not ok_dl:
+                        fail += 1
                         continue
-                    log.info("Vertex AI path failed — downloading PDF as fallback…")
-
-                log.info("Downloading %s…", item["gcs_path"])
-                ok_dl = download_pdf(item["blob_name"], tmp_path)
-                need_cleanup = True
-                if not ok_dl:
-                    fail += 1
-                    continue
 
             success = process_one(
-                pdf_path=tmp_path,
+                pdf_path=tmp_path if need_cleanup else "",
                 symbol=sym,
                 year=yr,
                 company_name=name,
