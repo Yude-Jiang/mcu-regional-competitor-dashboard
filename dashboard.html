@@ -959,7 +959,19 @@ function openDetail(sym) {
   } else {
     autoEl.style.display = 'none';
   }
-  $('dp-scope-note').textContent = prof.mcu_revenue_scope || '';
+  const scopeText = prof.mcu_revenue_scope || '';
+  const scopeEl = $('dp-scope-note');
+  scopeEl.textContent = scopeText;
+  if (scopeText.startsWith('⚠')) {
+    scopeEl.style.color = 'var(--yel-1, #d97706)';
+    scopeEl.style.background = 'rgba(217,119,6,.08)';
+    scopeEl.style.borderRadius = '4px';
+    scopeEl.style.padding = '4px 6px';
+  } else {
+    scopeEl.style.color = '';
+    scopeEl.style.background = '';
+    scopeEl.style.padding = '';
+  }
   const profileParts = [];
   if (prof.foundry && prof.foundry.length) profileParts.push(`晶圆厂: ${prof.foundry.join(' / ')}`);
   if (prof.core_ip && prof.core_ip.length) profileParts.push(`核心IP: ${prof.core_ip.join(', ')}`);
