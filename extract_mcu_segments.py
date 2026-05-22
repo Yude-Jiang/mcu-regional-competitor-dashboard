@@ -368,12 +368,40 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
                 response_mime_type="application/json",
             ),
         )
-        raw  = resp.text.strip()
-        raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-        return json.loads(raw)
+        raw = resp.text.strip()
+        try:
+            return _extract_json(raw)
+        except (ValueError, json.JSONDecodeError) as parse_exc:
+            log.warning("Gemini text call — JSON parse failed: %s", parse_exc)
+            log.debug("  Raw response (first 500 chars): %s", raw[:500])
+            return None
     except Exception as exc:
         log.warning("Gemini text call failed: %s", exc)
         return None
+
+
+def _extract_json(raw: str) -> dict:
+    """Robustly extract a JSON object from LLM response text.
+
+    Handles: bare JSON, ```json fences, prose before/after the object.
+    Raises ValueError if no valid JSON object found.
+    """
+    raw = raw.strip()
+    # 1. Direct parse
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        pass
+    # 2. Strip ``` fences (multiline, with or without 'json' tag)
+    fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
+    if fenced:
+        return json.loads(fenced.group(1))
+    # 3. Find the outermost { … } block greedily
+    brace_start = raw.find("{")
+    brace_end   = raw.rfind("}")
+    if brace_start != -1 and brace_end > brace_start:
+        return json.loads(raw[brace_start : brace_end + 1])
+    raise ValueError(f"No JSON object found in response (first 300 chars): {raw[:300]}")
 
 
 def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
@@ -430,8 +458,12 @@ def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
             ),
         )
         raw = resp.text.strip()
-        raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-        result = json.loads(raw)
+        try:
+            result = _extract_json(raw)
+        except (ValueError, json.JSONDecodeError) as parse_exc:
+            log.warning("  JSON parse failed: %s", parse_exc)
+            log.debug("  Raw response (first 500 chars): %s", raw[:500])
+            return None
         result["_model"] = "gemini-3.5-flash-inline"
         log.info("  Inline PDF extraction complete")
         return result
@@ -527,9 +559,13 @@ def call_gemini_native_pdf(pdf_path: str, company: str, year: int,
             model="gemini-3.5-flash",
             contents=[uploaded, prompt],
         )
-        raw  = resp.text.strip()
-        raw  = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-        result = json.loads(raw)
+        raw = resp.text.strip()
+        try:
+            result = _extract_json(raw)
+        except (ValueError, json.JSONDecodeError) as parse_exc:
+            log.warning("  Gemini native PDF — JSON parse failed: %s", parse_exc)
+            log.debug("  Raw response (first 500 chars): %s", raw[:500])
+            return None
         result["_model"] = "gemini-2.0-flash-native-pdf"
         log.info("  Gemini native PDF extraction complete")
         return result
@@ -569,11 +605,13 @@ def extract_with_llm(text: str, symbol: str, company_name: str,
             log.info("  Vertex AI GCS path failed, trying local Files API upload…")
 
         # Path 3: Files API upload (local PDF already on disk)
-        if gemini_key and pdf_path:
+        if gemini_key and pdf_path and Path(pdf_path).exists():
             result = call_gemini_native_pdf(pdf_path, company_name, year, gemini_key)
             if result:
                 return result
             log.info("  Gemini native PDF failed, falling back to text path…")
+        elif not (pdf_path and Path(pdf_path).exists()):
+            log.info("  No local PDF for Files API (gemini-native skips disk download)")
 
     if model_pref == "gemini" and gemini_key and text:
         result = call_gemini(text, company_name, year, gemini_key)
