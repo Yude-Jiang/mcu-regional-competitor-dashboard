@@ -745,10 +745,11 @@ def main() -> None:
             "  export GEMINI_API_KEY=AIza..."
         )
 
-    log.info("API: %s%s  model=%s",
+    _llm_model = "gemini-3.5-flash" if args.model in ("gemini", "gemini-native") else "deepseek-chat"
+    log.info("API: %s%s  pipeline=%s  llm=%s",
              "DeepSeek " if deepseek_key else "",
              "Gemini"    if gemini_key   else "",
-             args.model)
+             args.model, _llm_model)
 
     # Load company names
     meta_path = HERE / "companies_meta.json"
