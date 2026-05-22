@@ -420,6 +420,14 @@ def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
                 types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
                 prompt,
             ],
+            config=types.GenerateContentConfig(
+                temperature=0.1,
+                max_output_tokens=2000,
+                response_mime_type="application/json",
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                    disable=True,
+                ),
+            ),
         )
         raw = resp.text.strip()
         raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
