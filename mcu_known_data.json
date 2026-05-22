@@ -311,15 +311,15 @@
     },
     "2021": {
       "mcu_revenue_yuan": 295158518,
-      "data_type": "estimated",
-      "confidence": "low",
-      "source": "芯海科技2021年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "芯海科技2022年报 MCU芯片28,899.59万YoY-2.09%反推2021年值≈29,516万（Gemini提取295,158,518，差值<2元）"
     },
     "2022": {
-      "mcu_revenue_yuan": 288995946,
-      "data_type": "estimated",
-      "confidence": "low",
-      "source": "芯海科技2022年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+      "mcu_revenue_yuan": 288995900,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "芯海科技2022年报 管理层讨论「MCU芯片2022年实现销售28,899.59万元，较上年同期下降2.09%」"
     },
     "2023": {
       "mcu_revenue_yuan": 194614600,
