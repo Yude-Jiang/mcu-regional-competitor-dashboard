@@ -374,21 +374,22 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
 
 def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
                                  api_key: str) -> dict | None:
-    """GCS → BytesIO → Gemini Files API (全程Google内网，无需落盘，秒级完成).
+    """GCS → BytesIO → inline bytes in generate_content (no Files API upload).
 
-    适用于超大年报PDF：避免下载到Cloud Shell磁盘的慢速网络问题。
+    Sends PDF bytes inline in the request body (max ~20MB).
+    Avoids Files API entirely — works with API keys that restrict upload endpoint.
     """
     try:
         import io
         from google import genai
+        from google.genai import types
         from google.cloud import storage
     except ImportError:
         return None
 
-    # Parse bucket + blob from gs:// URI
     if not gcs_uri.startswith("gs://"):
         return None
-    path = gcs_uri[5:]  # strip gs://
+    path = gcs_uri[5:]
     bucket_name, _, blob_name = path.partition("/")
 
     prompt = (
@@ -396,43 +397,36 @@ def call_gemini_stream_from_gcs(gcs_uri: str, company: str, year: int,
         f"公司：{company}  财年：{year}年\n\n"
         "请从上传的年报PDF中提取MCU产品营业收入数据，输出JSON格式。"
     )
-    uploaded = None
     try:
-        log.info("  Streaming PDF: GCS → BytesIO → Gemini Files API…")
+        log.info("  Streaming PDF: GCS → BytesIO (inline bytes)…")
         gcs_client = storage.Client(project=PROJECT)
         buf = io.BytesIO()
         gcs_client.bucket(bucket_name).blob(blob_name).download_to_file(
             buf, timeout=None
         )
         buf.seek(0)
-        log.info("  GCS download complete (%.1f MB)", buf.getbuffer().nbytes / 1e6)
+        pdf_bytes = buf.read()
+        log.info("  GCS download complete (%.1f MB), sending inline…",
+                 len(pdf_bytes) / 1e6)
 
         client = genai.Client(api_key=api_key)
-        uploaded = client.files.upload(
-            file=buf,
-            config={"mime_type": "application/pdf"},
-        )
         resp = client.models.generate_content(
             model="gemini-3.5-flash",
-            contents=[uploaded, prompt],
+            contents=[
+                types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
+                prompt,
+            ],
         )
         raw = resp.text.strip()
         raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
         result = json.loads(raw)
-        result["_model"] = "gemini-3.5-flash-gcs-stream"
-        log.info("  GCS stream extraction complete")
+        result["_model"] = "gemini-3.5-flash-inline"
+        log.info("  Inline PDF extraction complete")
         return result
 
     except Exception as exc:
         log.warning("  GCS stream failed: %s", exc)
         return None
-
-    finally:
-        if uploaded:
-            try:
-                genai.Client(api_key=api_key).files.delete(name=uploaded.name)
-            except Exception:
-                pass
 
 
 def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
