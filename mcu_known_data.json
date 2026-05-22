@@ -86,6 +86,15 @@
     },
     "_todo_2018_2021": "招股书（2022年上市）含2019-2021历史MCU数据，待extract_mcu_segments.py读取招股书PDF补全"
   },
+  "002180": {
+    "2024": {
+      "mcu_revenue_yuan": 821011684.45,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "纳思达2024年报 极海微电子子公司「芯片」产品营收（年报未独立披露MCU口径；集成电路产业总营收¥14.0亿，其中「芯片」产品线¥8.21亿 = Geehy MCU口径）— Gemini-3.5-flash提取"
+    }
+  },
   "300327": {
     "2023": {
       "mcu_revenue_yuan": 1013682135,
