@@ -143,6 +143,12 @@ python extract_mcu_segments.py
 - 当前合法值：`segment_reported / segment_industrial / segment_estimated / total_proxy / estimated / subsidiary_geehy / na`
 - 建议：新口径优先复用现有策略名（如招股书数据用 `segment_reported`），避免白名单漏加导致 FAIL
 
+**688595 芯海科技 口径确认经过（避免重蹈）**
+- 年报管理层讨论同时披露「MCU和AIoT芯片合计52,303万」和「MCU芯片单行33,986万」
+- Gemini 提取的是 MCU芯片单行（正确），但用合计数比较导致误判为"提取错误"
+- 两次错误"修正"（改为MCU+AIoT合并值）后，经年报原文核实还原
+- **正确做法**：先确认口径边界（纯MCU or MCU+AIoT），再比较数字，不要直接用管理层讨论里的合并总数去验证分行提取值
+
 **300077 国民技术 MCU口径（历史结论存档）**
 - A股年报2018-2025：始终将MCU、安全芯片、BMS、RF合并为「芯片类产品」，永远不拆分
 - 2019年年报明确说明通用MCU"处于验证与测试阶段，尚未开始贡献经济效益"（即2019年MCU收入实际为零）
