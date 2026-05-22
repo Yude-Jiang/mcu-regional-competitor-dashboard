@@ -383,11 +383,14 @@ def call_gemini(text: str, company: str, year: int, api_key: str) -> dict | None
 def _extract_json(raw: str) -> dict:
     """Robustly extract a JSON object from LLM response text.
 
-    Handles: bare JSON, ```json fences, prose before/after the object.
+    Handles: bare JSON, ```json fences, prose before/after the object,
+    and extra content after the closing brace (uses raw_decode).
     Raises ValueError if no valid JSON object found.
     """
     raw = raw.strip()
-    # 1. Direct parse
+    decoder = json.JSONDecoder()
+
+    # 1. Direct parse (handles clean JSON)
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
@@ -395,12 +398,19 @@ def _extract_json(raw: str) -> dict:
     # 2. Strip ``` fences (multiline, with or without 'json' tag)
     fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
     if fenced:
-        return json.loads(fenced.group(1))
-    # 3. Find the outermost { … } block greedily
+        try:
+            return json.loads(fenced.group(1))
+        except json.JSONDecodeError:
+            pass
+    # 3. raw_decode from first '{' — reads exactly one JSON object,
+    #    ignores any trailing content (newlines, extra text, second objects)
     brace_start = raw.find("{")
-    brace_end   = raw.rfind("}")
-    if brace_start != -1 and brace_end > brace_start:
-        return json.loads(raw[brace_start : brace_end + 1])
+    if brace_start != -1:
+        try:
+            obj, _ = decoder.raw_decode(raw, brace_start)
+            return obj
+        except json.JSONDecodeError:
+            pass
     raise ValueError(f"No JSON object found in response (first 300 chars): {raw[:300]}")
 
 
@@ -495,8 +505,11 @@ def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
 
     # Try vertexai SDK first (v1 endpoint, more widely enabled)
     try:
+        import warnings
         import vertexai
-        from vertexai.generative_models import GenerativeModel, Part as VPart
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from vertexai.generative_models import GenerativeModel, Part as VPart
         for loc in _LOCATIONS:
             for model_id in _VERTEX_MODELS:
                 try:
@@ -506,9 +519,7 @@ def call_gemini_gcs_uri(gcs_uri: str, company: str, year: int) -> dict | None:
                         VPart.from_uri(gcs_uri, mime_type="application/pdf"),
                         prompt,
                     ])
-                    raw = resp.text.strip()
-                    raw = re.sub(r"^```json\s*|\s*```$", "", raw, flags=re.MULTILINE)
-                    result = json.loads(raw)
+                    result = _extract_json(resp.text.strip())
                     result["_model"] = f"{model_id}-vertex-gcs"
                     log.info("  Vertex AI GCS extraction complete (%s @ %s)", model_id, loc)
                     return result

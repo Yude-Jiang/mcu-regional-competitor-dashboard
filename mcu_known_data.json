@@ -86,6 +86,52 @@
     },
     "_todo_2018_2021": "招股书（2022年上市）含2019-2021历史MCU数据，待extract_mcu_segments.py读取招股书PDF补全"
   },
+  "688385": {
+    "2021": {
+      "mcu_revenue_yuan": 295785000,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2021年报 主营业务分产品情况表「智能电表芯片」行 — Gemini-3.5-flash提取"
+    },
+    "2022": {
+      "mcu_revenue_yuan": 594579682,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2022年报 主营业务分产品情况表「智能电表芯片」行 — Gemini-3.5-flash提取"
+    },
+    "2023": {
+      "mcu_revenue_yuan": 273770800,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2023年报 主营业务分产品情况表「智能电表芯片」行 — Gemini-3.5-flash提取"
+    },
+    "2024": {
+      "mcu_revenue_yuan": 396694700,
+      "mcu_gross_margin": 0.3607,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2024年报 主营业务分产品情况表「智能电表芯片」行第34-35页（涵盖智能电表MCU、通用MCU及车规MCU）¥39,669.47万 — Gemini-3.5-flash提取，JSON parse修复后人工录入"
+    },
+    "2025": {
+      "mcu_revenue_yuan": 518448863,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2025年报 主营业务分产品情况表「智能电表芯片」行 — Gemini-3.5-flash提取"
+    }
+  },
+  "688018": {
+    "2019": {
+      "mcu_revenue_yuan": 520672246,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "乐鑫科技2019年报 分产品收入「芯片」行（区别于模组收入）¥52,067.22万 — Gemini-3.5-flash提取"
+    }
+  },
   "002180": {
     "2024": {
       "mcu_revenue_yuan": 821011684.45,
