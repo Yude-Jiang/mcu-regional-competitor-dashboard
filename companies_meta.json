@@ -50,10 +50,10 @@
     "listed_year": 2010,
     "core_license": "ARM Cortex-M0/M4",
     "foundry_fab": "SMIC",
-    "mcu_strategy": "estimated",
-    "mcu_multiplier": null,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报未拆分MCU vs安全芯片，需IR活动记录或估算"
+    "mcu_strategy": "total_proxy",
+    "mcu_multiplier": 0.27,
+    "mcu_confidence": "low",
+    "mcu_note": "年报未拆分MCU vs安全芯片；IR问答推算MCU约占总营收27%，低置信度"
   },
   "688279": {
     "name_cn": "峰岹科技",
