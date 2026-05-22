@@ -100,6 +100,7 @@ def _merge_financials(bq, row: dict) -> None:
         @filing_date          AS filing_date,
         @data_coverage        AS data_coverage,
         CAST(@akshare_updated_at AS TIMESTAMP)  AS akshare_updated_at,
+        CAST(@pdf_extracted_at  AS TIMESTAMP)  AS pdf_extracted_at,
         CAST(@updated_at AS TIMESTAMP)          AS updated_at
     ) S ON T.symbol = S.symbol AND T.year = S.year AND T.period = S.period
     WHEN MATCHED THEN UPDATE SET
@@ -129,6 +130,7 @@ def _merge_financials(bq, row: dict) -> None:
         filing_date        = COALESCE(S.filing_date,       T.filing_date),
         data_coverage      = COALESCE(S.data_coverage,     T.data_coverage),
         akshare_updated_at = S.akshare_updated_at,
+        pdf_extracted_at   = COALESCE(S.pdf_extracted_at, T.pdf_extracted_at),
         updated_at         = S.updated_at
     WHEN NOT MATCHED THEN INSERT ROW
     """
@@ -166,6 +168,7 @@ def _merge_financials(bq, row: dict) -> None:
         ScalarQueryParameter("filing_date",       "STRING",  row.get("filing_date")),
         ScalarQueryParameter("data_coverage",     "FLOAT64", row.get("data_coverage")),
         ScalarQueryParameter("akshare_updated_at","STRING",  _now()),
+        ScalarQueryParameter("pdf_extracted_at",  "STRING",  row.get("pdf_extracted_at")),
         ScalarQueryParameter("updated_at",        "STRING",  _now()),
     ]
     job = bq.query(sql, job_config=QueryJobConfig(query_parameters=params))
@@ -207,6 +210,7 @@ def write_financials(symbol: str, year: int, fin_row: dict, meta: dict,
             "mcu_yoy_pct", "mcu_weight_pct",
             "mcu_data_type", "mcu_confidence", "mcu_source",
             "filing_status", "filing_date", "data_coverage",
+            "pdf_extracted_at",
         ]},
     }
     try:
