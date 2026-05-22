@@ -300,5 +300,44 @@
       "confidence": "high",
       "source": "中颖电子2025年报第16页「营业收入构成」及「占公司营业收入或营业利润10%以上的行业、产品、地区、销售模式的情况」中「工业控制」产品 — Gemini提取"
     }
+  },
+  "688595": {
+    "_note": "口径=「MCU和AIoT芯片」产品线（年报管理层讨论章节披露；含MCU+AIoT，非纯MCU）；2020-2023年数据Gemini提取，怀疑提取了错误产品行，待重新核验",
+    "2020": {
+      "mcu_revenue_yuan": 103761750,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "芯海科技2020年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+    },
+    "2021": {
+      "mcu_revenue_yuan": 295158518,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "芯海科技2021年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+    },
+    "2022": {
+      "mcu_revenue_yuan": 288995946,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "芯海科技2022年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+    },
+    "2023": {
+      "mcu_revenue_yuan": 194614593,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "芯海科技2023年报 Gemini提取 — 待重新核验（2025年存在提取行错误，此年份口径未确认）"
+    },
+    "2024": {
+      "mcu_revenue_yuan": 508230000,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "芯海科技2025年报管理层讨论「MCU和AIoT芯片实现销售52,303.27万元，较上年增长2.91%」反推2024年值"
+    },
+    "2025": {
+      "mcu_revenue_yuan": 523032700,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "芯海科技2025年报管理层讨论章节「MCU和AIoT芯片实现销售52,303.27万元，较上年增长2.91%」"
+    }
   }
 }

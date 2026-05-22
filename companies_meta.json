@@ -125,10 +125,10 @@
     "listed_year": 2020,
     "core_license": "ARM Cortex-M0",
     "foundry_fab": "TSMC / SMIC",
-    "mcu_strategy": "estimated",
+    "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
-    "mcu_confidence": "low",
-    "mcu_note": "MCU+模拟混合，无法从总收入直接推算，建议最后处理"
+    "mcu_confidence": "medium",
+    "mcu_note": "口径：年报「MCU和AIoT芯片」产品线（管理层讨论章节披露）；2024-2025已核验，2020-2023待重新提取确认"
   },
   "688391": {
     "name_cn": "钜泉科技",
