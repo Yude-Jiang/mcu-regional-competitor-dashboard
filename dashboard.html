@@ -17,7 +17,7 @@
   --text:var(--navy-1); --text-dim:var(--navy-2); --text-faint:var(--navy-3);
   --pos:#1a8a4e; --neg:var(--mag-1); --accent:var(--cyan-1);
   --font: Arial, "Helvetica Neue", "Microsoft YaHei", sans-serif;
-  --fz-base:13px; --fz-sm:12px; --fz-xs:11px; --fz-2xs:10px;
+  --fz-base:14px; --fz-sm:13px; --fz-xs:12px; --fz-2xs:11px;
 }
 [data-theme="dark"] {
   --bg-0:#07101e; --bg-1:#0c1726; --bg-2:#122033; --bg-3:#1a2c44;
@@ -173,10 +173,10 @@ canvas { display:block; width:100% !important; }
 .table-wrap { overflow:auto; background:var(--bg-1); flex:1; }
 table { width:100%; border-collapse:collapse; white-space:nowrap; }
 thead th {
-  background:var(--navy-1); color:#fff; padding:7px 10px;
+  background:var(--navy-1); color:#fff; padding:6px 8px;
   border-right:1px solid var(--navy-2); font:700 var(--fz-xs)/1 var(--font);
-  letter-spacing:.05em; text-transform:uppercase;
-  text-align:center; vertical-align:bottom;
+  letter-spacing:.04em; text-transform:uppercase;
+  text-align:center; vertical-align:bottom; white-space:nowrap;
 }
 thead th.sortable { cursor:pointer; user-select:none; }
 thead th.sortable:hover { background:var(--navy-2); }
@@ -190,7 +190,7 @@ th.g-mcu  { background:#09354f !important; border-top:2px solid var(--cyan-1) !i
 th.g-rd   { background:#0a3a2a !important; }
 th.g-etc  { background:#1c2a38 !important; }
 td {
-  padding:6px 10px; border-bottom:1px solid var(--border);
+  padding:5px 7px; border-bottom:1px solid var(--border);
   border-right:1px solid var(--bg-3);
   vertical-align:middle; text-align:right; color:var(--text); font-size:var(--fz-sm);
 }
@@ -292,7 +292,7 @@ footer {
 
 /* ── Detail Panel ── */
 .detail-panel {
-  position:fixed; top:0; right:0; bottom:0; width:320px; z-index:100;
+  position:fixed; top:0; right:0; bottom:0; width:400px; z-index:100;
   background:var(--bg-1); border-left:1px solid var(--border-b);
   display:flex; flex-direction:column;
   transform:translateX(100%); transition:transform .2s ease;
@@ -304,9 +304,9 @@ footer {
   padding:14px 16px 12px; background:var(--navy-1); flex-shrink:0;
   border-bottom:3px solid var(--cyan-1);
 }
-.dp-co-name { font:700 15px/1.3 var(--font); color:#fff; }
-.dp-co-en   { font:var(--fz-sm)/1.4 var(--font); color:var(--cyan-2); margin-top:3px; }
-.dp-co-tag  { font:var(--fz-xs)/1 monospace; color:var(--navy-3); margin-top:5px; }
+.dp-co-name { font:700 18px/1.3 var(--font); color:#fff; }
+.dp-co-en   { font:var(--fz-base)/1.4 var(--font); color:var(--cyan-2); margin-top:4px; }
+.dp-co-tag  { font:var(--fz-sm)/1 monospace; color:var(--navy-3); margin-top:6px; }
 .dp-close {
   background:transparent; border:none; color:var(--navy-3);
   font:18px/1 var(--font); cursor:pointer; padding:2px 5px; flex-shrink:0;
@@ -322,25 +322,25 @@ footer {
 .dp-section-ttl::after { content:""; flex:1; height:1px; background:var(--border); }
 .dp-strat-box {
   background:var(--bg-2); border:1px solid var(--border); border-radius:4px;
-  padding:10px 12px; font:var(--fz-sm)/1.5 var(--font); color:var(--text-dim);
+  padding:12px 14px; font:var(--fz-sm)/1.55 var(--font); color:var(--text-dim);
 }
 .dp-strat-badge {
-  display:inline-block; font:700 var(--fz-xs)/1 monospace; letter-spacing:.05em;
-  text-transform:uppercase; padding:3px 6px; border-radius:2px;
-  background:var(--bg-3); color:var(--text); margin-bottom:7px;
+  display:inline-block; font:700 var(--fz-sm)/1 monospace; letter-spacing:.05em;
+  text-transform:uppercase; padding:4px 8px; border-radius:2px;
+  background:var(--bg-3); color:var(--text); margin-bottom:8px;
 }
-.dp-strat-note { font:var(--fz-sm)/1.5 var(--font); color:var(--text-dim); }
-.dp-chart-wrap { position:relative; height:120px; }
+.dp-strat-note { font:var(--fz-sm)/1.6 var(--font); color:var(--text-dim); }
+.dp-chart-wrap { position:relative; height:140px; }
 .dp-metrics {
-  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
 }
 .dp-metric {
   background:var(--bg-2); border:1px solid var(--border); border-radius:4px;
-  padding:8px 10px;
+  padding:10px 12px;
 }
 .dp-metric-lbl { font:700 var(--fz-xs)/1 var(--font); color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; }
-.dp-metric-val { font:700 15px/1.3 var(--font); color:var(--text); margin-top:4px; }
-.dp-metric-sub { font:var(--fz-xs)/1.2 var(--font); color:var(--text-dim); margin-top:3px; }
+.dp-metric-val { font:700 17px/1.3 var(--font); color:var(--text); margin-top:5px; }
+.dp-metric-sub { font:var(--fz-sm)/1.2 var(--font); color:var(--text-dim); margin-top:3px; }
 .dp-metric-pos  { color:var(--pos); }
 .dp-metric-neg  { color:var(--neg); }
 .dp-overlay {
@@ -348,7 +348,7 @@ footer {
   z-index:99; cursor:pointer;
 }
 .dp-overlay.open { display:block; }
-body.panel-open .table-wrap { padding-right:328px; }
+body.panel-open .table-wrap { padding-right:408px; }
 
 /* ── Chart filter / sort bar ── */
 .chart-ctrl {
@@ -428,8 +428,10 @@ body.panel-open .table-wrap { padding-right:328px; }
   white-space:nowrap;
 }
 .cs-body {
-  padding:10px 20px 8px; min-height:200px; position:relative;
+  padding:10px 20px 8px; min-height:160px; position:relative;
 }
+/* 总营收 chart shorter than dual charts */
+.cs-wrap .cs-body { min-height:140px; }
 
 /* ── Dual chart row ── */
 .chart-dual {
@@ -444,7 +446,7 @@ body.panel-open .table-wrap { padding-right:328px; }
 }
 .chart-dual-main .cs-body,
 .chart-dual-side  .cs-body {
-  padding:10px 16px 8px; min-height:200px;
+  padding:10px 16px 8px; min-height:220px;
 }
 
 /* ── Responsive ── */
@@ -585,16 +587,16 @@ body.panel-open .table-wrap { padding-right:328px; }
 <thead>
   <tr>
     <th class="sticky" rowspan="2">公司</th>
-    <th rowspan="2">成立/上市</th>
+    <th rowspan="2">成立<br>上市</th>
     <th rowspan="2">核心架构</th>
-    <th class="g-rev sortable" data-col="rev" rowspan="1">总营收 M$<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;M$<span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
     <th class="g-rev sortable" data-col="cagr">CAGR<span class="si"></span></th>
-    <th class="g-mcu" rowspan="2" style="min-width:80px">MCU&nbsp;8年</th>
+    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
     <th class="g-mcu sortable" data-col="mcu">MCU M$<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="gm">毛利率%<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="gm">毛利率<span class="si"></span></th>
     <th class="g-etc" rowspan="2">代工厂</th>
     <th class="g-rd sortable" data-col="rd">研发 M$<span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
@@ -938,7 +940,7 @@ function sortVal(sym, year, col) {
 
 // ── Table render ──────────────────────────────────────────────────────────
 function renderTable(year, query) {
-  // (year labels removed — charts now show all years)
+  const yl = $('tbl-year-lbl'); if (yl) yl.textContent = year;
   const q = (query || '').toLowerCase();
 
   let syms = ORDER.filter(s => G.companies[s]).filter(s => {
@@ -978,8 +980,8 @@ function renderTable(year, query) {
         <div class="co-en">${m.name_en || ''}</div>
         <div class="co-tag">${sym}&nbsp;·&nbsp;${m.market || ''}</div>
       </td>
-      <td class="c" style="font-size:10px">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
-      <td class="l" style="max-width:130px;white-space:normal;font-size:10px;color:var(--text-dim)">${m.core_license || '—'}</td>
+      <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
+      <td class="l" style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
       <td>${fN(f.total_revenue_musd)}</td>
       <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="c">${cagr}</td>
@@ -988,7 +990,7 @@ function renderTable(year, query) {
       <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
       <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
       <td class="c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
-      <td class="l" style="font-size:10px;color:var(--text-dim);max-width:120px;white-space:normal">${m.foundry_fab || '—'}</td>
+      <td class="l" style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
       <td>${fN(f.rd_expense_musd)}</td>
       <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
