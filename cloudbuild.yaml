@@ -1,8 +1,8 @@
-# cloudbuild.yaml — Build Docker image only.
+# cloudbuild.yaml — Build & push to Artifact Registry (asia-east1).
 # Deploy via Cloud Shell (avoids Compute SA actAs permission issue):
 #
 #   gcloud run deploy mcu-regional-competitor-dashboard \
-#     --image gcr.io/st-china-ai-force/mcu-regional-competitor-dashboard \
+#     --image asia-east1-docker.pkg.dev/st-china-ai-force/mcu/mcu-regional-competitor-dashboard \
 #     --region asia-east1 --platform managed --allow-unauthenticated \
 #     --set-env-vars "GCP_PROJECT=st-china-ai-force,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports" \
 #     --set-secrets "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest" \
@@ -13,8 +13,8 @@ steps:
   args:
     - "build"
     - "-t"
-    - "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard"
+    - "asia-east1-docker.pkg.dev/$PROJECT_ID/mcu/mcu-regional-competitor-dashboard"
     - "."
 
 images:
-- "gcr.io/$PROJECT_ID/mcu-regional-competitor-dashboard"
+- "asia-east1-docker.pkg.dev/$PROJECT_ID/mcu/mcu-regional-competitor-dashboard"
