@@ -406,6 +406,22 @@ body.panel-open .table-wrap { padding-right:408px; }
 /* Hide sort year when sorting by name */
 #chart-sort-year.hidden { display:none; }
 
+/* Currency toggle */
+.cur-toggle { display:flex; border:1px solid var(--border-b); border-radius:4px; overflow:hidden; }
+.cur-btn {
+  padding:3px 10px; border:none; background:var(--bg-1); color:var(--text-dim);
+  font:700 var(--fz-2xs)/1 var(--font); cursor:pointer; transition:background .1s;
+}
+.cur-btn.active { background:var(--navy-1); color:#fff; }
+.cur-btn:not(.active):hover { background:var(--border-b); }
+
+/* FX rates bar */
+.fx-bar {
+  padding:4px 16px; font-size:var(--fz-2xs); color:var(--text-faint);
+  background:var(--bg-1); border-bottom:1px solid var(--border);
+  display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;
+}
+
 /* ── Chart section (cs) ── */
 .cs-wrap {
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
@@ -550,14 +566,24 @@ body.panel-open .table-wrap { padding-right:408px; }
     <div class="co-toggles" id="co-toggles"></div>
     <button class="yr-all-btn" id="co-all-btn">全部</button>
   </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl">货币</span>
+    <div class="cur-toggle">
+      <button class="cur-btn active" id="cur-btn-usd" onclick="setCur('usd')">USD</button>
+      <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
+    </div>
+  </div>
 </div>
+<!-- FX rates bar -->
+<div class="fx-bar" id="fx-bar"></div>
 
 <!-- ── 总营收 grouped chart ── -->
 <div class="cs-wrap">
   <div class="cs-hdr">
     <span class="cs-tag" style="background:#1a8a4e">总营收</span>
     <span class="cs-title">按公司 · 总营收 (来自年报)</span>
-    <span class="cs-unit">M USD</span>
+    <span class="cs-unit" id="cs-unit-rev">M USD</span>
   </div>
   <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
 </div>
@@ -568,7 +594,7 @@ body.panel-open .table-wrap { padding-right:408px; }
     <div class="cs-hdr">
       <span class="cs-tag" style="background:#03234b">MCU</span>
       <span class="cs-title">按公司 · MCU 营收 (推算)</span>
-      <span class="cs-unit">M USD · 2018—2025</span>
+      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
     </div>
     <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
   </div>
@@ -589,16 +615,16 @@ body.panel-open .table-wrap { padding-right:408px; }
     <th class="sticky" rowspan="2">公司</th>
     <th rowspan="2">成立<br>上市</th>
     <th rowspan="2">核心架构</th>
-    <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;M$<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
     <th class="g-rev sortable" data-col="cagr">CAGR<span class="si"></span></th>
     <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
-    <th class="g-mcu sortable" data-col="mcu">MCU M$<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="mcu">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="gm">毛利率<span class="si"></span></th>
     <th class="g-etc" rowspan="2">代工厂</th>
-    <th class="g-rd sortable" data-col="rd">研发 M$<span class="si"></span></th>
+    <th class="g-rd sortable" data-col="rd">研发 <span id="tbl-unit-rd">M$</span><span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
     <th class="g-etc sortable" data-col="emp">员工<span class="si"></span></th>
   </tr>
@@ -645,7 +671,7 @@ body.panel-open .table-wrap { padding-right:408px; }
     </div>
 
     <div>
-      <div class="dp-section-ttl">8年 总营收 vs MCU 营收 (M$)</div>
+      <div class="dp-section-ttl" id="dp-chart-ttl">8年 总营收 vs MCU 营收 (M$)</div>
       <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
     </div>
 
@@ -699,7 +725,21 @@ const CO_COLORS = [
 
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
 let _currentDetailSym = null;
+let FX = {};   // year → CNY/USD rate
+let CUR = 'usd'; // 'usd' | 'cny'
 const $ = id => document.getElementById(id);
+
+// ── Currency helpers ──────────────────────────────────────────────────────
+function curF(base) { return CUR === 'usd' ? base + '_musd' : base + '_yuan'; }
+function curUnit() { return CUR === 'usd' ? 'M USD' : '亿元'; }
+function curShort() { return CUR === 'usd' ? 'M$' : '亿'; }
+function curDec() { return CUR === 'usd' ? 1 : 2; }
+// Return display value: musd is already M$; yuan needs /1e8 → 亿元
+function curV(raw) { return raw != null ? (CUR === 'usd' ? raw : raw / 1e8) : null; }
+function curFmt(raw) {
+  const v = curV(raw);
+  return v != null ? v.toFixed(curDec()) + ' ' + curShort() : '—';
+}
 
 // ── Chart filter state ────────────────────────────────────────────────────
 const CF = {
@@ -720,7 +760,7 @@ function cfSyms()   {
       return CF.sortDir === 'asc' ? na.localeCompare(nb,'zh') : nb.localeCompare(na,'zh');
     });
   } else {
-    const field = CF.sortField === 'mcu' ? 'mcu_revenue_musd' : 'total_revenue_musd';
+    const field = CF.sortField === 'mcu' ? curF('mcu_revenue') : curF('total_revenue');
     ss = ss.slice().sort((a,b) => {
       const va = (G.companies[a].financials?.[CF.sortYear]||{})[field] ?? -1/0;
       const vb = (G.companies[b].financials?.[CF.sortYear]||{})[field] ?? -1/0;
@@ -731,8 +771,9 @@ function cfSyms()   {
 }
 
 function rerenderCharts() {
-  renderGroupedByYear('c-total-rev','totalRev','total_revenue_musd',' M$');
-  renderGroupedByYear('c-mcu-grp',  'mcuGrp',  'mcu_revenue_musd',  ' M$');
+  const suf = ' ' + curShort();
+  renderGroupedByYear('c-total-rev','totalRev', curF('total_revenue'), suf);
+  renderGroupedByYear('c-mcu-grp',  'mcuGrp',  curF('mcu_revenue'),  suf);
   renderStacked();
 }
 
@@ -874,6 +915,12 @@ const fYoY = v => {
 const fEmp = v => v != null ? Number(v).toLocaleString('zh-CN') : '<span class="na">—</span>';
 const mcuN = (v, dt) =>
   `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fN(v)}</div>`;
+// Currency-aware MCU cell: raw value in either _musd or _yuan, curV converts
+const mcuN2 = (raw, dt) => {
+  const v = curV(raw);
+  const s = v != null ? v.toFixed(curDec()) : '<span class="na">—</span>';
+  return `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
+};
 const mcuY = (v, dt) =>
   `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fYoY(v)}</div>`;
 const mcuW = (v, dt) => {
@@ -924,14 +971,14 @@ function renderPipeline(data, year) {
 function sortVal(sym, year, col) {
   const f = (G.companies[sym].financials || {})[String(year)] || {};
   switch (col) {
-    case 'rev':     return f.total_revenue_musd;
+    case 'rev':     return f[curF('total_revenue')];
     case 'rev_yoy': return f.revenue_yoy_pct;
     case 'cagr':    return f.cagr_pct;
-    case 'mcu':     return f.mcu_revenue_musd;
+    case 'mcu':     return f[curF('mcu_revenue')];
     case 'mcu_yoy': return f.mcu_yoy_pct;
     case 'wt':      return f.mcu_weight_pct;
     case 'gm':      return f.gross_margin_pct;
-    case 'rd':      return f.rd_expense_musd;
+    case 'rd':      return f[curF('rd_expense')];
     case 'rd_pct':  return f.rd_pct;
     case 'emp':     return f.employee_count;
     default:        return null;
@@ -973,7 +1020,10 @@ function renderTable(year, query) {
     const cagr = f.cagr_pct != null
       ? `<span title="${f.cagr_label || ''}">${f.cagr_pct.toFixed(1)}%</span>`
       : '<span class="na">—</span>';
-    const spkVals = allYears.map(y => (co.financials[y] || {}).mcu_revenue_musd ?? null);
+    const spkVals = allYears.map(y => { const v = (co.financials[y]||{})[curF('mcu_revenue')]; return v != null ? curV(v) : null; });
+    const fmtRev = curFmt(f[curF('total_revenue')]);
+    const fmtMcu = curFmt(f[curF('mcu_revenue')]);
+    const fmtRd  = curFmt(f[curF('rd_expense')]);
     return `<tr style="cursor:pointer" onclick="openDetail('${sym}')">
       <td class="sticky l">
         <div class="co-cn">${m.name_cn || sym}</div>
@@ -982,16 +1032,16 @@ function renderTable(year, query) {
       </td>
       <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
       <td class="l" style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
-      <td>${fN(f.total_revenue_musd)}</td>
+      <td>${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="c">${cagr}</td>
       <td class="c" style="padding:4px 8px">${sparkline(spkVals)}</td>
-      <td>${mcuN(f.mcu_revenue_musd, dt)}</td>
+      <td>${mcuN2(f[curF('mcu_revenue')], dt)}</td>
       <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
       <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
       <td class="c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="l" style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
-      <td>${fN(f.rd_expense_musd)}</td>
+      <td>${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
     </tr>`;
@@ -1033,11 +1083,12 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
   const tick  = dark ? '#7d94b3' : '#8191a5';
   const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
+  const scale = field.endsWith('_yuan') ? 1/1e8 : 1;
+  const dec   = field.endsWith('_yuan') ? 2 : 1;
   const datasets = years.map(y => ({
     label: String(y),
-    data:  ss.map(s => (G.companies[s].financials[y]||{})[field] ?? null),
+    data:  ss.map(s => { const v = (G.companies[s].financials[y]||{})[field]; return v != null ? v * scale : null; }),
     backgroundColor: YEAR_PAL[y],
-    // highlight current year with full opacity, others slightly transparent
     borderWidth: y === 2024 ? 2 : 0,
     borderColor: y === 2024 ? '#fff' : undefined,
     spanGaps: false,
@@ -1053,7 +1104,7 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
       plugins:{
         legend:{ position:'bottom', labels:{ font:{size:11,family:'Arial'}, boxWidth:12, color:tick, padding:8 } },
         tooltip:{ callbacks:{ label: c =>
-          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+tooltipSuffix : 'N/A'}` } },
+          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(dec)+tooltipSuffix : 'N/A'}` } },
       },
       scales:{
         x:{ ticks:{ font:{size:11,family:'Arial'}, color:tick, maxRotation:30 }, grid:{ color:grid } },
@@ -1071,16 +1122,19 @@ function renderStacked() {
   const tick  = dark ? '#7d94b3' : '#8191a5';
   const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
+  const mcuField = curF('mcu_revenue');
+  const stScale  = mcuField.endsWith('_yuan') ? 1/1e8 : 1;
+  const stDec    = mcuField.endsWith('_yuan') ? 2 : 1;
+  const stUnit   = curShort();
   const datasets = ss.map(s => ({
     label: (G.companies[s].meta||{}).name_cn || s,
-    data:  years.map(y => (G.companies[s].financials[y]||{}).mcu_revenue_musd ?? null),
+    data:  years.map(y => { const v = (G.companies[s].financials[y]||{})[mcuField]; return v != null ? v * stScale : null; }),
     backgroundColor: CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length],
     stack: 'a', spanGaps: false,
   }));
 
-  // per-year totals for datalabels-style annotation via tooltip
   const yearTotals = years.map(y =>
-    ss.reduce((sum, s) => sum + ((G.companies[s].financials[y]||{}).mcu_revenue_musd || 0), 0)
+    ss.reduce((sum, s) => { const v = (G.companies[s].financials[y]||{})[mcuField]; return sum + (v != null ? v * stScale : 0); }, 0)
   );
 
   const ctx = $('c-stacked').getContext('2d');
@@ -1094,10 +1148,10 @@ function renderStacked() {
         legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:10, color:tick, padding:5 } },
         tooltip:{
           callbacks:{
-            label: c => `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(1)+' M$' : 'N/A'}`,
+            label: c => `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(stDec)+' '+stUnit : 'N/A'}`,
             afterBody: ctx2 => {
               const yi = ctx2[0]?.dataIndex;
-              if (yi != null) return [`合计: ${yearTotals[yi].toFixed(0)} M$`];
+              if (yi != null) return [`合计: ${yearTotals[yi].toFixed(stDec)} ${stUnit}`];
               return [];
             },
           },
@@ -1128,19 +1182,19 @@ function _updateDetailMetrics(sym, year) {
   $('dp-metric-year').textContent = year;
   const f = fin[year] || {};
   const metrics = [
-    { lbl:'总营收',   val: f.total_revenue_musd != null ? f.total_revenue_musd.toFixed(1)+' M$' : '—',
+    { lbl:'总营收',   val: curFmt(f[curF('total_revenue')]),
       sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'MCU 营收', val: f.mcu_revenue_musd != null ? f.mcu_revenue_musd.toFixed(1)+' M$' : '—',
+    { lbl:'MCU 营收', val: curFmt(f[curF('mcu_revenue')]),
       sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
     { lbl:'MCU 占比', val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
       sub: STRAT_LBL[m.mcu_strategy] || '' },
     { lbl:'毛利率',   val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
       sub: f.mcu_confidence === 'high' ? 'MCU口径' : (f.gross_margin_pct != null ? '综合口径' : '') },
-    { lbl:'研发费用', val: f.rd_expense_musd != null ? f.rd_expense_musd.toFixed(1)+' M$' : '—',
+    { lbl:'研发费用', val: curFmt(f[curF('rd_expense')]),
       sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+'% of Rev' : '' },
-    { lbl:'净利润',   val: f.net_income_musd != null ? f.net_income_musd.toFixed(1)+' M$' : '—',
+    { lbl:'净利润',   val: curFmt(f[curF('net_income')]),
       sub: f.net_income_yoy_pct != null ? (f.net_income_yoy_pct>=0?'+':'')+f.net_income_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.net_income_yoy_pct!=null ? (f.net_income_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
     { lbl:'员工人数', val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—',
@@ -1209,9 +1263,11 @@ function openDetail(sym) {
   $('dp-profile-info').textContent = profileParts.join('　　');
 
   // Mini chart — bars for revenue, line for gross margin on secondary axis
+  const dpChartTtl = $('dp-chart-ttl');
+  if (dpChartTtl) dpChartTtl.textContent = `8年 总营收 vs MCU 营收 (${curUnit()})`;
   const labels  = allYears.map(String);
-  const revData = allYears.map(y => (fin[y] || {}).total_revenue_musd ?? null);
-  const mcuData = allYears.map(y => (fin[y] || {}).mcu_revenue_musd ?? null);
+  const revData = allYears.map(y => { const v = (fin[y]||{})[curF('total_revenue')]; return v != null ? curV(v) : null; });
+  const mcuData = allYears.map(y => { const v = (fin[y]||{})[curF('mcu_revenue')];   return v != null ? curV(v) : null; });
   const gmData  = allYears.map(y => (fin[y] || {}).gross_margin_pct ?? null);
   const hasGM   = gmData.some(v => v != null);
 
@@ -1274,11 +1330,43 @@ function closeDetail() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────
+function renderFxBar() {
+  const bar = $('fx-bar');
+  if (!bar) return;
+  const years = Object.keys(FX).map(Number).sort();
+  if (!years.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML =
+    `<span style="color:var(--text-dim);font-weight:600">汇率参考 CNY/USD：</span>` +
+    years.map(y => `<span>${y}: <b>${Number(FX[y]).toFixed(4)}</b></span>`).join('') +
+    `<span style="color:var(--text-faint);margin-left:4px">（来源：中国人民银行年度均值）</span>`;
+}
+
+function setCur(cur) {
+  CUR = cur;
+  $('cur-btn-usd').classList.toggle('active', cur === 'usd');
+  $('cur-btn-cny').classList.toggle('active', cur === 'cny');
+  // Update header unit labels
+  const u = cur === 'usd' ? 'M$' : '亿元';
+  ['tbl-unit-rev','tbl-unit-mcu','tbl-unit-rd'].forEach(id => { const el = $(id); if (el) el.textContent = u; });
+  const uu = cur === 'usd' ? 'M USD' : '亿元';
+  const revEl = $('cs-unit-rev'); if (revEl) revEl.textContent = uu;
+  const mcuEl = $('cs-unit-mcu'); if (mcuEl) mcuEl.textContent = uu + ' · 2018—2025';
+  // Re-render everything
+  const sel = $('year-sel');
+  const year = sel ? +sel.value : 2024;
+  rerenderCharts();
+  renderTable(year, $('search')?.value || '');
+  if (_currentDetailSym && $('detail-panel')?.classList.contains('open'))
+    openDetail(_currentDetailSym);
+}
+
 async function loadData() {
   try {
-    const [res, profRes] = await Promise.all([
+    const [res, profRes, fxRes] = await Promise.all([
       fetch('/data.json'),
       fetch('/profiles_xq.json').catch(() => null),
+      fetch('/fx_rates.json').catch(() => null),
     ]);
     if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
     G = await res.json();
@@ -1288,6 +1376,12 @@ async function loadData() {
       PROFILES = {};
       (Array.isArray(arr) ? arr : []).forEach(p => { if (p.symbol) PROFILES[p.symbol] = p; });
     }
+
+    if (fxRes && fxRes.ok) {
+      const fxData = await fxRes.json();
+      FX = fxData.CNY_USD || {};
+    }
+    renderFxBar();
 
     $('hdr-meta').innerHTML = G.generated_at
       ? `数据日期&nbsp;<b>${G.generated_at}</b>`
@@ -1332,9 +1426,7 @@ async function loadData() {
     renderPipeline(G, defYear);
     renderTable(defYear, '');
     initChartCtrl();
-    renderGroupedByYear('c-total-rev', 'totalRev', 'total_revenue_musd', ' M$');
-    renderGroupedByYear('c-mcu-grp',   'mcuGrp',   'mcu_revenue_musd',   ' M$');
-    renderStacked();
+    rerenderCharts();
 
     watchResize('c-total-rev', 'totalRev');
     watchResize('c-mcu-grp',   'mcuGrp');
