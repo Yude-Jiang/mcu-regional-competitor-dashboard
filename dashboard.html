@@ -331,6 +331,16 @@ footer {
 }
 .dp-strat-note { font:var(--fz-sm)/1.6 var(--font); color:var(--text-dim); }
 .dp-chart-wrap { position:relative; height:140px; }
+.dp-info-tbl { width:100%; border-collapse:collapse; font-size:var(--fz-xs); margin-top:4px; }
+.dp-info-tbl td { padding:3px 0; color:var(--text-dim); vertical-align:top; }
+.dp-info-tbl td:first-child { color:var(--text-faint); width:72px; padding-right:8px; white-space:nowrap; }
+.dp-hist-tbl { width:100%; border-collapse:collapse; font-size:var(--fz-xs); margin-top:4px; }
+.dp-hist-tbl th { padding:3px 6px; text-align:right; color:var(--text-faint); font-weight:600; border-bottom:1px solid var(--border); white-space:nowrap; }
+.dp-hist-tbl th:first-child { text-align:left; }
+.dp-hist-tbl td { padding:3px 6px; text-align:right; color:var(--text-dim); border-bottom:1px solid var(--border); }
+.dp-hist-tbl td:first-child { text-align:left; font-weight:700; color:var(--text); }
+.dp-hist-tbl tr.dp-hist-cur td { background:rgba(3,35,75,.07); }
+[data-theme=dark] .dp-hist-tbl tr.dp-hist-cur td { background:rgba(60,180,230,.08); }
 .dp-metrics {
   display:grid; grid-template-columns:1fr 1fr; gap:10px;
 }
@@ -680,6 +690,18 @@ body.panel-open .table-wrap { padding-right:408px; }
       <div class="dp-metrics" id="dp-metrics"></div>
     </div>
 
+    <div>
+      <div class="dp-section-ttl">公司画像</div>
+      <table class="dp-info-tbl" id="dp-info-tbl"></table>
+    </div>
+
+    <div>
+      <div class="dp-section-ttl">年报历史 · MCU</div>
+      <div style="overflow-x:auto">
+        <table class="dp-hist-tbl" id="dp-hist-tbl"></table>
+      </div>
+    </div>
+
   </div>
 </aside>
 
@@ -772,7 +794,7 @@ function cfSyms()   {
 
 function rerenderCharts() {
   const suf = ' ' + curShort();
-  renderGroupedByYear('c-total-rev','totalRev', curF('total_revenue'), suf);
+  renderGroupedByYear('c-total-rev','totalRev', curF('total_revenue'), suf, { type:'logarithmic' });
   renderGroupedByYear('c-mcu-grp',  'mcuGrp',  curF('mcu_revenue'),  suf);
   renderStacked();
 }
@@ -809,7 +831,7 @@ function initChartCtrl() {
   const coWrap = $('co-toggles');
   coWrap.innerHTML = '';
   ORDER.filter(s => G.companies[s]).forEach((s, i) => {
-    const col = CO_COLORS[i];
+    const col = CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length];
     const name = (G.companies[s].meta||{}).name_cn || s;
     const pill = document.createElement('button');
     pill.className = 'co-pill';
@@ -1075,7 +1097,7 @@ function cOpts(extra = {}) {
 function syms() { return ORDER.filter(s => G.companies[s]); }
 
 // ── Grouped chart helper: companies on X, one dataset per year ─────────────
-function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
+function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {}) {
   const years  = cfYears();
   const ss     = cfSyms();
   const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
@@ -1103,12 +1125,19 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix) {
       responsive:true, maintainAspectRatio:false, animation:false,
       plugins:{
         legend:{ position:'bottom', labels:{ font:{size:11,family:'Arial'}, boxWidth:12, color:tick, padding:8 } },
-        tooltip:{ callbacks:{ label: c =>
-          `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(dec)+tooltipSuffix : 'N/A'}` } },
+        tooltip:{ callbacks:{
+          label: c =>
+            `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(dec)+tooltipSuffix : 'N/A'}`,
+          afterTitle: ctx2 => {
+            const lbl = ctx2[0]?.label || '';
+            if (lbl.includes('纳思达')) return ['（002180 仅追踪极海微MCU子公司，集团总营收不在数据库）'];
+            return [];
+          },
+        } },
       },
       scales:{
         x:{ ticks:{ font:{size:11,family:'Arial'}, color:tick, maxRotation:30 }, grid:{ color:grid } },
-        y:{ ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid } },
+        y:{ ticks:{ font:{size:11,family:'Arial'}, color:tick }, grid:{ color:grid }, ...extraYOpts },
       },
     },
   });
@@ -1312,7 +1341,51 @@ function openDetail(sym) {
   });
 
   // Metrics — use the currently selected year
-  _updateDetailMetrics(sym, +$('year-sel').value || 2024);
+  const selYear = +$('year-sel').value || 2024;
+  _updateDetailMetrics(sym, selYear);
+
+  // 公司画像 table
+  const infoRows = [
+    ['核心架构', m.core_license || '—'],
+    ['代工厂',   m.foundry_fab  || '—'],
+    ['市场',     `${m.market||'—'} · 成立${m.founded_year||'?'} / 上市${m.listed_year||'?'}`],
+    ['MCU策略',  STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '—'],
+    ['置信度',   m.mcu_confidence || '—'],
+  ];
+  if (m.mcu_note) infoRows.push(['备注', m.mcu_note]);
+  $('dp-info-tbl').innerHTML = infoRows.map(([k,v]) =>
+    `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+
+  // 年报历史 table
+  const histYears = allYears.slice().reverse();
+  const revField = curF('total_revenue');
+  const mcuField2 = curF('mcu_revenue');
+  const revDec = curDec();
+  $('dp-hist-tbl').innerHTML =
+    `<thead><tr>
+      <th>FY</th><th>披露日</th>
+      <th>总营收<br><span style="font-weight:400">${curShort()}</span></th>
+      <th>MCU<br><span style="font-weight:400">${curShort()}</span></th>
+      <th>MCU%</th><th>毛利率</th><th>研发%</th><th>员工数</th>
+    </tr></thead>` +
+    `<tbody>` + histYears.map(y => {
+      const hf = fin[y] || {};
+      const isCur = (y === selYear);
+      const revV  = hf[revField] != null ? curV(hf[revField]).toFixed(revDec) : '—';
+      const mcuV  = hf[mcuField2] != null ? curV(hf[mcuField2]).toFixed(revDec) : '—';
+      const mcuW  = hf.mcu_weight_pct != null ? hf.mcu_weight_pct.toFixed(1)+'%' : '—';
+      const gm    = hf.gross_margin_pct != null ? hf.gross_margin_pct.toFixed(1)+'%' : '—';
+      const rdP   = hf.rd_pct != null ? hf.rd_pct.toFixed(1)+'%' : '—';
+      const emp   = hf.employee_count != null ? Number(hf.employee_count).toLocaleString('zh-CN') : '—';
+      const filed = hf.filing_date ? hf.filing_date.slice(5) : '—'; // MM-DD
+      const fstat = hf.filing_status === 'reported' ? '✓' : (hf.filing_status || '');
+      return `<tr class="${isCur?'dp-hist-cur':''}">
+        <td>${y}</td>
+        <td style="color:var(--text-faint)">${fstat}&nbsp;${filed}</td>
+        <td>${revV}</td><td>${mcuV}</td>
+        <td>${mcuW}</td><td>${gm}</td><td>${rdP}</td><td>${emp}</td>
+      </tr>`;
+    }).join('') + `</tbody>`;
 
   // Open
   $('detail-panel').classList.add('open');
