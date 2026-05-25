@@ -285,6 +285,9 @@ SYSTEM_PROMPT = """你是一位专业的半导体行业财务分析师。
 输出要求（严格JSON格式）：
 {
   "mcu_revenue_yuan": <float或null>,       // MCU产品营业收入，单位：元。如无则null
+  "total_revenue_yuan": <float或null>,     // 该公司/业务单元的总营业收入，单位：元。
+                                           // 对于纳思达002180：填「集成电路产业总营收」（即极海微全部IC产品合计，通常为14亿量级）；
+                                           // 对于其他公司：填该公司当年合并报表总营收（如已知）；如无可提取则null
   "mcu_revenue_note": "<string>",          // 数据来源描述，如"分产品营业收入表第X页"
   "other_segments": {                      // 其他主要产品线营收（元），可选
     "<产品名>": <float>
@@ -303,7 +306,11 @@ SYSTEM_PROMPT = """你是一位专业的半导体行业财务分析师。
 - 普冉股份：在"主营业务分产品情况"表中找"微控制器"行（区别于NOR Flash、SRAM）
 - 复旦微电子：找"智能计量"或"MCU"相关芯片收入行
 - 乐鑫科技：找"芯片"收入行（区别于"模组"收入）
-- 纳思达/极海（002180）：年报不单独披露MCU，请用「芯片」产品营收作为mcu_revenue_yuan（区别于「模组」收入）；集成电路产业总营收≈14亿，其中「芯片」≈8亿即极海MCU口径，置信度medium
+- 纳思达/极海（002180）：在「一、营业收入构成」或「主营业务分产品」表中：
+  (1) mcu_revenue_yuan = 「芯片」行营业收入（区别于「模组」行）；
+  (2) total_revenue_yuan = 「集成电路」分行业合计 或 所有IC产品行之和（通常比「芯片」行大40-70%，2024年≈14亿）；
+  若找不到集成电路合计行，则将「芯片」+「模组」+其他芯片类行求和填入total_revenue_yuan；
+  置信度medium
 - 国民技术（300077）：年报未拆分MCU vs安全芯片；如有分产品表，查找「MCU」或「微控制器」行；若仅有合并披露则返回null
 - 芯海科技（688595）：在管理层讨论章节找「MCU芯片」行（不含AIoT芯片、不含模拟信号链芯片）；关键字"MCU芯片业务"或"MCU芯片……实现销售"，取该行单独营收；若无独立MCU行则返回null
 - 表格中数字含逗号（千分位）为正常格式，如"1,316,813,511.75"即1316813511.75元
@@ -678,6 +685,10 @@ def update_mcu_known_data(symbol: str, year: int, result: dict) -> None:
     }
     if result.get("mcu_gross_margin") is not None:
         entry["mcu_gross_margin"] = result["mcu_gross_margin"]
+    # Write total_revenue_yuan if extracted (e.g. 纳思达 集成电路产业合计)
+    if result.get("total_revenue_yuan") is not None:
+        entry["total_revenue_yuan"] = result["total_revenue_yuan"]
+        log.info("  total_revenue_yuan also extracted: ¥%.0f", result["total_revenue_yuan"])
 
     data.setdefault(symbol, {})[str(year)] = entry
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
