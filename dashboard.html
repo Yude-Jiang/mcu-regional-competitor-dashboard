@@ -1038,6 +1038,19 @@ function setLang(lang) {
   const year = sel ? +sel.value : 2024;
   const srch = document.getElementById('search');
   if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
+  // Re-render pipeline strip (uses company names)
+  if (typeof G !== 'undefined' && G) renderPipeline(G, year);
+  // Update company pill labels in-place (no event listener re-attach needed)
+  if (typeof G !== 'undefined' && G) {
+    document.querySelectorAll('.co-pill[data-sym]').forEach(pill => {
+      const s = pill.dataset.sym;
+      const m = (G.companies[s]||{}).meta||{};
+      const name = (LANG==='en' ? m.name_en : m.name_cn) || s;
+      const cd = pill.querySelector('.cd');
+      pill.textContent = name;
+      if (cd) pill.prepend(cd);
+    });
+  }
   if (typeof _currentDetailSym !== 'undefined' && _currentDetailSym &&
       document.getElementById('detail-panel')?.classList.contains('open')) {
     openDetail(_currentDetailSym);
