@@ -192,6 +192,11 @@ def apply_mcu_strategy(
         # Manually entered data takes priority (supports both _yuan and legacy _musd)
         if key in known_mcu and isinstance(known_mcu[key], dict):
             k = known_mcu[key]
+            # Allow manual override of total_revenue_yuan (e.g. subsidiary segment total)
+            if k.get("total_revenue_yuan") is not None:
+                fx = FX.get(year, 7.2)
+                row["total_revenue_yuan"] = k["total_revenue_yuan"]
+                row["total_revenue_musd"] = round(k["total_revenue_yuan"] / fx / 1_000_000, 2)
             yuan = k.get("mcu_revenue_yuan")
             musd = k.get("mcu_revenue_musd")
             if yuan is not None:
@@ -323,6 +328,20 @@ def process_symbol(symbol: str, meta: dict, known_mcu: dict) -> dict:
 
     fin = fetch_profit_sheet(symbol)
     log.info("  financial rows: %d", len(fin))
+
+    # For subsidiary_geehy, AKShare returns GROUP consolidation which gets cleared.
+    # If AKShare returned nothing (network), seed skeleton rows from known_mcu years
+    # so that manually entered data can still be applied.
+    if meta.get("mcu_strategy") == "subsidiary_geehy" and not fin:
+        for yr_str, kd in known_mcu.items():
+            if isinstance(kd, dict):
+                try:
+                    yr = int(yr_str)
+                    fin[yr] = {}
+                except ValueError:
+                    pass
+        if fin:
+            log.info("  [%s] seeded %d skeleton rows from mcu_known_data", symbol, len(fin))
 
     emp = fetch_employee_count(symbol)
     for yr, cnt in emp.items():

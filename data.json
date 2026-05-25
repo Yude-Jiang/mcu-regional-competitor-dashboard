@@ -1193,7 +1193,7 @@
           "cagr_label": "N/A"
         },
         "2024": {
-          "total_revenue_yuan": null,
+          "total_revenue_yuan": 1400000000.0,
           "net_income_yuan": null,
           "rd_expense_yuan": null,
           "mcu_revenue_yuan": 821011684.45,
@@ -1205,7 +1205,7 @@
           "revenue_yoy_pct": null,
           "mcu_yoy_pct": null,
           "fx_rate_cny_usd": 7.19,
-          "total_revenue_musd": null,
+          "total_revenue_musd": 194.71,
           "net_income_musd": null,
           "rd_expense_musd": null,
           "mcu_revenue_musd": 114.19,
