@@ -761,22 +761,22 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 <!-- ── Table section header + legend ── -->
 <div class="tbl-section-hdr">
-  <span class="cs-tag" style="background:var(--navy-1)">数据表</span>
-  <span class="cs-title">公司详情 · 点击任意行查看完整画像与历史数据</span>
-  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)">数据来源：年报 / AKShare / 招股书</span>
+  <span class="cs-tag" style="background:var(--navy-1)" data-i18n="tag_tbl">数据表</span>
+  <span class="cs-title" data-i18n="tbl_title">公司详情 · 点击任意行查看完整画像与历史数据</span>
+  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="tbl_src">数据来源：年报 / AKShare / 招股书</span>
 </div>
 <div class="tbl-legend">
-  <span style="font-weight:600;color:var(--text-dim);margin-right:4px">MCU数据置信度：</span>
-  <span class="tbl-legend-item"><span class="dot dc">●</span>年报直接披露</span>
-  <span class="tbl-legend-item"><span class="dot dd">●</span>推算（高置信）</span>
-  <span class="tbl-legend-item"><span class="dot dp">●</span>估算（低置信）</span>
-  <span class="tbl-legend-item"><span class="dot du">●</span>数据缺失</span>
+  <span style="font-weight:600;color:var(--text-dim);margin-right:4px" data-i18n="legend_conf_ttl">MCU数据置信度：</span>
+  <span class="tbl-legend-item"><span class="dot dc">●</span><span data-i18n="legend_reported">年报直接披露</span></span>
+  <span class="tbl-legend-item"><span class="dot dd">●</span><span data-i18n="legend_derived">推算（高置信）</span></span>
+  <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
+  <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
   <span class="tbl-legend-sep"></span>
-  <span style="font-weight:600;color:var(--text-dim);margin-right:4px">YoY同比：</span>
-  <span class="tbl-legend-item"><span class="pos">+X%</span>&nbsp;增长</span>
-  <span class="tbl-legend-item"><span class="neg">-X%</span>&nbsp;下滑</span>
+  <span style="font-weight:600;color:var(--text-dim);margin-right:4px" data-i18n="legend_yoy_ttl">YoY同比：</span>
+  <span class="tbl-legend-item"><span class="pos">+X%</span>&nbsp;<span data-i18n="legend_growth">增长</span></span>
+  <span class="tbl-legend-item"><span class="neg">-X%</span>&nbsp;<span data-i18n="legend_decline">下滑</span></span>
   <span class="tbl-legend-sep"></span>
-  <span style="color:var(--text-faint)">毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）</span>
+  <span style="color:var(--text-faint)" data-i18n="legend_gm_note">毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）</span>
 </div>
 <!-- ── Table ── -->
 <div class="table-wrap">
@@ -801,7 +801,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </tr>
 </thead>
 <tbody id="tbody">
-  <tr><td colspan="15" style="text-align:center;padding:48px;color:var(--text-faint)">
+  <tr><td colspan="15" style="text-align:center;padding:48px;color:var(--text-faint)" id="tbody-loading">
     加载中…&ensp;如数据为空请先运行 <code>python fetch_mcu_data.py</code>
   </td></tr>
 </tbody>
@@ -811,8 +811,8 @@ body.panel-open .table-wrap { padding-right:50vw; }
 <!-- ── Footer ── -->
 <footer>
   MCU Regional Competitor Analysis &nbsp;|&nbsp;
-  数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书 &nbsp;|&nbsp;
-  创建: yude.jiang@st.com &nbsp;|&nbsp;
+  <span data-i18n="footer_src">数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书</span> &nbsp;|&nbsp;
+  <span data-i18n="footer_creator">创建: yude.jiang@st.com</span> &nbsp;|&nbsp;
   <span id="footer-date"></span>
 </footer>
 <script>
@@ -838,12 +838,12 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <div class="dp-co-en"  id="dp-en"></div>
       <div class="dp-co-tag" id="dp-tag"></div>
     </div>
-    <button class="dp-close" onclick="closeDetail()" title="关闭">✕</button>
+    <button class="dp-close" onclick="closeDetail()" title="Close" data-i18n-title="dp_close">✕</button>
   </div>
   <div class="dp-body">
 
     <div>
-      <div class="dp-section-ttl">MCU 口径策略</div>
+      <div class="dp-section-ttl" data-i18n="dp_mcu_strategy">MCU 口径策略</div>
       <div class="dp-strat-box">
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <div class="dp-strat-badge" id="dp-strat-badge">—</div>
@@ -861,17 +861,17 @@ body.panel-open .table-wrap { padding-right:50vw; }
     </div>
 
     <div>
-      <div class="dp-section-ttl">关键指标 · <span id="dp-metric-year">2024</span></div>
+      <div class="dp-section-ttl"><span data-i18n="dp_key_metrics">关键指标</span> · <span id="dp-metric-year">2024</span></div>
       <div class="dp-metrics" id="dp-metrics"></div>
     </div>
 
     <div>
-      <div class="dp-section-ttl">公司画像</div>
+      <div class="dp-section-ttl" data-i18n="dp_profile">公司画像</div>
       <table class="dp-info-tbl" id="dp-info-tbl"></table>
     </div>
 
     <div>
-      <div class="dp-section-ttl">年报历史 · MCU</div>
+      <div class="dp-section-ttl" data-i18n="dp_hist_title">年报历史 · MCU</div>
       <div style="overflow-x:auto">
         <table class="dp-hist-tbl" id="dp-hist-tbl"></table>
       </div>
@@ -882,6 +882,165 @@ body.panel-open .table-wrap { padding-right:50vw; }
 </aside>
 
 <script>
+// ── i18n ──────────────────────────────────────────────────────────────────
+let LANG = localStorage.getItem('mcu_lang') || 'zh';
+
+const I18N = {
+  zh: {
+    subtitle:'中国大陆 MCU 上市公司 · 年报与推算',
+    admin:'⚙ 管理',
+    lbl_year:'年份', lbl_search:'搜索', ph_search:'公司名 / 代码 / 代工厂…',
+    btn_all:'全部', lbl_sort:'排序',
+    sort_mcu_rev:'MCU 营收', sort_total_rev:'总营收', sort_name:'公司名',
+    sort_desc:'↓ 降序', sort_asc:'↑ 升序',
+    lbl_companies:'公司', lbl_currency:'货币',
+    tag_rev:'总营收', chart_rev_title:'按公司 · 总营收 (来自年报)',
+    tag_net_margin:'净利率', chart_net_title:'按公司 · 净利润率 %', net_margin_yaxis:'净利润率',
+    tag_mcu:'MCU', chart_mcu_title:'按公司 · MCU 营收 (推算)',
+    tag_stacked:'堆叠', chart_stacked_title:'按年度 · 公司堆叠',
+    tag_heatmap:'热力图', chart_heatmap_title:'YoY% 营收热力图',
+    heatmap_sub:'上：总营收YoY  下：MCU YoY',
+    sect_rev_src_html:'<strong>数据来源：</strong>AKShare / 东方财富 API 拉取年报合并利润表「营业收入」&amp;「净利润」，按当年平均汇率换算 M$。&ensp;<strong>解读：</strong>2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑，净利率同步收窄；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。',
+    sect_mcu_src_html:'<strong>数据来源：</strong>部分公司年报直接披露 MCU 分产品收入（<em>●年报直接</em>）；其余按总收入 × 业务系数推算（<em>●推算</em>），详见各公司策略标签。堆叠图展示行业 MCU 合计规模年度演变。&ensp;<strong>解读：</strong>行业 MCU 合计营收 2018→2025 年 CAGR 约 20%+；兆易创新持续占据最大份额；纳思达极海微定位工业/汽车，单价较高；乐鑫凭借 AIoT 生态增速领先。',
+    tag_tbl:'数据表', tbl_title:'公司详情 · 点击任意行查看完整画像与历史数据',
+    tbl_src:'数据来源：年报 / AKShare / 招股书',
+    legend_conf_ttl:'MCU数据置信度：',
+    legend_reported:'年报直接披露', legend_derived:'推算（高置信）',
+    legend_estimated:'估算（低置信）', legend_unavail:'数据缺失',
+    legend_yoy_ttl:'YoY同比：', legend_growth:'增长', legend_decline:'下滑',
+    legend_gm_note:'毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）',
+    th_company:'公司', th_founded:'成立<br>上市', th_arch:'核心架构',
+    th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_mcu_8yr:'MCU<br>8年', th_mcu_yoy:'YoY%', th_mcu_pct:'占比%',
+    th_gm:'毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
+    loading:'加载中… 如数据为空请先运行 ',
+    err_load:'数据加载失败：', err_run:'请先运行 ', no_results:'无匹配结果',
+    fx_label:'汇率参考 CNY/USD：', fx_source:'（来源：中国人民银行年度均值）',
+    data_updated:'数据更新: ', data_date_pfx:'数据日期 ', err_no_data:'请运行 fetch_mcu_data.py',
+    footer_src:'数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书',
+    footer_creator:'创建: yude.jiang@st.com',
+    dp_mcu_strategy:'MCU 口径策略', dp_chart_ttl_pfx:'8年 总营收 vs MCU 营收',
+    dp_key_metrics:'关键指标', dp_profile:'公司画像', dp_hist_title:'年报历史 · MCU',
+    dp_close:'关闭', dp_arch:'核心架构', dp_foundry:'代工厂', dp_market:'市场',
+    dp_mcu_strat:'MCU策略', dp_conf:'置信度', dp_note:'备注',
+    dph_fy:'FY', dph_filed:'披露日', dph_rev:'总营收', dph_mcu:'MCU',
+    dph_mcu_pct:'MCU%', dph_gm:'毛利率', dph_rd:'研发%', dph_emp:'员工数',
+    mcu_total_pfx:'家合计（推算）：', rev_total_pfx:'家公司合计：',
+    src_prospectus:'招股书',
+    fn_prosp:(yrs) => `<strong>招股书</strong> — ${yrs}年营收来自 IPO 招股说明书（上市前财务披露），毛利率与员工数在招股书中未规范列报，暂未提取，显示「—」。`,
+    fn_gm_none:'毛利率全部缺失：AKShare/东方财富 API 未提供该公司分产品毛利率，需从年报 PDF 单独提取（待补充）。',
+    fn_gm_partial:(yrs) => `毛利率部分缺失（${yrs}年）：数据源从近年才开始覆盖，历史年份待 PDF 补充。`,
+    note_nashida_rev:'（002180 仅追踪极海微IC子公司营收，集团总营收不在数据库）',
+    note_nashida_mcu:'（002180 仅追踪极海微MCU子公司，集团总营收不在数据库）',
+    mcu_sub_mcu:'MCU口径', mcu_sub_co:'综合口径',
+    qa_title:'AI 竞情问答', qa_model_default:'DeepSeek / Gemini',
+    qa_ph:'问任何关于11家MCU公司的问题…', qa_send:'发送',
+    qa_suggested_ttl:'建议问题', qa_err_pfx:'错误：', qa_net_err_pfx:'网络错误：',
+    m_total_rev:'总营收', m_mcu_rev:'MCU 营收', m_mcu_pct:'MCU 占比',
+    m_gross_mgn:'毛利率', m_rd_exp:'研发费用', m_net_inc:'净利润', m_emp:'员工人数',
+    m_mcu_basis:'MCU口径', m_co_basis:'综合口径', m_pct_of_rev:'% of Rev',
+    founded:'成立', listed:'上市',
+  },
+  en: {
+    subtitle:'China A-Share MCU Companies · Annual Reports & Estimates',
+    admin:'⚙ Admin',
+    lbl_year:'Year', lbl_search:'Search', ph_search:'Company / Code / Foundry…',
+    btn_all:'All', lbl_sort:'Sort',
+    sort_mcu_rev:'MCU Rev', sort_total_rev:'Total Rev', sort_name:'Name',
+    sort_desc:'↓ Desc', sort_asc:'↑ Asc',
+    lbl_companies:'Companies', lbl_currency:'Currency',
+    tag_rev:'Total Rev', chart_rev_title:'By Company · Total Revenue (Annual Reports)',
+    tag_net_margin:'Net Margin', chart_net_title:'By Company · Net Profit Margin %', net_margin_yaxis:'Net Margin %',
+    tag_mcu:'MCU', chart_mcu_title:'By Company · MCU Revenue (Estimates)',
+    tag_stacked:'Stacked', chart_stacked_title:'By Year · Company Stack',
+    tag_heatmap:'Heatmap', chart_heatmap_title:'YoY% Revenue Heatmap',
+    heatmap_sub:'Top: Total Rev YoY  Bottom: MCU YoY',
+    sect_rev_src_html:'<strong>Source:</strong> AKShare / EastMoney API — consolidated income statement "Revenue" &amp; "Net Income", converted to M$ at annual avg. FX.&ensp;<strong>Insight:</strong> 2021–22 chip shortage drove revenue surge; 2023 inventory digestion caused broad declines; 2024 recovery diverged — GigaDevice &amp; Espressif showed strongest rebound.',
+    sect_mcu_src_html:'<strong>Source:</strong> Some companies directly report MCU segment revenue (<em>●Direct</em>); others estimated via Total Rev × coefficient (<em>●Estimated</em>). See each company\'s strategy badge. Stacked chart shows industry MCU aggregate by year.&ensp;<strong>Insight:</strong> Industry MCU CAGR 2018→2025 ~20%+; GigaDevice holds largest share; Geehy (NSDA) targets industrial/auto with high ASP; Espressif leads growth via AIoT ecosystem.',
+    tag_tbl:'Table', tbl_title:'Company Detail · Click any row for full profile & history',
+    tbl_src:'Source: Annual Reports / AKShare / Prospectus',
+    legend_conf_ttl:'MCU Data Confidence:',
+    legend_reported:'Annual Report (Direct)', legend_derived:'Derived (High Conf.)',
+    legend_estimated:'Estimated (Low Conf.)', legend_unavail:'Unavailable',
+    legend_yoy_ttl:'YoY:', legend_growth:'Growth', legend_decline:'Decline',
+    legend_gm_note:'Gross Margin: product-level where available; historical PDF extraction pending (shown as —)',
+    th_company:'Company', th_founded:'Founded<br>Listed', th_arch:'Core Arch.',
+    th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_mcu_8yr:'MCU<br>8yr', th_mcu_yoy:'YoY%', th_mcu_pct:'MCU Mix%',
+    th_gm:'Gross Mgn', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
+    loading:'Loading… If empty, run ',
+    err_load:'Failed to load data: ', err_run:'Please run ', no_results:'No results',
+    fx_label:'FX Reference CNY/USD:', fx_source:'(Source: PBOC Annual Average)',
+    data_updated:'Updated: ', data_date_pfx:'Data date ', err_no_data:'Run fetch_mcu_data.py',
+    footer_src:'Source: AKShare · EastMoney · Annual Reports · IPO Prospectus',
+    footer_creator:'Created by: yude.jiang@st.com',
+    dp_mcu_strategy:'MCU Strategy', dp_chart_ttl_pfx:'8-Year Total Rev vs MCU Rev',
+    dp_key_metrics:'Key Metrics', dp_profile:'Company Profile', dp_hist_title:'Annual History · MCU',
+    dp_close:'Close', dp_arch:'Core Arch.', dp_foundry:'Foundry', dp_market:'Market',
+    dp_mcu_strat:'MCU Strategy', dp_conf:'Confidence', dp_note:'Notes',
+    dph_fy:'FY', dph_filed:'Filed', dph_rev:'Total Rev', dph_mcu:'MCU',
+    dph_mcu_pct:'MCU%', dph_gm:'Gross Mgn', dph_rd:'R&D%', dph_emp:'Employees',
+    mcu_total_pfx:'-Co. Total (Est.):', rev_total_pfx:' Companies Total:',
+    src_prospectus:'Prospectus',
+    fn_prosp:(yrs) => `<strong>Prospectus</strong> — Revenue for ${yrs} from IPO Prospectus (pre-listing disclosure). Gross margin &amp; headcount not extracted from prospectus; shown as —.`,
+    fn_gm_none:'Gross margin unavailable: AKShare/EastMoney does not provide segment gross margin; PDF extraction pending.',
+    fn_gm_partial:(yrs) => `Partial gross margin (${yrs}): data source coverage starts from recent years only; historical years pending PDF extraction.`,
+    note_nashida_rev:'(002180 tracks Geehy Micro IC subsidiary only; group revenue not in DB)',
+    note_nashida_mcu:'(002180 tracks Geehy Micro MCU subsidiary only; group revenue not in DB)',
+    mcu_sub_mcu:'MCU-level', mcu_sub_co:'Company-level',
+    qa_title:'AI Competitive Q&A', qa_model_default:'DeepSeek / Gemini',
+    qa_ph:'Ask anything about the 11 MCU companies…', qa_send:'Send',
+    qa_suggested_ttl:'Suggested Questions', qa_err_pfx:'Error: ', qa_net_err_pfx:'Network error: ',
+    m_total_rev:'Total Revenue', m_mcu_rev:'MCU Revenue', m_mcu_pct:'MCU Mix%',
+    m_gross_mgn:'Gross Margin', m_rd_exp:'R&D Expense', m_net_inc:'Net Income', m_emp:'Headcount',
+    m_mcu_basis:'MCU-level', m_co_basis:'Company-level', m_pct_of_rev:'% of Rev',
+    founded:'f.', listed:'l.',
+  },
+};
+
+function T(key) { return (I18N[LANG] || I18N.zh)[key] ?? key; }
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = T(el.dataset.i18n);
+    if (el.innerHTML !== v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = T(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = T(el.dataset.i18nPh);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = T(el.dataset.i18nTitle);
+  });
+  // Update lang button
+  const lb = document.getElementById('lang-btn');
+  if (lb) { lb.textContent = LANG === 'zh' ? 'EN' : '中'; lb.classList.toggle('active', LANG === 'en'); }
+}
+
+function setLang(lang) {
+  LANG = lang;
+  localStorage.setItem('mcu_lang', lang);
+  applyI18n();
+  // Re-render dynamic content
+  renderFxBar();
+  if (typeof rerenderCharts === 'function') rerenderCharts();
+  const sel = document.getElementById('year-sel');
+  const year = sel ? +sel.value : 2024;
+  const srch = document.getElementById('search');
+  if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
+  if (typeof _currentDetailSym !== 'undefined' && _currentDetailSym &&
+      document.getElementById('detail-panel')?.classList.contains('open')) {
+    openDetail(_currentDetailSym);
+  }
+  // Update hdr-meta
+  if (typeof G !== 'undefined' && G && G.generated_at) {
+    const el = document.getElementById('hdr-meta');
+    if (el) el.innerHTML = T('data_date_pfx') + `<b>${G.generated_at}</b>`;
+  }
+}
+
 const ORDER = [
   '603986','300327','688380','300077','688279',
   '002180','688385','688766','688595','688391','688018',
@@ -1011,7 +1170,8 @@ function initChartCtrl() {
   coWrap.innerHTML = '';
   ORDER.filter(s => G.companies[s]).forEach((s, i) => {
     const col = CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length];
-    const name = (G.companies[s].meta||{}).name_cn || s;
+    const meta2 = G.companies[s].meta||{};
+    const name = (LANG==='en' ? meta2.name_en : meta2.name_cn) || s;
     const pill = document.createElement('button');
     pill.className = 'co-pill';
     pill.dataset.sym = s;
@@ -1057,7 +1217,7 @@ function initChartCtrl() {
   const dirBtn = $('chart-sort-dir');
   dirBtn.addEventListener('click', () => {
     CF.sortDir = CF.sortDir === 'desc' ? 'asc' : 'desc';
-    dirBtn.textContent = CF.sortDir === 'desc' ? '↓ 降序' : '↑ 升序';
+    dirBtn.textContent = CF.sortDir === 'desc' ? T('sort_desc') : T('sort_asc');
     dirBtn.classList.toggle('asc', CF.sortDir === 'asc');
     rerenderCharts();
   });
@@ -1162,7 +1322,7 @@ function renderPipeline(data, year) {
     const border = CONF_BORDER[conf] || CONF_BORDER.na;
     return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}" onclick="openDetail('${sym}')">
       <span class="fp-sym">${sym}</span>
-      <span class="fp-name">${m.name_cn || sym}</span>
+      <span class="fp-name">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</span>
       <span class="fp-badge">${strat}</span>
     </div>`;
   }).join('');
@@ -1227,8 +1387,8 @@ function renderTable(year, query) {
     const fmtRd  = curFmt(f[curF('rd_expense')]);
     return `<tr style="cursor:pointer" onclick="openDetail('${sym}')">
       <td class="sticky l">
-        <div class="co-cn">${m.name_cn || sym}</div>
-        <div class="co-en">${m.name_en || ''}</div>
+        <div class="co-cn">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</div>
+        <div class="co-en">${(LANG==='en' ? m.name_cn : m.name_en) || ''}</div>
         <div class="co-tag">${sym}&nbsp;·&nbsp;${m.market || ''}</div>
       </td>
       <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
@@ -1249,7 +1409,7 @@ function renderTable(year, query) {
   });
 
   $('tbody').innerHTML = rows.join('') ||
-    '<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text-faint)">无匹配结果</td></tr>';
+    `<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text-faint)">${T('no_results')}</td></tr>`;
 
   document.querySelectorAll('thead th.sortable').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
@@ -1300,7 +1460,7 @@ function _updateMcuSummary(years, ss) {
   const yoy  = n>0 && totals[n-1]>0 ? (totals[n]-totals[n-1])/totals[n-1]*100 : null;
   const cagr = n>0 && totals[0]>0   ? (Math.pow(totals[n]/totals[0],1/n)-1)*100 : null;
   const flow = yrs.map((y,i)=>`${y}: <b>${totals[i].toFixed(dec)} ${unit}</b>`).join(' → ');
-  let html = `<span style="color:var(--text-dim);font-weight:600">MCU ${ss.length}家合计（推算）：</span>${flow}`;
+  let html = `<span style="color:var(--text-dim);font-weight:600">MCU ${ss.length}${T('mcu_total_pfx')}</span>${flow}`;
   if (yoy!=null) html += ` <span style="opacity:.5">|</span> YoY <b style="color:${yoy>=0?'var(--pos)':'var(--neg)'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</b>`;
   if (cagr!=null) html += ` <span style="opacity:.5">|</span> ${n}Y CAGR <b>${cagr.toFixed(1)}%</b>`;
   el.innerHTML = html;
@@ -1323,7 +1483,7 @@ function _updateRevSummary(years, ss) {
   const yoy  = n>0 && totals[n-1]>0 ? (totals[n]-totals[n-1])/totals[n-1]*100 : null;
   const cagr = n>0 && totals[0]>0   ? (Math.pow(totals[n]/totals[0],1/n)-1)*100 : null;
   const flow = yrs.map((y,i)=>`${y}: <b>${totals[i].toFixed(dec)} ${unit}</b>`).join(' → ');
-  let html = `<span style="color:var(--text-dim);font-weight:600">${ss.length}家公司合计：</span>${flow}`;
+  let html = `<span style="color:var(--text-dim);font-weight:600">${ss.length}${T('rev_total_pfx')}</span>${flow}`;
   if (yoy!=null) html += ` <span style="opacity:.5">|</span> YoY <b style="color:${yoy>=0?'var(--pos)':'var(--neg)'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</b>`;
   if (cagr!=null) html += ` <span style="opacity:.5">|</span> ${n}Y CAGR <b>${cagr.toFixed(1)}%</b>`;
   el.innerHTML = html;
@@ -1333,7 +1493,7 @@ function _updateRevSummary(years, ss) {
 function renderTotalRevChart() {
   const years  = cfYears();
   const ss     = cfSyms();
-  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const labels = ss.map(s => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; });
   const field  = curF('total_revenue');
   const scale  = field.endsWith('_yuan') ? 1/1e8 : 1;
   const dec    = field.endsWith('_yuan') ? 2 : 1;
@@ -1364,8 +1524,9 @@ function renderTotalRevChart() {
         tooltip:{ callbacks:{
           label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(dec)+' '+unit:'N/A'}`,
           afterTitle: ctx2 => {
-            if ((ctx2[0]?.label||'').includes('纳思达'))
-              return ['（002180 仅追踪极海微IC子公司营收，集团总营收不在数据库）'];
+            const lbl = ctx2[0]?.label || '';
+            if (lbl.includes('纳思达') || lbl.includes('Nasda') || lbl.includes('NSDA'))
+              return [T('note_nashida_rev')];
             return [];
           },
         }},
@@ -1383,7 +1544,7 @@ function renderTotalRevChart() {
 function renderNetMarginChart() {
   const years  = cfYears();
   const ss     = cfSyms();
-  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const labels = ss.map(s => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; });
   const dark   = document.documentElement.dataset.theme === 'dark';
   const tick   = dark ? '#7d94b3' : '#8191a5';
   const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
@@ -1413,7 +1574,7 @@ function renderNetMarginChart() {
         x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
         y:{ ticks:{font:{size:11,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
             grid:{color:grid},
-            title:{display:true,text:'净利润率',color:tick,font:{size:10}} },
+            title:{display:true,text:T('net_margin_yaxis'),color:tick,font:{size:10}} },
       },
     },
   });
@@ -1422,7 +1583,7 @@ function renderNetMarginChart() {
 function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {}) {
   const years  = cfYears();
   const ss     = cfSyms();
-  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const labels = ss.map(s => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; });
   const dark  = document.documentElement.dataset.theme === 'dark';
   const tick  = dark ? '#7d94b3' : '#8191a5';
   const grid  = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
@@ -1452,7 +1613,8 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {
             `${c.dataset.label}: ${c.parsed.y!=null ? c.parsed.y.toFixed(dec)+tooltipSuffix : 'N/A'}`,
           afterTitle: ctx2 => {
             const lbl = ctx2[0]?.label || '';
-            if (lbl.includes('纳思达')) return ['（002180 仅追踪极海微MCU子公司，集团总营收不在数据库）'];
+            if (lbl.includes('纳思达') || lbl.includes('Nasda') || lbl.includes('NSDA'))
+              return [T('note_nashida_mcu')];
             return [];
           },
         } },
@@ -1478,7 +1640,7 @@ function renderStacked() {
   const stDec    = mcuField.endsWith('_yuan') ? 2 : 1;
   const stUnit   = curShort();
   const datasets = ss.map(s => ({
-    label: (G.companies[s].meta||{}).name_cn || s,
+    label: (() => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; })(),
     data:  years.map(y => { const v = (G.companies[s].financials[y]||{})[mcuField]; return v != null ? v * stScale : null; }),
     backgroundColor: CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length],
     stack: 'a', spanGaps: false,
@@ -1546,7 +1708,8 @@ function renderYoYHeatmap() {
 
   // Data rows
   ss.forEach(s => {
-    const name = (G.companies[s].meta||{}).name_cn || s;
+    const meta = G.companies[s].meta||{};
+    const name = (LANG==='en' ? meta.name_en : meta.name_cn) || s;
     html += `<div class="yoy-row-lbl">${name}</div>`;
     years.forEach(y => {
       const f    = (G.companies[s].financials[y]||{});
@@ -1636,27 +1799,27 @@ function _updateDetailMetrics(sym, year) {
   $('dp-metric-year').textContent = year;
   const f = fin[year] || {};
   const metrics = [
-    { lbl:'总营收',   val: curFmt(f[curF('total_revenue')]),
+    { key:'total_rev',  lbl:T('m_total_rev'),  val: curFmt(f[curF('total_revenue')]),
       sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'MCU 营收', val: curFmt(f[curF('mcu_revenue')]),
+    { key:'mcu_rev',   lbl:T('m_mcu_rev'),    val: curFmt(f[curF('mcu_revenue')]),
       sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'MCU 占比', val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
+    { key:'mcu_pct',   lbl:T('m_mcu_pct'),    val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
       sub: STRAT_LBL[m.mcu_strategy] || '' },
-    { lbl:'毛利率',   val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
-      sub: f.mcu_confidence === 'high' ? 'MCU口径' : (f.gross_margin_pct != null ? '综合口径' : '') },
-    { lbl:'研发费用', val: curFmt(f[curF('rd_expense')]),
-      sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+'% of Rev' : '' },
-    { lbl:'净利润',   val: curFmt(f[curF('net_income')]),
+    { key:'gross_mgn', lbl:T('m_gross_mgn'),  val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
+      sub: f.mcu_confidence === 'high' ? T('m_mcu_basis') : (f.gross_margin_pct != null ? T('m_co_basis') : '') },
+    { key:'rd_exp',    lbl:T('m_rd_exp'),     val: curFmt(f[curF('rd_expense')]),
+      sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+T('m_pct_of_rev') : '' },
+    { key:'net_inc',   lbl:T('m_net_inc'),    val: curFmt(f[curF('net_income')]),
       sub: f.net_income_yoy_pct != null ? (f.net_income_yoy_pct>=0?'+':'')+f.net_income_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.net_income_yoy_pct!=null ? (f.net_income_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { lbl:'员工人数', val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—',
+    { key:'emp_count', lbl:T('m_emp'),        val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—',
       sub: '' },
   ];
   $('dp-metrics').innerHTML = metrics.map(me => `
     <div class="dp-metric">
-      <div class="dp-metric-lbl">${me.lbl}<span class="info-tip" onclick="showMetricInfo('${me.lbl}',this)" title="说明">?</span></div>
+      <div class="dp-metric-lbl">${me.lbl}<span class="info-tip" onclick="showMetricInfo('${me.key}',this)" title="?">?</span></div>
       <div class="dp-metric-val">${me.val}</div>
       ${me.sub ? `<div class="dp-metric-sub ${me.cls||''}">${me.sub}</div>` : ''}
     </div>`).join('');
@@ -1671,9 +1834,9 @@ function openDetail(sym) {
   const allYears = G.years || [];
 
   // Header
-  $('dp-name').textContent = m.name_cn || sym;
-  $('dp-en').textContent   = m.name_en || '';
-  $('dp-tag').textContent  = `${sym} · ${m.market || ''} · 成立${m.founded_year||'?'} / 上市${m.listed_year||'?'}`;
+  $('dp-name').textContent = (LANG === 'en' ? m.name_en : m.name_cn) || sym;
+  $('dp-en').textContent   = LANG === 'en' ? (m.name_cn || '') : (m.name_en || '');
+  $('dp-tag').textContent  = `${sym} · ${m.market || ''} · ${T('founded')} ${m.founded_year||'?'} / ${T('listed')} ${m.listed_year||'?'}`;
 
   // Strategy
   $('dp-strat-badge').textContent = STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '?';
@@ -1718,7 +1881,7 @@ function openDetail(sym) {
 
   // Mini chart — bars for revenue, line for gross margin on secondary axis
   const dpChartTtl = $('dp-chart-ttl');
-  if (dpChartTtl) dpChartTtl.textContent = `8年 总营收 vs MCU 营收 (${curUnit()})`;
+  if (dpChartTtl) dpChartTtl.textContent = `${T('dp_chart_ttl_pfx')} (${curUnit()})`;
   const labels  = allYears.map(String);
   const revData = allYears.map(y => { const v = (fin[y]||{})[curF('total_revenue')]; return v != null ? curV(v) : null; });
   const mcuData = allYears.map(y => { const v = (fin[y]||{})[curF('mcu_revenue')];   return v != null ? curV(v) : null; });
@@ -1771,13 +1934,13 @@ function openDetail(sym) {
 
   // 公司画像 table
   const infoRows = [
-    ['核心架构', m.core_license || '—'],
-    ['代工厂',   m.foundry_fab  || '—'],
-    ['市场',     `${m.market||'—'} · 成立${m.founded_year||'?'} / 上市${m.listed_year||'?'}`],
-    ['MCU策略',  STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '—'],
-    ['置信度',   m.mcu_confidence || '—'],
+    [T('dp_arch'),     m.core_license || '—'],
+    [T('dp_foundry'),  m.foundry_fab  || '—'],
+    [T('dp_market'),   `${m.market||'—'} · ${T('founded')} ${m.founded_year||'?'} / ${T('listed')} ${m.listed_year||'?'}`],
+    [T('dp_mcu_strat'), STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '—'],
+    [T('dp_conf'),     m.mcu_confidence || '—'],
   ];
-  if (m.mcu_note) infoRows.push(['备注', m.mcu_note]);
+  if (m.mcu_note) infoRows.push([T('dp_note'), m.mcu_note]);
   $('dp-info-tbl').innerHTML = infoRows.map(([k,v]) =>
     `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
 
@@ -1789,10 +1952,10 @@ function openDetail(sym) {
   const listedYear = parseInt(m.listed_year || '9999');
   $('dp-hist-tbl').innerHTML =
     `<thead><tr>
-      <th>FY</th><th>披露日</th>
-      <th>总营收<br><span style="font-weight:400">${curShort()}</span></th>
-      <th>MCU<br><span style="font-weight:400">${curShort()}</span></th>
-      <th>MCU%</th><th>毛利率</th><th>研发%</th><th>员工数</th>
+      <th>${T('dph_fy')}</th><th>${T('dph_filed')}</th>
+      <th>${T('dph_rev')}<br><span style="font-weight:400">${curShort()}</span></th>
+      <th>${T('dph_mcu')}<br><span style="font-weight:400">${curShort()}</span></th>
+      <th>${T('dph_mcu_pct')}</th><th>${T('dph_gm')}</th><th>${T('dph_rd')}</th><th>${T('dph_emp')}</th>
     </tr></thead>` +
     `<tbody>` + histYears.map(y => {
       const hf = fin[y] || {};
@@ -1807,7 +1970,7 @@ function openDetail(sym) {
       const filed = hf.filing_date ? hf.filing_date.slice(5) : '—'; // MM-DD
       const fstat = hf.filing_status === 'reported' ? '✓' : (hf.filing_status || '');
       return `<tr class="${isCur?'dp-hist-cur':''}">
-        <td>${y}${isProsp ? '<span class="src-badge src-prosp">招股书</span>' : ''}</td>
+        <td>${y}${isProsp ? `<span class="src-badge src-prosp">${T('src_prospectus')}</span>` : ''}</td>
         <td style="color:var(--text-faint)">${fstat}&nbsp;${filed}</td>
         <td>${revV}</td><td>${mcuV}</td>
         <td>${mcuW}</td><td>${gm}</td><td>${rdP}</td><td>${emp}</td>
@@ -1821,14 +1984,14 @@ function openDetail(sym) {
   const footnoteEl = $('dp-hist-footnote');
   const notes = [];
   if (prospYears.length) {
-    notes.push(`<strong>招股书</strong> — ${prospYears.slice().reverse().join('、')}年营收来自 IPO 招股说明书（上市前财务披露），毛利率与员工数在招股书中未规范列报，暂未提取，显示「—」。`);
+    notes.push(I18N[LANG].fn_prosp(prospYears.slice().reverse().join(LANG==='zh'?'、':',')));
   }
   if (hasNoGM) {
-    notes.push(`<span class="nt-gm">毛利率全部缺失：AKShare/东方财富 API 未提供该公司分产品毛利率，需从年报 PDF 单独提取（待补充）。</span>`);
+    notes.push(`<span class="nt-gm">${T('fn_gm_none')}</span>`);
   } else if (partialGM) {
     const missingGMYrs = allYears.filter(y => (fin[y]||{}).gross_margin_pct == null && parseInt(y) >= listedYear);
     if (missingGMYrs.length) {
-      notes.push(`<span class="nt-gm">毛利率部分缺失（${missingGMYrs.join('、')}年）：数据源从近年才开始覆盖，历史年份待 PDF 补充。</span>`);
+      notes.push(`<span class="nt-gm">${I18N[LANG].fn_gm_partial(missingGMYrs.join(LANG==='zh'?'、':','))}</span>`);
     }
   }
   footnoteEl.innerHTML = notes.length ? `<div class="dp-hist-note">${notes.join('<br>')}</div>` : '';
@@ -1841,21 +2004,43 @@ function openDetail(sym) {
 
 // ── 指标说明 tooltip ──────────────────────────────────────────────────────────
 const METRIC_INFO = {
-  '总营收':   { formula:'营业收入 = 产品销售额 + 服务额', note:'来自年报合并利润表「营业收入」行；M$ 按当年平均汇率换算。' },
-  'MCU 营收': { formula:'因公司口径而异（见策略标签）', note:'segment_reported：年报分产品表直接取数<br>total_proxy×k：总收入 × 业务系数<br>subsidiary：极海微子公司营收' },
-  'MCU 占比': { formula:'MCU营收 ÷ 总营收 × 100%', note:'反映 MCU 主业集中度。>80% 为纯 MCU 厂商，<30% 说明多元化布局。' },
-  '毛利率':   { formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。<br><br>⚠ 中微半导、峰岹、芯海、钜泉、乐鑫历史毛利率 API 未覆盖，待年报 PDF 提取。' },
-  '研发费用': { formula:'研发费用率 = 研发费用 ÷ 营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。A股芯片公司普遍 10–20%。' },
-  '净利润':   { formula:'净利润率 = 净利润 ÷ 营收 × 100%', note:'归属于母公司股东的净利润，已扣除所有成本、税费及少数股东损益。' },
-  '员工人数': { formula:'人效（万元/人）= 总营收 ÷ 员工人数', note:'报告期末在职员工总数，来自年报「员工情况」章节。' },
+  total_rev:  {
+    zh:{ title:'总营收',   formula:'营业收入 = 产品销售额 + 服务额', note:'来自年报合并利润表「营业收入」行；M$ 按当年平均汇率换算。' },
+    en:{ title:'Total Revenue', formula:'Revenue = Product Sales + Services', note:'From consolidated income statement "Operating Revenue"; M$ converted at annual avg. FX rate.' },
+  },
+  mcu_rev: {
+    zh:{ title:'MCU 营收', formula:'因公司口径而异（见策略标签）', note:'segment_reported：年报分产品表直接取数<br>total_proxy×k：总收入 × 业务系数<br>subsidiary：极海微子公司营收' },
+    en:{ title:'MCU Revenue', formula:'Varies by company methodology (see strategy badge)', note:'segment_reported: direct from annual report segment table<br>total_proxy×k: total revenue × business coefficient<br>subsidiary: Geehy Micro subsidiary revenue' },
+  },
+  mcu_pct: {
+    zh:{ title:'MCU 占比', formula:'MCU营收 ÷ 总营收 × 100%', note:'反映 MCU 主业集中度。>80% 为纯 MCU 厂商，<30% 说明多元化布局。' },
+    en:{ title:'MCU Mix%', formula:'MCU Revenue ÷ Total Revenue × 100%', note:'Reflects MCU business concentration. >80% = pure-play MCU; <30% = diversified.' },
+  },
+  gross_mgn: {
+    zh:{ title:'毛利率', formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。<br><br>⚠ 中微半导、峰岹、芯海、钜泉、乐鑫历史毛利率 API 未覆盖，待年报 PDF 提取。' },
+    en:{ title:'Gross Margin', formula:'(Revenue − COGS) ÷ Revenue × 100%', note:'MCU-level: product segment gross margin (preferred)<br>Company-level: overall gross margin (includes non-MCU)<br>Normal range for chip companies: 30–60%.<br><br>⚠ Cmsemicon, Fortior, Chipsea, Hi-Trend, Espressif historical GM not covered by API; pending PDF extraction.' },
+  },
+  rd_exp: {
+    zh:{ title:'研发费用', formula:'研发费用率 = 研发费用 ÷ 营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。A股芯片公司普遍 10–20%。' },
+    en:{ title:'R&D Expense', formula:'R&D Intensity = R&D Expense ÷ Revenue × 100%', note:'From income statement "R&D Expenses". China A-share chip companies typically 10–20%.' },
+  },
+  net_inc: {
+    zh:{ title:'净利润', formula:'净利润率 = 净利润 ÷ 营收 × 100%', note:'归属于母公司股东的净利润，已扣除所有成本、税费及少数股东损益。' },
+    en:{ title:'Net Income', formula:'Net Margin = Net Income ÷ Revenue × 100%', note:'Net income attributable to parent shareholders, after all costs, taxes, and minority interests.' },
+  },
+  emp_count: {
+    zh:{ title:'员工人数', formula:'人效（万元/人）= 总营收 ÷ 员工人数', note:'报告期末在职员工总数，来自年报「员工情况」章节。' },
+    en:{ title:'Headcount', formula:'Revenue/Employee (M$/person) = Total Rev ÷ Headcount', note:'Total active employees at period end, from annual report "Employee" section.' },
+  },
 };
 
-function showMetricInfo(lbl, el) {
-  const info = METRIC_INFO[lbl];
+function showMetricInfo(key, el) {
+  const entry = METRIC_INFO[key];
   const popup = $('metric-popup');
-  if (!info || !popup) return;
+  if (!entry || !popup) return;
+  const info = entry[LANG] || entry.zh;
   popup.innerHTML =
-    `<div class="metric-popup-title">${lbl}
+    `<div class="metric-popup-title">${info.title}
        <button class="metric-popup-close" onclick="$('metric-popup').classList.remove('show')">×</button>
      </div>
      <code class="metric-popup-formula">${info.formula}</code>
@@ -1897,15 +2082,15 @@ function renderFxBar() {
   if (!years.length) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML =
-    `<span style="color:var(--text-dim);font-weight:600">汇率参考 CNY/USD：</span>` +
+    `<span style="color:var(--text-dim);font-weight:600">${T('fx_label')}</span>` +
     years.map(y => `<span>${y}: <b>${Number(FX[y]).toFixed(4)}</b></span>`).join('') +
-    `<span style="color:var(--text-faint);margin-left:4px">（来源：中国人民银行年度均值）</span>`;
+    `<span style="color:var(--text-faint);margin-left:4px">${T('fx_source')}</span>`;
   // Data timestamp
   if (G && G.generated_at) {
     const ts = String(G.generated_at).slice(0, 10); // YYYY-MM-DD
     const el = $('fx-generated-at');
     if (el) {
-      el.textContent = `数据更新: ${ts}`;
+      el.textContent = `${T('data_updated')}${ts}`;
       el.style.display = 'inline';
     }
   }
@@ -1953,8 +2138,8 @@ async function loadData() {
     renderFxBar();
 
     $('hdr-meta').innerHTML = G.generated_at
-      ? `数据日期&nbsp;<b>${G.generated_at}</b>`
-      : '<span style="color:var(--neg)">请运行 fetch_mcu_data.py</span>';
+      ? `${T('data_date_pfx')}<b>${G.generated_at}</b>`
+      : `<span style="color:var(--neg)">${T('err_no_data')}</span>`;
 
     // Year selector
     const years = (G.years || []).slice().reverse();
@@ -2002,16 +2187,18 @@ async function loadData() {
     watchResize('c-mcu-grp',     'mcuGrp');
     watchResize('c-stacked',     'stacked');
     applyChartTheme();
+    applyI18n();
 
   } catch (err) {
     $('tbody').innerHTML = `<tr><td colspan="15"
       style="text-align:center;padding:48px;color:var(--neg)">
-      数据加载失败：${err.message}<br><br>
-      <small style="color:var(--text-faint)">请先运行 <code>python fetch_mcu_data.py</code></small>
+      ${T('err_load')}${err.message}<br><br>
+      <small style="color:var(--text-faint)">${T('err_run')}<code>python fetch_mcu_data.py</code></small>
     </td></tr>`;
   }
 }
 
+applyI18n();
 loadData();
 
 // ── AI Q&A ─────────────────────────────────────────────────────────────────
@@ -2040,7 +2227,7 @@ loadData();
     const msgs = $('qa-msgs');
     const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
-    wrap.innerHTML = `<div style="font:9px/1 sans-serif;color:var(--text-faint);margin-bottom:2px;text-transform:uppercase;letter-spacing:.08em">建议问题</div>` +
+    wrap.innerHTML = `<div style="font:9px/1 sans-serif;color:var(--text-faint);margin-bottom:2px;text-transform:uppercase;letter-spacing:.08em">${T('qa_suggested_ttl')}</div>` +
       SUGGESTED.map(q => `<button onclick="window._qaAsk(this.textContent)"
         style="text-align:left;background:var(--bg-3);border:1px solid var(--border);
                border-radius:4px;padding:6px 10px;cursor:pointer;font:11px/1.4 sans-serif;
@@ -2096,11 +2283,11 @@ loadData();
         }
       } else {
         const msg = d.message || d.error || '请求失败';
-        appendBubble(`错误：${msg}`, 'err');
+        appendBubble(`${T('qa_err_pfx')}${msg}`, 'err');
       }
     } catch(e) {
       typing.style.display = 'none';
-      appendBubble(`网络错误：${e.message}`, 'err');
+      appendBubble(`${T('qa_net_err_pfx')}${e.message}`, 'err');
     }
     btn.disabled = false;
     input.focus();
@@ -2128,12 +2315,12 @@ loadData();
 </script>
 
 <!-- ── AI Q&A floating button + panel ── -->
-<button class="qa-fab" onclick="toggleQA()" title="AI 问答">💬</button>
+<button class="qa-fab" onclick="toggleQA()" title="AI Q&A">💬</button>
 
 <div class="qa-panel" id="qa-panel">
   <div class="qa-head">
-    <h3>AI 竞情问答</h3>
-    <span class="qa-model" id="qa-model">DeepSeek / Gemini</span>
+    <h3 data-i18n="qa_title">AI 竞情问答</h3>
+    <span class="qa-model" id="qa-model" data-i18n="qa_model_default">DeepSeek / Gemini</span>
     <button class="qa-close" onclick="toggleQA()">✕</button>
   </div>
   <div class="qa-msgs" id="qa-msgs"></div>
@@ -2141,8 +2328,8 @@ loadData();
     <span></span><span></span><span></span>
   </div>
   <div class="qa-foot">
-    <input class="qa-input" id="qa-input" placeholder="问任何关于11家MCU公司的问题…" autocomplete="off">
-    <button class="qa-send" id="qa-send" onclick="_qaAsk($('qa-input').value)">发送</button>
+    <input class="qa-input" id="qa-input" placeholder="问任何关于11家MCU公司的问题…" autocomplete="off" data-i18n-ph="qa_ph">
+    <button class="qa-send" id="qa-send" onclick="_qaAsk($('qa-input').value)" data-i18n="qa_send">发送</button>
   </div>
 </div>
 
