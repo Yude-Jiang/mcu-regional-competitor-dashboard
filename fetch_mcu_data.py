@@ -84,7 +84,7 @@ def _parse_long_df(df: "pd.DataFrame", annual_only: bool = True) -> dict[int, di
     """Parse long-format profit sheet: rows=periods, cols=English field names.
 
     AKShare 1.18+ returns:
-      REPORT_DATE, TOTAL_OPERATE_INCOME, PARENT_NETPROFIT, RESEARCH_EXPENSE, ...
+      REPORT_DATE, TOTAL_OPERATE_INCOME, OPERATE_COST, PARENT_NETPROFIT, RESEARCH_EXPENSE, ...
     """
     out: dict[int, dict] = {}
     for _, row in df.iterrows():
@@ -101,12 +101,18 @@ def _parse_long_df(df: "pd.DataFrame", annual_only: bool = True) -> dict[int, di
         revenue = safe_float(row.get("TOTAL_OPERATE_INCOME") or row.get("OPERATE_INCOME"))
         net_inc = safe_float(row.get("PARENT_NETPROFIT") or row.get("NETPROFIT"))
         rd      = safe_float(row.get("RESEARCH_EXPENSE") or row.get("ME_RESEARCH_EXPENSE"))
+        cost    = safe_float(row.get("OPERATE_COST") or row.get("TOTAL_OPERATE_COST"))
+
+        gm_pct = None
+        if revenue and cost is not None and revenue > 0:
+            gm_pct = round((revenue - cost) / revenue * 100, 2)
 
         if revenue is not None:
             out[year] = {
                 "total_revenue_yuan": revenue,
                 "net_income_yuan":    net_inc,
                 "rd_expense_yuan":    rd,
+                "gross_margin_pct":   gm_pct,
             }
     return out
 
@@ -188,6 +194,7 @@ def apply_mcu_strategy(
             row["net_income_musd"]    = None
             row["rd_expense_yuan"]    = None
             row["rd_expense_musd"]    = None
+            row["gross_margin_pct"]   = None  # group-level margin irrelevant for 极海微
 
         # Manually entered data takes priority (supports both _yuan and legacy _musd)
         if key in known_mcu and isinstance(known_mcu[key], dict):
