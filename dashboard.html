@@ -481,6 +481,55 @@ body.panel-open .table-wrap { padding-right:408px; }
   padding:10px 16px 8px; min-height:220px;
 }
 
+/* ── YoY Heatmap ── */
+.yoy-heatmap {
+  background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
+  overflow-x:auto;
+}
+.yoy-heatmap-hdr {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 20px 6px; background:var(--bg-2);
+  border-bottom:1px solid var(--border);
+}
+.yoy-heatmap-hdr .cs-tag { background:#5c6bc0; color:#fff; }
+.yoy-heatmap-grid {
+  display:grid; min-width:max-content;
+  padding:8px 20px 10px; gap:2px;
+}
+.yoy-cell-hdr {
+  font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
+  padding:4px 6px; text-align:center; white-space:nowrap;
+}
+.yoy-row-lbl {
+  font:600 var(--fz-xs)/1.3 var(--font); color:var(--text);
+  padding:4px 10px 4px 0; display:flex; align-items:center;
+  white-space:nowrap; min-width:80px;
+}
+.yoy-cell {
+  padding:4px 8px; border-radius:3px; text-align:center;
+  min-width:64px; min-height:38px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px;
+}
+.yoy-cell-rev {
+  font:700 var(--fz-xs)/1 var(--font);
+}
+.yoy-cell-mcu {
+  font:var(--fz-2xs)/1 var(--font); opacity:.75;
+}
+.yoy-cell-null {
+  color:var(--text-faint); opacity:.4;
+  font:var(--fz-xs)/1 var(--font);
+}
+
+/* ── CSV export button ── */
+.csv-btn {
+  padding:3px 9px; border-radius:10px; border:1px solid var(--border-b);
+  background:var(--bg-1); color:var(--text-dim); font:600 var(--fz-2xs)/1 var(--font);
+  cursor:pointer; transition:background .1s; white-space:nowrap;
+}
+.csv-btn:hover { background:var(--cyan-1); color:var(--navy-1); border-color:var(--cyan-1); }
+
 /* ── Responsive ── */
 @media (max-width: 960px) {
   .chart-row {
@@ -590,9 +639,15 @@ body.panel-open .table-wrap { padding-right:408px; }
       <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
     </div>
   </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
+  </div>
 </div>
 <!-- FX rates bar -->
-<div class="fx-bar" id="fx-bar"></div>
+<div class="fx-bar" id="fx-bar">
+  <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
+</div>
 
 <!-- ── 总营收 + 净利润率 dual row ── -->
 <div class="chart-dual">
@@ -631,6 +686,34 @@ body.panel-open .table-wrap { padding-right:408px; }
     </div>
     <div class="cs-body"><canvas id="c-stacked"></canvas></div>
   </div>
+</div>
+
+<!-- ── MCU 市场份额 + 毛利率对比 dual row ── -->
+<div class="chart-dual">
+  <div class="chart-dual-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#3cb4e6;color:#03234b">饼图</span>
+      <span class="cs-title">MCU 市场份额 · <span id="cs-share-year">2024</span></span>
+    </div>
+    <div class="cs-body"><canvas id="c-mcu-share"></canvas></div>
+  </div>
+  <div class="chart-dual-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#f9a825;color:#03234b">毛利率</span>
+      <span class="cs-title">按公司 · 毛利率 %</span>
+    </div>
+    <div class="cs-body"><canvas id="c-gross-margin"></canvas></div>
+  </div>
+</div>
+
+<!-- ── YoY% 热力图 ── -->
+<div class="yoy-heatmap" id="yoy-heatmap">
+  <div class="yoy-heatmap-hdr">
+    <span class="cs-tag" style="background:#5c6bc0;color:#fff">热力图</span>
+    <span class="cs-title">YoY% 营收热力图</span>
+    <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)">上：总营收YoY &nbsp;下：MCU YoY</span>
+  </div>
+  <div class="yoy-heatmap-grid" id="yoy-heatmap-grid"></div>
 </div>
 
 <!-- ── Table ── -->
@@ -814,6 +897,9 @@ function rerenderCharts() {
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   renderStacked();
+  renderMcuShareChart();
+  renderGrossMarginChart();
+  renderYoYHeatmap();
 }
 
 // ── Chart control bar init ────────────────────────────────────────────────
@@ -1331,6 +1417,205 @@ function renderStacked() {
   });
 }
 
+// ── MCU 市场份额 doughnut ────────────────────────────────────────────────────
+function renderMcuShareChart() {
+  const year   = CF.sortYear;
+  const ss     = cfSyms();
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const mcuField = curF('mcu_revenue');
+  const scale    = mcuField.endsWith('_yuan') ? 1/1e8 : 1;
+
+  // Build slices — exclude nulls
+  const entries = ss
+    .map(s => {
+      const v = (G.companies[s].financials[year]||{})[mcuField];
+      return { sym: s, val: v != null ? v * scale : null };
+    })
+    .filter(e => e.val != null && e.val > 0);
+
+  const labels = entries.map(e => (G.companies[e.sym].meta||{}).name_cn || e.sym);
+  const data   = entries.map(e => e.val);
+  const colors = entries.map(e => CO_COLORS[ORDER.indexOf(e.sym) % CO_COLORS.length]);
+  const total  = data.reduce((s, v) => s + v, 0);
+  const unit   = curShort();
+  const dec    = mcuField.endsWith('_yuan') ? 2 : 1;
+
+  // Update year label in header
+  const el = $('cs-share-year');
+  if (el) el.textContent = year;
+
+  const ctx = $('c-mcu-share').getContext('2d');
+  if (charts.mcuShare) charts.mcuShare.destroy();
+  charts.mcuShare = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 1, borderColor: dark ? '#0c1726' : '#fff' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 11, family: 'Arial' }, color: tick, padding: 8, boxWidth: 12 } },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const pct = total > 0 ? (c.parsed / total * 100).toFixed(1) : '0.0';
+              return `${c.label}: ${c.parsed.toFixed(dec)} ${unit} (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+// ── 毛利率对比 grouped bars ──────────────────────────────────────────────────
+function renderGrossMarginChart() {
+  const years  = cfYears();
+  const ss     = cfSyms();
+  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const datasets = years.map(y => ({
+    label: String(y),
+    data: ss.map(s => {
+      const v = (G.companies[s].financials[y]||{}).gross_margin_pct;
+      return v != null ? v : null;
+    }),
+    backgroundColor: YEAR_PAL[y],
+    borderWidth: y === CF.sortYear ? 2 : 0,
+    borderColor: y === CF.sortYear ? '#fff' : undefined,
+    spanGaps: false,
+  }));
+
+  const ctx = $('c-gross-margin').getContext('2d');
+  if (charts.grossMargin) charts.grossMargin.destroy();
+  charts.grossMargin = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10, family: 'Arial' }, boxWidth: 11, color: tick, padding: 6 } },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.dataset.label}: ${c.parsed.y != null ? c.parsed.y.toFixed(1) + '%' : '—'}`,
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { font: { size: 11, family: 'Arial' }, color: tick, maxRotation: 30 }, grid: { color: grid } },
+        y: { ticks: { font: { size: 11, family: 'Arial' }, color: tick, callback: v => v.toFixed(0) + '%' },
+             grid: { color: grid },
+             title: { display: true, text: '毛利率 %', color: tick, font: { size: 10 } } },
+      },
+    },
+  });
+}
+
+// ── YoY% 热力图 ──────────────────────────────────────────────────────────────
+function renderYoYHeatmap() {
+  const years = cfYears();
+  const ss    = cfSyms();
+  const grid  = $('yoy-heatmap-grid');
+  if (!grid) return;
+
+  // Color scale for YoY%
+  function yoyColor(v) {
+    if (v == null) return { bg: 'transparent', fg: 'var(--text-faint)', dark: false };
+    if (v >= 30)  return { bg: '#1a8a4e', fg: '#fff', dark: true };
+    if (v >= 10)  return { bg: '#4caf7d', fg: '#fff', dark: true };
+    if (v >= -10) return { bg: 'var(--bg-3)', fg: 'var(--text)', dark: false };
+    if (v >= -30) return { bg: '#f48fb1', fg: '#03234b', dark: false };
+    return           { bg: '#e6007e', fg: '#fff', dark: true };
+  }
+
+  // Grid template: 1 label col + 1 col per year
+  const colCount = 1 + years.length;
+  grid.style.gridTemplateColumns = `minmax(80px,auto) repeat(${years.length}, minmax(64px,1fr))`;
+
+  let html = '';
+  // Header row
+  html += '<div></div>'; // top-left corner
+  years.forEach(y => {
+    html += `<div class="yoy-cell-hdr">${y}</div>`;
+  });
+
+  // Data rows
+  ss.forEach(s => {
+    const name = (G.companies[s].meta||{}).name_cn || s;
+    html += `<div class="yoy-row-lbl">${name}</div>`;
+    years.forEach(y => {
+      const f    = (G.companies[s].financials[y]||{});
+      const rv   = f.revenue_yoy_pct;
+      const mv   = f.mcu_yoy_pct;
+      const rc   = yoyColor(rv);
+      if (rv == null && mv == null) {
+        html += `<div class="yoy-cell" style="background:${rc.bg}"><span class="yoy-cell-null">—</span></div>`;
+      } else {
+        const rvTxt = rv != null ? (rv >= 0 ? '+' : '') + rv.toFixed(1) + '%' : '—';
+        const mvTxt = mv != null ? (mv >= 0 ? '+' : '') + mv.toFixed(1) + '%' : '—';
+        html += `<div class="yoy-cell" style="background:${rc.bg};color:${rc.fg}">` +
+          `<span class="yoy-cell-rev" style="color:${rc.fg}">${rvTxt}</span>` +
+          `<span class="yoy-cell-mcu" style="color:${rc.fg}">${mvTxt}</span>` +
+          `</div>`;
+      }
+    });
+  });
+
+  grid.innerHTML = html;
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!G) return;
+  const years = cfYears();
+  const ss    = cfSyms();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const cols = [
+    'symbol','name_cn','year',
+    'total_revenue_musd','mcu_revenue_musd','gross_margin_pct',
+    'net_income_musd','rd_pct','mcu_weight_pct','mcu_yoy_pct','employee_count',
+  ];
+
+  const rows = [cols.join(',')];
+  ss.forEach(sym => {
+    const co   = G.companies[sym];
+    const meta = co.meta || {};
+    years.forEach(y => {
+      const f = (co.financials||{})[y] || {};
+      const esc = v => (v == null ? '' : String(v).includes(',') ? `"${v}"` : String(v));
+      const ni  = f.net_income_musd ?? (f.net_income_yuan != null ? (f.net_income_yuan / 1e6 / (FX[y] || 7.1)) : null);
+      const rv  = f.total_revenue_musd ?? null;
+      const mc  = f.mcu_revenue_musd ?? null;
+      rows.push([
+        esc(sym),
+        esc(meta.name_cn || sym),
+        y,
+        rv  != null ? rv.toFixed(2)  : '',
+        mc  != null ? mc.toFixed(2)  : '',
+        f.gross_margin_pct  != null ? f.gross_margin_pct.toFixed(2)  : '',
+        ni  != null ? ni.toFixed(2)  : '',
+        f.rd_pct            != null ? f.rd_pct.toFixed(2)            : '',
+        f.mcu_weight_pct    != null ? f.mcu_weight_pct.toFixed(2)    : '',
+        f.mcu_yoy_pct       != null ? f.mcu_yoy_pct.toFixed(2)       : '',
+        f.employee_count    != null ? f.employee_count                : '',
+      ].join(','));
+    });
+  });
+
+  const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `mcu_data_${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ResizeObserver wiring
 function watchResize(canvasId, key) {
   const el = $(canvasId)?.parentElement;
@@ -1550,6 +1835,15 @@ function renderFxBar() {
     `<span style="color:var(--text-dim);font-weight:600">汇率参考 CNY/USD：</span>` +
     years.map(y => `<span>${y}: <b>${Number(FX[y]).toFixed(4)}</b></span>`).join('') +
     `<span style="color:var(--text-faint);margin-left:4px">（来源：中国人民银行年度均值）</span>`;
+  // Data timestamp
+  if (G && G.generated_at) {
+    const ts = String(G.generated_at).slice(0, 10); // YYYY-MM-DD
+    const el = $('fx-generated-at');
+    if (el) {
+      el.textContent = `数据更新: ${ts}`;
+      el.style.display = 'inline';
+    }
+  }
 }
 
 function setCur(cur) {
@@ -1638,10 +1932,12 @@ async function loadData() {
     initChartCtrl();
     rerenderCharts();
 
-    watchResize('c-total-rev',  'totalRev');
-    watchResize('c-net-margin', 'netMargin');
-    watchResize('c-mcu-grp',    'mcuGrp');
-    watchResize('c-stacked',    'stacked');
+    watchResize('c-total-rev',   'totalRev');
+    watchResize('c-net-margin',  'netMargin');
+    watchResize('c-mcu-grp',     'mcuGrp');
+    watchResize('c-stacked',     'stacked');
+    watchResize('c-mcu-share',   'mcuShare');
+    watchResize('c-gross-margin','grossMargin');
 
     applyChartTheme();
 
