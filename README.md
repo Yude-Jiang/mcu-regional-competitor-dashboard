@@ -79,6 +79,7 @@ python extract_mcu_segments.py
 | `fetch_yjbb_quarterly.py` | 毛利率/净利润YoY + BQ同步 |
 | `download_reports.py` | CNINFO PDF 下载（Colab/本地） |
 | `upload_pdfs.py` | PDF → GCS + BQ pdf_index |
+| `extract_employee_counts.py` | Gemini REST API 批量提取年报员工总数 |
 | `extract_mcu_segments.py` | LLM MCU分段提取（DeepSeek/Gemini） |
 | `bq_writer.py` | BigQuery UPSERT 工具库 |
 | `validate_data.py` | data.json schema 检查 |
@@ -95,6 +96,101 @@ python extract_mcu_segments.py
 ---
 
 ## 运维日志
+
+### 2026-05-25 — Dashboard 可读性大升级 + 历史员工数补录（56条）
+
+#### 完成内容
+
+1. **历史员工数提取（extract_employee_counts.py）**
+   - 新建脚本，使用 Gemini REST API（绕过 google.genai SDK 编码问题）批量读取 GCS 年报 PDF
+   - 在 Colab 运行，提取 11 家公司 2018–2024 年「报告期末在职员工总数」
+   - 成功率 56/56，写入 `data.json` 的 `employee_count` 字段
+   - 覆盖明细：002180(7年) · 300077(7年) · 300327(7年) · 603986(7年) · 688018(6年) · 688279(3年) · 688380(3年) · 688385(4年) · 688391(3年) · 688595(5年) · 688766(4年)
+
+2. **Dashboard 图表精简**
+   - 删除「MCU市场份额饼图」和「毛利率对比」双图：数据覆盖率不足50%，展示误导性强
+   - 删除 `renderMcuShareChart()` / `renderGrossMarginChart()` 及其所有引用
+
+3. **Detail Panel 宽度升级**
+   - 固定宽度 600px → 响应式 `width:50vw; min-width:440px; max-width:900px`
+   - `body.panel-open .table-wrap` padding-right 随之调整为 50vw
+
+4. **Pipeline 导航优化**
+   - 增加高度至 56px，确保股票代码完整可见
+   - 代码字体改为 `var(--fz-xs)`，颜色改为 `var(--text-dim)`
+
+5. **MCU 11家合计汇总条**
+   - 在「MCU按公司分组图」下方添加 `#mcu-summary`，镜像总营收汇总条逻辑
+   - 实现 `_updateMcuSummary()`，按选中年份动态计算、显示 MCU 合计 M$ 及 YoY
+
+6. **KPI 指标 `?` 悬浮解释**
+   - 所有 7 个指标（总营收/MCU营收/MCU占比/毛利率/研发费用/净利润/员工人数）右上角添加圆形 `?` 按钮
+   - 点击弹出 `.metric-popup` 展示计算公式 + 数据说明；点击任意处关闭
+   - 毛利率 tooltip 特别列出 5 家历史数据缺失的公司及原因
+
+7. **页脚更新**
+   - 由 `AKShare...` 改为 `MCU Regional Competitor Analysis | 数据来源:AKShare·东方财富·年报·IPO招股书 | 创建: yude.jiang@st.com | 动态日期`
+
+8. **首页各 Section 说明文字**
+   - 总营收板块：说明数据来源（AKShare/东方财富），AI 解读年化增长与2024景气度
+   - MCU营收板块：说明口径差异（年报分部/总收入系数推算），提示置信度分层含义
+
+9. **公司详情表头 + 图例**
+   - 表格上方加「公司详情」section header 及数据来源说明
+   - 彩色点图例（绿=年报直接披露/青=推算高置信/橙=估算低置信/红=数据缺失）
+   - YoY 颜色说明（+绿/-红）
+
+10. **数据来源透明化（招股书标注）**
+    - 历史表格中上市前年份的 FY 列显示紫色 `招股书` 徽章（7家公司有上市前数据）
+    - 表格下方动态脚注：自动说明招股书来源年份范围、毛利率缺失原因
+    - 毛利率全缺失（688380/688279/688595/688391/688018）：注明 AKShare 未覆盖，需 PDF 提取
+    - 毛利率部分缺失：列出具体年份
+
+**data.json 数据点变化：员工数 0 → 56（11家公司全覆盖2018–2024）**
+
+#### 经验与教训
+
+**google.genai SDK 中文编码 Bug（关键）**
+- `google.genai` SDK 内部使用 `httpx`，在设置 HTTP headers 时调用 `value.encode("ascii")`
+- Prompt 含中文字符时（`EMPLOYEE_PROMPT` 使用中文），httpx 在 header 序列化时崩溃
+- 错误信息：`UnicodeEncodeError: 'ascii' codec can't encode characters`，堆栈指向 `httpx/_models.py line 82`
+- **根本修复**：绕过 SDK，直接用 `requests.post()` 调用 Gemini REST API
+  ```python
+  url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={api_key}"
+  requests.post(url, json=payload, timeout=120)
+  ```
+- 适用场景：只要 Prompt 或系统指令含非 ASCII 字符，就应用 REST API 直调
+
+**gemini-3.5-flash `responseMimeType` 截断问题**
+- 设置 `responseMimeType: "application/json"` 导致响应被截断为 "Here is the JSON requested"（不含实际 JSON）
+- **修复**：移除 `responseMimeType`，改为纯文本响应，再用正则从文本中提取 JSON 块
+- JSON 解析使用三级 fallback：① markdown 代码块 ② `{...employee_count...}` ③ 任意 `{}`
+
+**JSON 解析：千分位逗号**
+- Gemini 有时输出 `"employee_count": 1,781`（含千分位逗号，非合法 JSON）
+- 在 `json.loads()` 前先 `re.sub(r'(\d),(\d{3})', r'\1\2', raw)` 清洗
+
+**maxOutputTokens 设置**
+- 中文 JSON 响应中每个汉字占 2–3 tokens；300 tokens 不足以输出完整 JSON（末尾 `}` 会截断）
+- **推荐值**：`1000`（约 300 中文字 + JSON 结构开销）
+
+**Colab 无法直接 push GitHub**
+- Colab 无 GitHub 写权限；提取结果以 JSON 格式 `print()` 输出 → 粘贴给 Claude Code → 从远端环境推送
+- 适用于所有「Colab 计算 + Claude Code 提交」场景
+
+**招股书数据覆盖局限**
+- 上市前年份（year < listed_year）的总营收来自 IPO 招股说明书
+- 招股书中毛利率格式不规范（不在标准财务附注位置），未做自动提取 → 显示「—」
+- 员工数在招股书中通常有，本次已通过 `extract_employee_counts.py` 统一提取（含招股书年份）
+- 7家存在招股书数据的公司：688380(2018-21) · 688279(2018-20) · 688385(2018-20) · 688766(2018-21) · 688595(2018-19) · 688391(2018-20) · 688018(2018)
+
+**gross_margin 覆盖现状（截至2026-05-25）**
+- AKShare 完全未覆盖（所有年份为 null）：688380中微半导 / 688279峰岹科技 / 688595芯海科技 / 688391钜泉科技 / 688018乐鑫科技
+- 部分覆盖：300327中颖(仅2024-25) · 688385复旦微(仅2024) · 688766普冉(仅2024) · 300077国民(2022-24)
+- 全覆盖：603986兆易创新 · 002180纳思达
+- 待补充路径：对「完全未覆盖」5家跑 `extract_mcu_segments.py` 提取年报毛利率
+
+---
 
 ### 2026-05-22 — 数据覆盖扩张 + 质检脚本 + 300077港股招股书录入
 
