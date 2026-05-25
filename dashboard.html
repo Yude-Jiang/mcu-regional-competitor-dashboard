@@ -748,8 +748,21 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 <!-- ── Footer ── -->
 <footer>
-  AKShare · 东方财富 · 公司年报 · IPO招股书 — MCU推算方法见 companies_meta.json / mcu_known_data.json
+  MCU Regional Competitor Analysis &nbsp;|&nbsp;
+  数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书 &nbsp;|&nbsp;
+  创建: yude.jiang@st.com &nbsp;|&nbsp;
+  <span id="footer-date"></span>
 </footer>
+<script>
+  (function(){
+    const d = new Date();
+    const s = d.getFullYear() + '-' +
+              String(d.getMonth()+1).padStart(2,'0') + '-' +
+              String(d.getDate()).padStart(2,'0');
+    const el = document.getElementById('footer-date');
+    if (el) el.textContent = s;
+  })();
+</script>
 
 </div>
 
