@@ -292,7 +292,7 @@ footer {
 
 /* ── Detail Panel ── */
 .detail-panel {
-  position:fixed; top:0; right:0; bottom:0; width:600px; z-index:100;
+  position:fixed; top:0; right:0; bottom:0; width:50vw; min-width:440px; max-width:900px; z-index:100;
   background:var(--bg-1); border-left:1px solid var(--border-b);
   display:flex; flex-direction:column;
   transform:translateX(100%); transition:transform .2s ease;
@@ -353,12 +353,35 @@ footer {
 .dp-metric-sub { font:var(--fz-sm)/1.2 var(--font); color:var(--text-dim); margin-top:3px; }
 .dp-metric-pos  { color:var(--pos); }
 .dp-metric-neg  { color:var(--neg); }
+.info-tip {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:13px; height:13px; border-radius:50%; cursor:pointer;
+  background:var(--navy-3); color:#fff; font:700 9px/1 var(--font);
+  vertical-align:middle; margin-left:4px; flex-shrink:0;
+  transition:background .1s; user-select:none;
+}
+.info-tip:hover { background:var(--cyan-1); color:var(--navy-1); }
+.metric-popup {
+  display:none; position:fixed; z-index:300;
+  background:var(--bg-0); border:1px solid var(--border-b);
+  border-radius:6px; padding:12px 14px; max-width:270px;
+  box-shadow:0 6px 24px rgba(0,0,0,.2); font:var(--fz-xs)/1.55 var(--font);
+}
+.metric-popup.show { display:block; }
+.metric-popup-title { font:700 var(--fz-sm)/1 var(--font); color:var(--text); margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+.metric-popup-close { background:none; border:none; cursor:pointer; color:var(--text-faint); font-size:16px; line-height:1; padding:0; }
+.metric-popup-close:hover { color:var(--text); }
+.metric-popup-formula {
+  display:block; font:600 var(--fz-xs)/1.4 monospace; color:var(--cyan-1);
+  background:var(--bg-2); border-radius:3px; padding:6px 8px; margin:7px 0;
+}
+.metric-popup-note { color:var(--text-dim); }
 .dp-overlay {
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.18);
   z-index:99; cursor:pointer;
 }
 .dp-overlay.open { display:block; }
-body.panel-open .table-wrap { padding-right:408px; }
+body.panel-open .table-wrap { padding-right:50vw; }
 
 /* ── Chart filter / sort bar ── */
 .chart-ctrl {
@@ -731,6 +754,7 @@ body.panel-open .table-wrap { padding-right:408px; }
 </div>
 
 <!-- ── Detail Panel ── -->
+<div id="metric-popup" class="metric-popup"></div>
 <div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
 <aside class="detail-panel" id="detail-panel">
   <div class="dp-head">
@@ -1556,7 +1580,7 @@ function _updateDetailMetrics(sym, year) {
   ];
   $('dp-metrics').innerHTML = metrics.map(me => `
     <div class="dp-metric">
-      <div class="dp-metric-lbl">${me.lbl}</div>
+      <div class="dp-metric-lbl">${me.lbl}<span class="info-tip" onclick="showMetricInfo('${me.lbl}',this)" title="说明">?</span></div>
       <div class="dp-metric-val">${me.val}</div>
       ${me.sub ? `<div class="dp-metric-sub ${me.cls||''}">${me.sub}</div>` : ''}
     </div>`).join('');
@@ -1717,6 +1741,47 @@ function openDetail(sym) {
   $('dp-overlay').classList.add('open');
   document.body.classList.add('panel-open');
 }
+
+// ── 指标说明 tooltip ──────────────────────────────────────────────────────────
+const METRIC_INFO = {
+  '总营收':   { formula:'营业收入 = 产品销售额 + 服务额', note:'来自年报合并利润表「营业收入」行；M$ 按当年平均汇率换算。' },
+  'MCU 营收': { formula:'因公司口径而异（见策略标签）', note:'segment_reported：年报分产品表直接取数<br>total_proxy×k：总收入 × 业务系数<br>subsidiary：极海微子公司营收' },
+  'MCU 占比': { formula:'MCU营收 ÷ 总营收 × 100%', note:'反映 MCU 主业集中度。>80% 为纯 MCU 厂商，<30% 说明多元化布局。' },
+  '毛利率':   { formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。' },
+  '研发费用': { formula:'研发费用率 = 研发费用 ÷ 营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。A股芯片公司普遍 10–20%。' },
+  '净利润':   { formula:'净利润率 = 净利润 ÷ 营收 × 100%', note:'归属于母公司股东的净利润，已扣除所有成本、税费及少数股东损益。' },
+  '员工人数': { formula:'人效（万元/人）= 总营收 ÷ 员工人数', note:'报告期末在职员工总数，来自年报「员工情况」章节。' },
+};
+
+function showMetricInfo(lbl, el) {
+  const info = METRIC_INFO[lbl];
+  const popup = $('metric-popup');
+  if (!info || !popup) return;
+  popup.innerHTML =
+    `<div class="metric-popup-title">${lbl}
+       <button class="metric-popup-close" onclick="$('metric-popup').classList.remove('show')">×</button>
+     </div>
+     <code class="metric-popup-formula">${info.formula}</code>
+     <div class="metric-popup-note">${info.note}</div>`;
+  const rect = el.getBoundingClientRect();
+  const pw = 280, ph = 160;
+  let left = rect.left - pw - 10;
+  if (left < 8) left = rect.right + 10;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  let top = rect.top - 8;
+  if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
+  popup.style.left = left + 'px';
+  popup.style.top  = top + 'px';
+  popup.classList.add('show');
+}
+
+document.addEventListener('click', e => {
+  const popup = $('metric-popup');
+  if (popup && popup.classList.contains('show') &&
+      !popup.contains(e.target) && !e.target.classList.contains('info-tip')) {
+    popup.classList.remove('show');
+  }
+});
 
 function closeDetail() {
   _currentDetailSym = null;
