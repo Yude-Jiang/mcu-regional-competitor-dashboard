@@ -217,7 +217,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 2333
         }
       }
     },
@@ -421,7 +422,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 532
         }
       }
     },
@@ -623,7 +625,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 30.4,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 459
         }
       }
     },
@@ -832,7 +835,8 @@
           "data_coverage": 1.0,
           "cagr_pct": 12.3,
           "cagr_label": "CAGR 2018–2025",
-          "mcu_gross_margin": null
+          "mcu_gross_margin": null,
+          "employee_count": 1112
         }
       }
     },
@@ -1034,7 +1038,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 35.7,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 315
         }
       }
     },
@@ -1447,7 +1452,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 15.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1958
         }
       }
     },
@@ -1650,7 +1656,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 44.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 574
         }
       }
     },
@@ -1852,7 +1859,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 546
         }
       }
     },
@@ -2054,7 +2062,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 17.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 289
         }
       }
     },
@@ -2256,7 +2265,8 @@
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 915
         }
       }
     }
