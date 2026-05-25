@@ -1,4 +1,5 @@
 # General ignores
+.claude/
 .env
 .env.local
 __pycache__
