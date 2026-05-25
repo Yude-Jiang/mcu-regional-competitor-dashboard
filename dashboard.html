@@ -479,6 +479,28 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .cs-body {
   padding:10px 20px 8px; min-height:160px; position:relative;
 }
+.sect-desc {
+  font:var(--fz-xs)/1.65 var(--font); color:var(--text-faint);
+  padding:6px 20px 8px; background:var(--bg-0);
+  border-top:1px solid var(--border);
+}
+.sect-desc strong { color:var(--text-dim); font-weight:600; }
+.sect-desc em { color:var(--cyan-1); font-style:normal; }
+.tbl-section-hdr {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 16px; background:var(--bg-2);
+  border-bottom:1px solid var(--border); border-top:2px solid var(--navy-1);
+}
+.tbl-legend {
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:5px 16px; background:var(--bg-0);
+  border-bottom:1px solid var(--border);
+  font:var(--fz-xs)/1 var(--font); color:var(--text-faint);
+}
+.tbl-legend-item { display:flex; align-items:center; gap:4px; }
+.tbl-legend-sep { width:1px; height:12px; background:var(--border-b); }
+.tbl-legend .pos { font-weight:700; }
+.tbl-legend .neg { font-weight:700; }
 /* 总营收 chart: fixed compact height */
 .cs-wrap .cs-body { height:200px; min-height:200px; max-height:200px; }
 /* Revenue summary bar below 总营收 chart */
@@ -684,6 +706,10 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
   </div>
 </div>
+<div class="sect-desc">
+  <strong>数据来源：</strong>AKShare / 东方财富 API 拉取年报合并利润表「营业收入」&「净利润」，按当年平均汇率换算 M$。&ensp;
+  <strong>解读：</strong>2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑，净利率同步收窄；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。
+</div>
 <div class="rev-summary" id="rev-summary"></div>
 
 <!-- ── MCU grouped + Stacked dual row ── -->
@@ -705,6 +731,10 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <div class="cs-body"><canvas id="c-stacked"></canvas></div>
   </div>
 </div>
+<div class="sect-desc">
+  <strong>数据来源：</strong>部分公司年报直接披露 MCU 分产品收入（<em>●年报直接</em>）；其余按总收入 × 业务系数推算（<em>●推算</em>），详见各公司策略标签。堆叠图展示行业 MCU 合计规模年度演变。&ensp;
+  <strong>解读：</strong>行业 MCU 合计营收 2018→2025 年 CAGR 约 20%+；兆易创新持续占据最大份额；纳思达极海微定位工业/汽车，单价较高；乐鑫凭借 AIoT 生态增速领先。
+</div>
 
 <!-- ── YoY% 热力图 ── -->
 <div class="yoy-heatmap" id="yoy-heatmap">
@@ -716,6 +746,25 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <div class="yoy-heatmap-grid" id="yoy-heatmap-grid"></div>
 </div>
 
+<!-- ── Table section header + legend ── -->
+<div class="tbl-section-hdr">
+  <span class="cs-tag" style="background:var(--navy-1)">数据表</span>
+  <span class="cs-title">公司详情 · 点击任意行查看完整画像与历史数据</span>
+  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)">数据来源：年报 / AKShare / 招股书</span>
+</div>
+<div class="tbl-legend">
+  <span style="font-weight:600;color:var(--text-dim);margin-right:4px">MCU数据置信度：</span>
+  <span class="tbl-legend-item"><span class="dot dc">●</span>年报直接披露</span>
+  <span class="tbl-legend-item"><span class="dot dd">●</span>推算（高置信）</span>
+  <span class="tbl-legend-item"><span class="dot dp">●</span>估算（低置信）</span>
+  <span class="tbl-legend-item"><span class="dot du">●</span>数据缺失</span>
+  <span class="tbl-legend-sep"></span>
+  <span style="font-weight:600;color:var(--text-dim);margin-right:4px">YoY同比：</span>
+  <span class="tbl-legend-item"><span class="pos">+X%</span>&nbsp;增长</span>
+  <span class="tbl-legend-item"><span class="neg">-X%</span>&nbsp;下滑</span>
+  <span class="tbl-legend-sep"></span>
+  <span style="color:var(--text-faint)">毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）</span>
+</div>
 <!-- ── Table ── -->
 <div class="table-wrap">
 <table id="tbl">
@@ -1760,7 +1809,7 @@ const METRIC_INFO = {
   '总营收':   { formula:'营业收入 = 产品销售额 + 服务额', note:'来自年报合并利润表「营业收入」行；M$ 按当年平均汇率换算。' },
   'MCU 营收': { formula:'因公司口径而异（见策略标签）', note:'segment_reported：年报分产品表直接取数<br>total_proxy×k：总收入 × 业务系数<br>subsidiary：极海微子公司营收' },
   'MCU 占比': { formula:'MCU营收 ÷ 总营收 × 100%', note:'反映 MCU 主业集中度。>80% 为纯 MCU 厂商，<30% 说明多元化布局。' },
-  '毛利率':   { formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。' },
+  '毛利率':   { formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。<br><br>⚠ 中微半导、峰岹、芯海、钜泉、乐鑫历史毛利率 API 未覆盖，待年报 PDF 提取。' },
   '研发费用': { formula:'研发费用率 = 研发费用 ÷ 营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。A股芯片公司普遍 10–20%。' },
   '净利润':   { formula:'净利润率 = 净利润 ÷ 营收 × 100%', note:'归属于母公司股东的净利润，已扣除所有成本、税费及少数股东损益。' },
   '员工人数': { formula:'人效（万元/人）= 总营收 ÷ 员工人数', note:'报告期末在职员工总数，来自年报「员工情况」章节。' },
