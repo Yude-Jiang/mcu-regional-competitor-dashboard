@@ -456,8 +456,14 @@ body.panel-open .table-wrap { padding-right:408px; }
 .cs-body {
   padding:10px 20px 8px; min-height:160px; position:relative;
 }
-/* 总营收 chart shorter than dual charts */
-.cs-wrap .cs-body { min-height:140px; }
+/* 总营收 chart: fixed compact height */
+.cs-wrap .cs-body { height:200px; min-height:200px; max-height:200px; }
+/* Revenue summary bar below 总营收 chart */
+.rev-summary {
+  padding:5px 20px 6px; font-size:var(--fz-xs); color:var(--text-faint);
+  background:var(--bg-2); border-bottom:1px solid var(--border);
+  display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; line-height:1.5;
+}
 
 /* ── Dual chart row ── */
 .chart-dual {
@@ -597,6 +603,7 @@ body.panel-open .table-wrap { padding-right:408px; }
   </div>
   <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
 </div>
+<div class="rev-summary" id="rev-summary"></div>
 
 <!-- ── MCU grouped + Stacked dual row ── -->
 <div class="chart-dual">
@@ -793,9 +800,9 @@ function cfSyms()   {
 }
 
 function rerenderCharts() {
+  renderTotalRevChart();
   const suf = ' ' + curShort();
-  renderGroupedByYear('c-total-rev','totalRev', curF('total_revenue'), suf, { type:'logarithmic' });
-  renderGroupedByYear('c-mcu-grp',  'mcuGrp',  curF('mcu_revenue'),  suf);
+  renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   renderStacked();
 }
 
@@ -1097,6 +1104,106 @@ function cOpts(extra = {}) {
 function syms() { return ORDER.filter(s => G.companies[s]); }
 
 // ── Grouped chart helper: companies on X, one dataset per year ─────────────
+// ── Net margin helper ────────────────────────────────────────────────────
+function netMarginPct(f) {
+  const ni = f.net_income_musd ?? f.net_income_yuan;
+  const tr = f.total_revenue_musd ?? f.total_revenue_yuan;
+  return (ni != null && tr != null && tr > 0) ? ni / tr * 100 : null;
+}
+
+// ── Revenue summary bar ───────────────────────────────────────────────────
+function _updateRevSummary(years, ss) {
+  const el = $('rev-summary');
+  if (!el) return;
+  const field = curF('total_revenue');
+  const scale = field.endsWith('_yuan') ? 1/1e8 : 1;
+  const dec   = curDec();
+  const unit  = curShort();
+  const yrs   = years.slice().sort();
+  const totals = yrs.map(y =>
+    ss.reduce((sum, s) => { const v=(G.companies[s].financials[y]||{})[field]; return sum+(v!=null?v*scale:0); }, 0)
+  );
+  if (!totals.length) { el.innerHTML = ''; return; }
+  const n    = totals.length - 1;
+  const yoy  = n>0 && totals[n-1]>0 ? (totals[n]-totals[n-1])/totals[n-1]*100 : null;
+  const cagr = n>0 && totals[0]>0   ? (Math.pow(totals[n]/totals[0],1/n)-1)*100 : null;
+  const flow = yrs.map((y,i)=>`${y}: <b>${totals[i].toFixed(dec)} ${unit}</b>`).join(' → ');
+  let html = `<span style="color:var(--text-dim);font-weight:600">${ss.length}家公司合计：</span>${flow}`;
+  if (yoy!=null) html += ` <span style="opacity:.5">|</span> YoY <b style="color:${yoy>=0?'var(--pos)':'var(--neg)'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</b>`;
+  if (cagr!=null) html += ` <span style="opacity:.5">|</span> ${n}Y CAGR <b>${cagr.toFixed(1)}%</b>`;
+  el.innerHTML = html;
+}
+
+// ── 总营收 specialized chart: grouped bars + net margin % lines ───────────
+function renderTotalRevChart() {
+  const years  = cfYears();
+  const ss     = cfSyms();
+  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const field  = curF('total_revenue');
+  const scale  = field.endsWith('_yuan') ? 1/1e8 : 1;
+  const dec    = field.endsWith('_yuan') ? 2 : 1;
+  const unit   = curShort();
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const barDS = years.map(y => ({
+    type: 'bar', label: String(y),
+    data: ss.map(s => { const v=(G.companies[s].financials[y]||{})[field]; return v!=null?v*scale:null; }),
+    backgroundColor: YEAR_PAL[y],
+    borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    yAxisID: 'y', spanGaps: false, order: 2,
+  }));
+
+  const lineDS = years.map(y => ({
+    type: 'line', label: `净利率 ${y}`,
+    data: ss.map(s => netMarginPct(G.companies[s].financials[y]||{})),
+    borderColor: YEAR_PAL[y], backgroundColor: 'transparent',
+    borderWidth: 1.5, borderDash: [5,3],
+    pointRadius: 2.5, pointBackgroundColor: YEAR_PAL[y],
+    yAxisID: 'y2', spanGaps: true, order: 1,
+  }));
+
+  _updateRevSummary(years, ss);
+
+  const ctx = $('c-total-rev').getContext('2d');
+  if (charts.totalRev) charts.totalRev.destroy();
+  charts.totalRev = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [...barDS, ...lineDS] },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{
+          font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6,
+          filter: item => !item.text.startsWith('净利率'),
+        }},
+        tooltip:{ callbacks:{
+          label: c => {
+            if (c.dataset.yAxisID==='y2')
+              return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
+            return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(dec)+' '+unit:'N/A'}`;
+          },
+          afterTitle: ctx2 => {
+            if ((ctx2[0]?.label||'').includes('纳思达'))
+              return ['（002180 仅追踪极海微MCU子公司，集团总营收不在数据库）'];
+            return [];
+          },
+        }},
+      },
+      scales:{
+        x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
+        y:{ ticks:{font:{size:11,family:'Arial'},color:tick}, grid:{color:grid},
+            title:{display:true,text:unit,color:tick,font:{size:10}} },
+        y2:{ position:'right',
+             ticks:{font:{size:10,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
+             grid:{drawOnChartArea:false},
+             title:{display:true,text:'净利润率',color:tick,font:{size:10}} },
+      },
+    },
+  });
+}
+
 function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {}) {
   const years  = cfYears();
   const ss     = cfSyms();
