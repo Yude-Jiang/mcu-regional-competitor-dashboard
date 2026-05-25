@@ -49,7 +49,8 @@
           "filing_date": "2018-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 521
         },
         "2019": {
           "total_revenue_yuan": 3202917103.2,
@@ -73,7 +74,8 @@
           "filing_date": "2019-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 854
         },
         "2020": {
           "total_revenue_yuan": 4496894867.81,
@@ -97,7 +99,8 @@
           "filing_date": "2020-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1129
         },
         "2021": {
           "total_revenue_yuan": 8510223468.73,
@@ -121,7 +124,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1343
         },
         "2022": {
           "total_revenue_yuan": 8129992424.99,
@@ -145,7 +149,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1564
         },
         "2023": {
           "total_revenue_yuan": 5760823414.65,
@@ -169,7 +174,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1781
         },
         "2024": {
           "total_revenue_yuan": 7355977677.11,
@@ -193,7 +199,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 22.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 2087
         },
         "2025": {
           "total_revenue_yuan": 9203463124.58,
@@ -259,7 +266,8 @@
           "filing_date": "2018-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 334
         },
         "2019": {
           "total_revenue_yuan": 834147157.27,
@@ -282,7 +290,8 @@
           "filing_date": "2019-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 363
         },
         "2020": {
           "total_revenue_yuan": 1012256028.41,
@@ -305,7 +314,8 @@
           "filing_date": "2020-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 361
         },
         "2021": {
           "total_revenue_yuan": 1493907714.17,
@@ -328,7 +338,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 422
         },
         "2022": {
           "total_revenue_yuan": 1601894105.25,
@@ -351,7 +362,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 486
         },
         "2023": {
           "total_revenue_yuan": 1300231731.1,
@@ -374,7 +386,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 512
         },
         "2024": {
           "total_revenue_yuan": 1343449000.69,
@@ -398,7 +411,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 7.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 515
         },
         "2025": {
           "total_revenue_yuan": 1284188766.88,
@@ -556,7 +570,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 30.4,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 466
         },
         "2023": {
           "total_revenue_yuan": 713569748.57,
@@ -579,7 +594,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 30.4,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 426
         },
         "2024": {
           "total_revenue_yuan": 911654675.0,
@@ -602,7 +618,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 30.4,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 439
         },
         "2025": {
           "total_revenue_yuan": 1122150053.86,
@@ -667,7 +684,8 @@
           "filing_date": "2018-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 12.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 859
         },
         "2019": {
           "total_revenue_yuan": 394733173.32,
@@ -690,7 +708,8 @@
           "filing_date": "2019-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 12.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 750
         },
         "2020": {
           "total_revenue_yuan": 379707203.3,
@@ -713,7 +732,8 @@
           "filing_date": "2020-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 12.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 754
         },
         "2021": {
           "total_revenue_yuan": 1017608714.04,
@@ -736,7 +756,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 12.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1060
         },
         "2022": {
           "total_revenue_yuan": 1195410943.37,
@@ -761,7 +782,8 @@
           "cagr_pct": 12.3,
           "cagr_label": "CAGR 2018–2025",
           "mcu_gross_margin": 0.449,
-          "gross_margin_pct": 44.9
+          "gross_margin_pct": 44.9,
+          "employee_count": 1175
         },
         "2023": {
           "total_revenue_yuan": 1036752756.19,
@@ -786,7 +808,8 @@
           "cagr_pct": 12.3,
           "cagr_label": "CAGR 2018–2025",
           "mcu_gross_margin": 0.086,
-          "gross_margin_pct": 8.6
+          "gross_margin_pct": 8.6,
+          "employee_count": 975
         },
         "2024": {
           "total_revenue_yuan": 1167550263.68,
@@ -811,7 +834,8 @@
           "cagr_pct": 12.3,
           "cagr_label": "CAGR 2018–2025",
           "mcu_gross_margin": 0.238,
-          "gross_margin_pct": 23.8
+          "gross_margin_pct": 23.8,
+          "employee_count": 1165
         },
         "2025": {
           "total_revenue_yuan": 1360265565.1,
@@ -969,7 +993,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 35.7,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 203
         },
         "2023": {
           "total_revenue_yuan": 411359196.52,
@@ -992,7 +1017,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 35.7,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 237
         },
         "2024": {
           "total_revenue_yuan": 600324711.69,
@@ -1015,7 +1041,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 35.7,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 270
         },
         "2025": {
           "total_revenue_yuan": 773904376.96,
@@ -1081,7 +1108,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 82.26
+          "gross_margin_pct": 82.26,
+          "employee_count": 16899
         },
         "2019": {
           "total_revenue_yuan": 631525425.66,
@@ -1105,7 +1133,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 70.24
+          "gross_margin_pct": 70.24,
+          "employee_count": 18491
         },
         "2020": {
           "total_revenue_yuan": 539767514.91,
@@ -1129,7 +1158,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 61.81
+          "gross_margin_pct": 61.81,
+          "employee_count": 18001
         },
         "2021": {
           "total_revenue_yuan": 1432402016.02,
@@ -1153,7 +1183,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 65.01
+          "gross_margin_pct": 65.01,
+          "employee_count": 21787
         },
         "2022": {
           "total_revenue_yuan": 1928188755.03,
@@ -1177,7 +1208,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 63.71
+          "gross_margin_pct": 63.71,
+          "employee_count": 22336
         },
         "2023": {
           "total_revenue_yuan": 1421721289.4,
@@ -1201,7 +1233,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 56.62
+          "gross_margin_pct": 56.62,
+          "employee_count": 21997
         },
         "2024": {
           "total_revenue_yuan": 1400109613.04,
@@ -1225,7 +1258,8 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025",
-          "gross_margin_pct": 42.44
+          "gross_margin_pct": 42.44,
+          "employee_count": 23139
         },
         "2025": {
           "total_revenue_yuan": 1092181364.86,
@@ -1359,7 +1393,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 15.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1531
         },
         "2022": {
           "total_revenue_yuan": 3538908884.94,
@@ -1382,7 +1417,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 15.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 1691
         },
         "2023": {
           "total_revenue_yuan": 3536259423.6,
@@ -1405,7 +1441,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 15.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 2045
         },
         "2024": {
           "total_revenue_yuan": 3590223828.23,
@@ -1429,7 +1466,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 15.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 2077
         },
         "2025": {
           "total_revenue_yuan": 3982261101.52,
@@ -1563,7 +1601,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 0.67,
           "cagr_pct": 44.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 216
         },
         "2022": {
           "total_revenue_yuan": 924828277.26,
@@ -1586,7 +1625,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 44.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 320
         },
         "2023": {
           "total_revenue_yuan": 1127050035.41,
@@ -1609,7 +1649,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 44.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 353
         },
         "2024": {
           "total_revenue_yuan": 1803569661.85,
@@ -1633,7 +1674,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 44.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 432
         },
         "2025": {
           "total_revenue_yuan": 2319754086.04,
@@ -1744,7 +1786,8 @@
           "filing_date": "2020-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 259
         },
         "2021": {
           "total_revenue_yuan": 659081215.92,
@@ -1767,7 +1810,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 421
         },
         "2022": {
           "total_revenue_yuan": 617672465.8,
@@ -1790,7 +1834,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 501
         },
         "2023": {
           "total_revenue_yuan": 432946141.25,
@@ -1813,7 +1858,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 510
         },
         "2024": {
           "total_revenue_yuan": 702306080.34,
@@ -1836,7 +1882,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 505
         },
         "2025": {
           "total_revenue_yuan": 848557310.67,
@@ -1993,7 +2040,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 17.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 225
         },
         "2023": {
           "total_revenue_yuan": 603045632.83,
@@ -2016,7 +2064,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 17.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 270
         },
         "2024": {
           "total_revenue_yuan": 591868213.05,
@@ -2039,7 +2088,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 17.8,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 281
         },
         "2025": {
           "total_revenue_yuan": 538668585.45,
@@ -2127,7 +2177,8 @@
           "filing_date": "2019-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 345
         },
         "2020": {
           "total_revenue_yuan": 831286490.38,
@@ -2150,7 +2201,8 @@
           "filing_date": "2020-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 449
         },
         "2021": {
           "total_revenue_yuan": 1386371540.68,
@@ -2173,7 +2225,8 @@
           "filing_date": "2021-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 517
         },
         "2022": {
           "total_revenue_yuan": 1271127201.38,
@@ -2196,7 +2249,8 @@
           "filing_date": "2022-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 578
         },
         "2023": {
           "total_revenue_yuan": 1433064910.56,
@@ -2219,7 +2273,8 @@
           "filing_date": "2023-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 625
         },
         "2024": {
           "total_revenue_yuan": 2006919686.57,
@@ -2242,7 +2297,8 @@
           "filing_date": "2024-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 27.2,
-          "cagr_label": "CAGR 2018–2025"
+          "cagr_label": "CAGR 2018–2025",
+          "employee_count": 770
         },
         "2025": {
           "total_revenue_yuan": 2565275431.81,
