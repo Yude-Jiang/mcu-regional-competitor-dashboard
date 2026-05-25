@@ -176,59 +176,75 @@
   "002180": {
     "2018": {
       "mcu_revenue_yuan": 738392851.94,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2018年报第19页营业收入构成表及第20页占公司营业收入或营业利润10%以上的产品情况表中的「芯片」产品营业收入 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "分产品营业收入构成表第19页 芯片行",
+      "total_revenue_yuan": 1198701435.25,
+      "total_revenue_note": "主要控股参股公司分析表第39页 珠海艾派克微电子有限公司营业收入行（另第16页披露集成电路业务总收入约14.04亿元）",
+      "mcu_gross_margin": 0.8226
     },
     "2019": {
       "mcu_revenue_yuan": 631525425.66,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2019年报第23页营业收入构成表及第24页占公司营业收入10%以上的产品情况表中的「芯片」产品 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "第23页「二、主营业务分析」之「（1）营业收入构成」表「芯片」行",
+      "total_revenue_yuan": 631525425.66,
+      "total_revenue_note": "第23页「二、主营业务分析」之「（1）营业收入构成」表「芯片」行。注：第19页「（1）艾派克微电子业务经营情况」中提及公司集成电路业务总收入约12.97亿元。",
+      "mcu_gross_margin": 0.7024
+    },
+    "2020": {
+      "mcu_revenue_yuan": 539767514.91,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "第25页「一、主营业务分析-2、收入与成本-(1)营业收入构成」表中的「芯片」产品行",
+      "total_revenue_yuan": 539767514.91,
+      "total_revenue_note": "第25页「一、主营业务分析-2、收入与成本-(1)营业收入构成」表中的「芯片」产品行（年报未列示其他模组或集成电路细分产品）",
+      "mcu_gross_margin": 0.6181
     },
     "2021": {
       "mcu_revenue_yuan": 711184353.14,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2021年报第22页分产品收入表中的「芯片（对外销售）」 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "第22页『(1) 营业收入构成』分产品表中的『芯片（对外销售）』行",
+      "total_revenue_yuan": 1432402016.02,
+      "total_revenue_note": "第22页『(1) 营业收入构成』分行业表中的『集成电路产业』行",
+      "mcu_gross_margin": 0.6501
     },
     "2022": {
       "mcu_revenue_yuan": 1184245857.21,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2022年报第21页「一、营业收入构成」中分产品「芯片」营业收入 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "分产品营业收入构成表第21页 芯片行",
+      "total_revenue_yuan": 1928188755.03,
+      "total_revenue_note": "分行业营业收入构成表第21页 集成电路产业行",
+      "mcu_gross_margin": 0.6371
     },
     "2023": {
       "mcu_revenue_yuan": 873981108.44,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2023年报第19页营业收入构成表及占公司营业收入或营业利润10%以上的产品情况表 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "分产品营业收入构成表（第19页）「分产品」之「芯片」行",
+      "total_revenue_yuan": 1421721289.4,
+      "total_revenue_note": "分产品营业收入构成表（第19页）「分行业」之「集成电路产业」行",
+      "mcu_gross_margin": 0.5662
     },
     "2024": {
       "mcu_revenue_yuan": 821011684.45,
-      "mcu_gross_margin": null,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2024年报 极海微电子子公司「芯片」产品营收（年报未独立披露MCU口径；集成电路产业总营收¥14.0亿，其中「芯片」产品线¥8.21亿 = Geehy MCU口径）— Gemini提取；极海微集成电路产业总营收¥14.0亿（含MCU¥8.21亿+其他IC¥5.79亿）",
-      "total_revenue_yuan": 1400000000.0
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "年报第19页'2、收入与成本/（1）营业收入构成'表，分产品之'芯片'行",
+      "total_revenue_yuan": 1400109613.04,
+      "total_revenue_note": "年报第19页'2、收入与成本/（1）营业收入构成'表，分行业之'集成电路产业'行",
+      "mcu_gross_margin": 0.4244
     },
     "2025": {
       "mcu_revenue_yuan": 618110393.3,
-      "data_type": "estimated",
-      "confidence": "medium",
-      "source": "纳思达2025年报第20页分产品营业收入表 — Gemini提取",
-      "total_revenue_yuan": null,
-      "total_revenue_note": "待补充：极海微集成电路总营收需从纳思达年报「子公司」章节另查"
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "第20页「2、收入与成本-(1)营业收入构成」中分产品「芯片」行",
+      "total_revenue_yuan": 1092181364.86,
+      "total_revenue_note": "第20页「2、收入与成本-(1)营业收入构成」中分行业「集成电路产业」行",
+      "mcu_gross_margin": 0.327
     }
   },
   "300077": {
