@@ -292,7 +292,7 @@ footer {
 
 /* ── Detail Panel ── */
 .detail-panel {
-  position:fixed; top:0; right:0; bottom:0; width:400px; z-index:100;
+  position:fixed; top:0; right:0; bottom:0; width:600px; z-index:100;
   background:var(--bg-1); border-left:1px solid var(--border-b);
   display:flex; flex-direction:column;
   transform:translateX(100%); transition:transform .2s ease;
@@ -688,24 +688,6 @@ body.panel-open .table-wrap { padding-right:408px; }
   </div>
 </div>
 
-<!-- ── MCU 市场份额 + 毛利率对比 dual row ── -->
-<div class="chart-dual">
-  <div class="chart-dual-main">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#3cb4e6;color:#03234b">饼图</span>
-      <span class="cs-title">MCU 市场份额 · <span id="cs-share-year">2024</span></span>
-    </div>
-    <div class="cs-body"><canvas id="c-mcu-share"></canvas></div>
-  </div>
-  <div class="chart-dual-side">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#f9a825;color:#03234b">毛利率</span>
-      <span class="cs-title">按公司 · 毛利率 %</span>
-    </div>
-    <div class="cs-body"><canvas id="c-gross-margin"></canvas></div>
-  </div>
-</div>
-
 <!-- ── YoY% 热力图 ── -->
 <div class="yoy-heatmap" id="yoy-heatmap">
   <div class="yoy-heatmap-hdr">
@@ -897,8 +879,6 @@ function rerenderCharts() {
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   renderStacked();
-  renderMcuShareChart();
-  renderGrossMarginChart();
   renderYoYHeatmap();
 }
 
@@ -1417,102 +1397,6 @@ function renderStacked() {
   });
 }
 
-// ── MCU 市场份额 doughnut ────────────────────────────────────────────────────
-function renderMcuShareChart() {
-  const year   = CF.sortYear;
-  const ss     = cfSyms();
-  const dark   = document.documentElement.dataset.theme === 'dark';
-  const tick   = dark ? '#7d94b3' : '#8191a5';
-  const mcuField = curF('mcu_revenue');
-  const scale    = mcuField.endsWith('_yuan') ? 1/1e8 : 1;
-
-  // Build slices — exclude nulls
-  const entries = ss
-    .map(s => {
-      const v = (G.companies[s].financials[year]||{})[mcuField];
-      return { sym: s, val: v != null ? v * scale : null };
-    })
-    .filter(e => e.val != null && e.val > 0);
-
-  const labels = entries.map(e => (G.companies[e.sym].meta||{}).name_cn || e.sym);
-  const data   = entries.map(e => e.val);
-  const colors = entries.map(e => CO_COLORS[ORDER.indexOf(e.sym) % CO_COLORS.length]);
-  const total  = data.reduce((s, v) => s + v, 0);
-  const unit   = curShort();
-  const dec    = mcuField.endsWith('_yuan') ? 2 : 1;
-
-  // Update year label in header
-  const el = $('cs-share-year');
-  if (el) el.textContent = year;
-
-  const ctx = $('c-mcu-share').getContext('2d');
-  if (charts.mcuShare) charts.mcuShare.destroy();
-  charts.mcuShare = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 1, borderColor: dark ? '#0c1726' : '#fff' }] },
-    options: {
-      responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: {
-        legend: { position: 'right', labels: { font: { size: 11, family: 'Arial' }, color: tick, padding: 8, boxWidth: 12 } },
-        tooltip: {
-          callbacks: {
-            label: c => {
-              const pct = total > 0 ? (c.parsed / total * 100).toFixed(1) : '0.0';
-              return `${c.label}: ${c.parsed.toFixed(dec)} ${unit} (${pct}%)`;
-            },
-          },
-        },
-      },
-    },
-  });
-}
-
-// ── 毛利率对比 grouped bars ──────────────────────────────────────────────────
-function renderGrossMarginChart() {
-  const years  = cfYears();
-  const ss     = cfSyms();
-  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
-  const dark   = document.documentElement.dataset.theme === 'dark';
-  const tick   = dark ? '#7d94b3' : '#8191a5';
-  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
-
-  const datasets = years.map(y => ({
-    label: String(y),
-    data: ss.map(s => {
-      const v = (G.companies[s].financials[y]||{}).gross_margin_pct;
-      return v != null ? v : null;
-    }),
-    backgroundColor: YEAR_PAL[y],
-    borderWidth: y === CF.sortYear ? 2 : 0,
-    borderColor: y === CF.sortYear ? '#fff' : undefined,
-    spanGaps: false,
-  }));
-
-  const ctx = $('c-gross-margin').getContext('2d');
-  if (charts.grossMargin) charts.grossMargin.destroy();
-  charts.grossMargin = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 10, family: 'Arial' }, boxWidth: 11, color: tick, padding: 6 } },
-        tooltip: {
-          callbacks: {
-            label: c => `${c.dataset.label}: ${c.parsed.y != null ? c.parsed.y.toFixed(1) + '%' : '—'}`,
-          },
-        },
-      },
-      scales: {
-        x: { ticks: { font: { size: 11, family: 'Arial' }, color: tick, maxRotation: 30 }, grid: { color: grid } },
-        y: { ticks: { font: { size: 11, family: 'Arial' }, color: tick, callback: v => v.toFixed(0) + '%' },
-             grid: { color: grid },
-             title: { display: true, text: '毛利率 %', color: tick, font: { size: 10 } } },
-      },
-    },
-  });
-}
-
 // ── YoY% 热力图 ──────────────────────────────────────────────────────────────
 function renderYoYHeatmap() {
   const years = cfYears();
@@ -1936,9 +1820,6 @@ async function loadData() {
     watchResize('c-net-margin',  'netMargin');
     watchResize('c-mcu-grp',     'mcuGrp');
     watchResize('c-stacked',     'stacked');
-    watchResize('c-mcu-share',   'mcuShare');
-    watchResize('c-gross-margin','grossMargin');
-
     applyChartTheme();
 
   } catch (err) {
