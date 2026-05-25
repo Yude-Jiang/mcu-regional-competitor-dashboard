@@ -79,7 +79,7 @@ html,body {
 
 /* ── Pipeline strip ── */
 .pipeline {
-  display:flex; align-items:stretch; height:44px; flex-shrink:0;
+  display:flex; align-items:stretch; height:56px; flex-shrink:0;
   background:var(--bg-1); border-bottom:1px solid var(--border);
   overflow-x:auto; overflow-y:hidden;
 }
@@ -99,7 +99,7 @@ html,body {
   cursor:pointer; transition:background .1s;
 }
 .fp-card:hover { background:var(--bg-2); }
-.fp-sym  { font:600 var(--fz-2xs)/1 monospace; color:var(--text-faint); }
+.fp-sym  { font:600 var(--fz-xs)/1 monospace; color:var(--text-dim); }
 .fp-name { font:600 var(--fz-sm)/1.2 var(--font); color:var(--text); white-space:nowrap; }
 .fp-badge {
   font:500 var(--fz-2xs)/1 monospace; letter-spacing:.05em; text-transform:uppercase;
@@ -599,12 +599,6 @@ body.panel-open .table-wrap { padding-right:408px; }
     <label>搜索</label>
     <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…">
   </div>
-  <div class="legend">
-    <span><span class="dot dc">●</span>已填入（有来源）</span>
-    <span><span class="dot dd">●</span>推算（高置信）</span>
-    <span><span class="dot dp">●</span>待补充</span>
-    <span><span class="dot du">●</span>缺失</span>
-  </div>
 </div>
 
 <!-- ── Chart filter / sort bar ── -->
@@ -678,6 +672,7 @@ body.panel-open .table-wrap { padding-right:408px; }
       <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
     </div>
     <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
+    <div class="rev-summary" id="mcu-summary"></div>
   </div>
   <div class="chart-dual-side">
     <div class="cs-hdr">
@@ -878,6 +873,7 @@ function rerenderCharts() {
   renderNetMarginChart();
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
+  _updateMcuSummary(cfYears(), cfSyms());
   renderStacked();
   renderYoYHeatmap();
 }
@@ -1185,6 +1181,29 @@ function netMarginPct(f) {
   const ni = f.net_income_musd ?? f.net_income_yuan;
   const tr = f.total_revenue_musd ?? f.total_revenue_yuan;
   return (ni != null && tr != null && tr > 0) ? ni / tr * 100 : null;
+}
+
+// ── MCU summary bar ───────────────────────────────────────────────────────
+function _updateMcuSummary(years, ss) {
+  const el = $('mcu-summary');
+  if (!el) return;
+  const field = curF('mcu_revenue');
+  const scale = field.endsWith('_yuan') ? 1/1e8 : 1;
+  const dec   = curDec();
+  const unit  = curShort();
+  const yrs   = years.slice().sort();
+  const totals = yrs.map(y =>
+    ss.reduce((sum, s) => { const v=(G.companies[s].financials[y]||{})[field]; return sum+(v!=null?v*scale:0); }, 0)
+  );
+  if (!totals.length) { el.innerHTML = ''; return; }
+  const n    = totals.length - 1;
+  const yoy  = n>0 && totals[n-1]>0 ? (totals[n]-totals[n-1])/totals[n-1]*100 : null;
+  const cagr = n>0 && totals[0]>0   ? (Math.pow(totals[n]/totals[0],1/n)-1)*100 : null;
+  const flow = yrs.map((y,i)=>`${y}: <b>${totals[i].toFixed(dec)} ${unit}</b>`).join(' → ');
+  let html = `<span style="color:var(--text-dim);font-weight:600">MCU ${ss.length}家合计（推算）：</span>${flow}`;
+  if (yoy!=null) html += ` <span style="opacity:.5">|</span> YoY <b style="color:${yoy>=0?'var(--pos)':'var(--neg)'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</b>`;
+  if (cagr!=null) html += ` <span style="opacity:.5">|</span> ${n}Y CAGR <b>${cagr.toFixed(1)}%</b>`;
+  el.innerHTML = html;
 }
 
 // ── Revenue summary bar ───────────────────────────────────────────────────
