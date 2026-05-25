@@ -722,7 +722,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
       <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_net">净利率随营收同步收窄；2023 年多家公司跌至低点，2024 年随去库存结束逐步回升。</div>
+    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
     <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
   </div>
 </div>
@@ -903,7 +903,7 @@ const I18N = {
     tag_heatmap:'热力图', chart_heatmap_title:'YoY% 营收热力图',
     heatmap_sub:'上：总营收YoY  下：MCU YoY',
     desc_rev:'2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。',
-    desc_net:'净利率随营收同步收窄；2023 年多家公司跌至低点，2024 年随去库存结束逐步回升。',
+    desc_net:'净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。',
     desc_mcu:'2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。',
     desc_stacked:'11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。',
     desc_heatmap:'绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。',
@@ -961,7 +961,7 @@ const I18N = {
     tag_heatmap:'Heatmap', chart_heatmap_title:'YoY% Revenue Heatmap',
     heatmap_sub:'Top: Total Rev YoY  Bottom: MCU YoY',
     desc_rev:'2021–22 chip shortage drove revenue surge; 2023 inventory digestion caused broad declines; 2024 recovery diverged — GigaDevice & Espressif showed the strongest rebound.',
-    desc_net:'Net margins contracted in tandem with revenues; 2023 saw several companies turn unprofitable; gradual recovery in 2024 as inventories cleared.',
+    desc_net:'Net Margin = Net Income ÷ Revenue × 100%. Moves in tandem with revenue cycles; 2023 saw several companies turn unprofitable; gradual recovery in 2024. Note: NationZ (300077) net margin was ~−268% in 2018 due to a governance crisis (CEO disappeared), triggering massive asset impairments — net loss ~¥1.6B vs. revenue of only ¥0.6B.',
     desc_mcu:'Industry MCU CAGR 2018→2025 ~20%+; GigaDevice holds the largest share; Espressif leads growth via its AIoT ecosystem.',
     desc_stacked:'Annual evolution of 11-company MCU aggregate; Nasda/Geehy targets industrial & automotive with higher ASP.',
     desc_heatmap:'Green = growth, red = decline. 2023 saw broad synchronized correction across all 11 companies; 2024–25 recovery pace varies by company.',
@@ -1086,19 +1086,19 @@ const YEAR_PAL = {
   2021:'#81d4fa', 2022:'#3cb4e6',
   2023:'#f48fb1', 2024:'#e6007e', 2025:'#ffd200',
 };
-// Company palette: 11 colors for stacked chart — distinct from YEAR_PAL
+// Company palette: 11 muted colors for stacked chart — desaturated, easy on the eye
 const CO_COLORS = [
-  '#1976d2',  // 603986 兆易创新  blue
-  '#00897b',  // 300327 中颖电子  teal
-  '#558b2f',  // 688380 中微半导  olive green
-  '#9c27b0',  // 300077 国民技术  purple (lighter, avoids clash with 钜泉)
-  '#e65100',  // 688279 峰岹科技  deep orange
-  '#795548',  // 002180 纳思达    brown (distinct from every other color)
-  '#d81b60',  // 688385 复旦微电  pink-magenta
-  '#c62828',  // 688766 普冉股份  deep red
-  '#f9a825',  // 688595 芯海科技  amber-gold
-  '#546e7a',  // 688391 钜泉科技  blue-grey
-  '#2e7d32',  // 688018 乐鑫科技  forest green
+  '#5b8db8',  // 603986 兆易创新  steel blue
+  '#5aa08a',  // 300327 中颖电子  sage teal
+  '#7a9e5f',  // 688380 中微半导  muted olive
+  '#8e72a8',  // 300077 国民技术  soft lavender
+  '#c07a45',  // 688279 峰岹科技  warm terracotta
+  '#8a7060',  // 002180 纳思达    warm taupe
+  '#b06080',  // 688385 复旦微电  dusty rose
+  '#a05050',  // 688766 普冉股份  muted brick
+  '#b89a40',  // 688595 芯海科技  muted gold
+  '#607a88',  // 688391 钜泉科技  slate
+  '#4a8c5c',  // 688018 乐鑫科技  muted forest
 ];
 
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
