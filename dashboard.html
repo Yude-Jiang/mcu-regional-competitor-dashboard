@@ -594,14 +594,23 @@ body.panel-open .table-wrap { padding-right:408px; }
 <!-- FX rates bar -->
 <div class="fx-bar" id="fx-bar"></div>
 
-<!-- ── 总营收 grouped chart ── -->
-<div class="cs-wrap">
-  <div class="cs-hdr">
-    <span class="cs-tag" style="background:#1a8a4e">总营收</span>
-    <span class="cs-title">按公司 · 总营收 (来自年报)</span>
-    <span class="cs-unit" id="cs-unit-rev">M USD</span>
+<!-- ── 总营收 + 净利润率 dual row ── -->
+<div class="chart-dual">
+  <div class="chart-dual-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#1a8a4e">总营收</span>
+      <span class="cs-title">按公司 · 总营收 (来自年报)</span>
+      <span class="cs-unit" id="cs-unit-rev">M USD</span>
+    </div>
+    <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
   </div>
-  <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
+  <div class="chart-dual-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff">净利率</span>
+      <span class="cs-title">按公司 · 净利润率 %</span>
+    </div>
+    <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
+  </div>
 </div>
 <div class="rev-summary" id="rev-summary"></div>
 
@@ -801,6 +810,7 @@ function cfSyms()   {
 
 function rerenderCharts() {
   renderTotalRevChart();
+  renderNetMarginChart();
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   renderStacked();
@@ -1134,7 +1144,7 @@ function _updateRevSummary(years, ss) {
   el.innerHTML = html;
 }
 
-// ── 总营收 specialized chart: grouped bars + net margin % lines ───────────
+// ── 总营收 grouped bars ────────────────────────────────────────────────────
 function renderTotalRevChart() {
   const years  = cfYears();
   const ss     = cfSyms();
@@ -1147,21 +1157,12 @@ function renderTotalRevChart() {
   const tick   = dark ? '#7d94b3' : '#8191a5';
   const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
 
-  const barDS = years.map(y => ({
-    type: 'bar', label: String(y),
+  const datasets = years.map(y => ({
+    label: String(y),
     data: ss.map(s => { const v=(G.companies[s].financials[y]||{})[field]; return v!=null?v*scale:null; }),
     backgroundColor: YEAR_PAL[y],
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
-    yAxisID: 'y', spanGaps: false, order: 2,
-  }));
-
-  const lineDS = years.map(y => ({
-    type: 'line', label: `净利率 ${y}`,
-    data: ss.map(s => netMarginPct(G.companies[s].financials[y]||{})),
-    borderColor: YEAR_PAL[y], backgroundColor: 'transparent',
-    borderWidth: 1.5, borderDash: [5,3],
-    pointRadius: 2.5, pointBackgroundColor: YEAR_PAL[y],
-    yAxisID: 'y2', spanGaps: true, order: 1,
+    spanGaps: false,
   }));
 
   _updateRevSummary(years, ss);
@@ -1170,23 +1171,16 @@ function renderTotalRevChart() {
   if (charts.totalRev) charts.totalRev.destroy();
   charts.totalRev = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [...barDS, ...lineDS] },
+    data: { labels, datasets },
     options: {
       responsive:true, maintainAspectRatio:false, animation:false,
       plugins:{
-        legend:{ position:'bottom', labels:{
-          font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6,
-          filter: item => !item.text.startsWith('净利率'),
-        }},
+        legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6 } },
         tooltip:{ callbacks:{
-          label: c => {
-            if (c.dataset.yAxisID==='y2')
-              return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
-            return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(dec)+' '+unit:'N/A'}`;
-          },
+          label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(dec)+' '+unit:'N/A'}`,
           afterTitle: ctx2 => {
             if ((ctx2[0]?.label||'').includes('纳思达'))
-              return ['（002180 仅追踪极海微MCU子公司，集团总营收不在数据库）'];
+              return ['（002180 仅追踪极海微IC子公司营收，集团总营收不在数据库）'];
             return [];
           },
         }},
@@ -1195,10 +1189,46 @@ function renderTotalRevChart() {
         x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
         y:{ ticks:{font:{size:11,family:'Arial'},color:tick}, grid:{color:grid},
             title:{display:true,text:unit,color:tick,font:{size:10}} },
-        y2:{ position:'right',
-             ticks:{font:{size:10,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
-             grid:{drawOnChartArea:false},
-             title:{display:true,text:'净利润率',color:tick,font:{size:10}} },
+      },
+    },
+  });
+}
+
+// ── 净利润率 grouped bars (right panel of 总营收 dual row) ─────────────────
+function renderNetMarginChart() {
+  const years  = cfYears();
+  const ss     = cfSyms();
+  const labels = ss.map(s => (G.companies[s].meta||{}).name_cn || s);
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const datasets = years.map(y => ({
+    label: String(y),
+    data: ss.map(s => netMarginPct(G.companies[s].financials[y]||{})),
+    backgroundColor: YEAR_PAL[y],
+    borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    spanGaps: false,
+  }));
+
+  const ctx = $('c-net-margin').getContext('2d');
+  if (charts.netMargin) charts.netMargin.destroy();
+  charts.netMargin = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6 } },
+        tooltip:{ callbacks:{
+          label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`,
+        }},
+      },
+      scales:{
+        x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
+        y:{ ticks:{font:{size:11,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
+            grid:{color:grid},
+            title:{display:true,text:'净利润率',color:tick,font:{size:10}} },
       },
     },
   });
@@ -1608,9 +1638,10 @@ async function loadData() {
     initChartCtrl();
     rerenderCharts();
 
-    watchResize('c-total-rev', 'totalRev');
-    watchResize('c-mcu-grp',   'mcuGrp');
-    watchResize('c-stacked',   'stacked');
+    watchResize('c-total-rev',  'totalRev');
+    watchResize('c-net-margin', 'netMargin');
+    watchResize('c-mcu-grp',    'mcuGrp');
+    watchResize('c-stacked',    'stacked');
 
     applyChartTheme();
 
