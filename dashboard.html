@@ -332,10 +332,16 @@ footer {
   padding:12px 14px; font:var(--fz-sm)/1.55 var(--font); color:var(--text-dim);
 }
 .dp-strat-badge {
-  display:inline-block; font:700 var(--fz-sm)/1 monospace; letter-spacing:.05em;
-  text-transform:uppercase; padding:4px 8px; border-radius:2px;
-  background:var(--bg-3); color:var(--text); margin-bottom:8px;
+  display:inline-block; font:700 13px/1.4 monospace; letter-spacing:.05em;
+  text-transform:uppercase; padding:5px 14px; border-radius:3px;
+  border:1px solid transparent; /* color set by JS */
 }
+.dp-conf-badge {
+  display:inline-block; font:700 10px/1 var(--font); letter-spacing:.07em;
+  text-transform:uppercase; padding:3px 8px; border-radius:2px;
+  border:1px solid transparent; /* color set by JS */
+}
+.dp-strat-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:9px; }
 .dp-strat-note { font:var(--fz-sm)/1.6 var(--font); color:var(--text-dim); }
 .dp-chart-wrap { position:relative; height:140px; }
 .dp-info-tbl { width:100%; border-collapse:collapse; font-size:var(--fz-xs); margin-top:4px; }
@@ -847,8 +853,9 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <div>
       <div class="dp-section-ttl" data-i18n="dp_mcu_strategy">MCU 口径策略</div>
       <div class="dp-strat-box">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <div class="dp-strat-row">
           <div class="dp-strat-badge" id="dp-strat-badge">—</div>
+          <div class="dp-conf-badge" id="dp-conf-badge"></div>
           <div class="dp-auto-status" id="dp-auto-status" style="display:none"></div>
         </div>
         <div class="dp-strat-note" id="dp-strat-note"></div>
@@ -1086,20 +1093,35 @@ const YEAR_PAL = {
   2021:'#81d4fa', 2022:'#3cb4e6',
   2023:'#f48fb1', 2024:'#e6007e', 2025:'#ffd200',
 };
-// Company palette: 11 muted colors for stacked chart — desaturated, easy on the eye
+// Company palette: maximise hue gap between adjacent companies in stack ORDER
+// ORDER: 603986→300327→688380→300077→688279→002180→688385→688766→688595→688391→688018
 const CO_COLORS = [
-  '#5b8db8',  // 603986 兆易创新  steel blue
-  '#5aa08a',  // 300327 中颖电子  sage teal
-  '#7a9e5f',  // 688380 中微半导  muted olive
-  '#8e72a8',  // 300077 国民技术  soft lavender
-  '#c07a45',  // 688279 峰岹科技  warm terracotta
-  '#8a7060',  // 002180 纳思达    warm taupe
-  '#b06080',  // 688385 复旦微电  dusty rose
-  '#a05050',  // 688766 普冉股份  muted brick
-  '#b89a40',  // 688595 芯海科技  muted gold
-  '#607a88',  // 688391 钜泉科技  slate
-  '#4a8c5c',  // 688018 乐鑫科技  muted forest
+  '#4878b8',  // 603986 兆易创新  cornflower blue
+  '#c07030',  // 300327 中颖电子  burnt orange     (190° from blue)
+  '#9060b0',  // 688380 中微半导  dusty purple     (250° from orange)
+  '#489858',  // 300077 国民技术  muted green      (160° from purple)
+  '#c04848',  // 688279 峰岹科技  muted coral      (120° from green)
+  '#3d90a0',  // 002180 纳思达    steel teal       (170° from coral)
+  '#c0a030',  // 688385 复旦微电  golden amber     (145° from teal)
+  '#b06888',  // 688766 普冉股份  dusty rose       (130° from amber)
+  '#708848',  // 688595 芯海科技  moss olive       (120° from rose)
+  '#6878c0',  // 688391 钜泉科技  periwinkle       (120° from olive)
+  '#3a8850',  // 688018 乐鑫科技  forest green     (140° from periwinkle)
 ];
+
+// Strategy badge color coding
+const STRAT_COLORS = {
+  segment_reported:   { bg:'rgba(34,197,94,.18)',   fg:'#22c55e', bd:'rgba(34,197,94,.45)'   },
+  segment_industrial: { bg:'rgba(56,189,248,.16)',  fg:'#0ea5e9', bd:'rgba(56,189,248,.4)'   },
+  segment_estimated:  { bg:'rgba(20,184,166,.16)',  fg:'#14b8a6', bd:'rgba(20,184,166,.4)'   },
+  total_proxy:        { bg:'rgba(251,146,60,.18)',  fg:'#ea8020', bd:'rgba(251,146,60,.45)'  },
+  total_revenue:      { bg:'rgba(251,146,60,.18)',  fg:'#ea8020', bd:'rgba(251,146,60,.45)'  },
+  estimated:          { bg:'rgba(245,158,11,.16)',  fg:'#c08000', bd:'rgba(245,158,11,.4)'   },
+  subsidiary_geehy:   { bg:'rgba(167,139,250,.18)', fg:'#8b5cf6', bd:'rgba(167,139,250,.45)' },
+};
+const STRAT_CLR_DEF = { bg:'rgba(100,116,139,.13)', fg:'#94a3b8', bd:'rgba(100,116,139,.3)' };
+
+const CONF_COLORS = { high:'#22c55e', medium:'#f59e0b', low:'#ef4444', na:'#94a3b8' };
 
 let G = null, charts = {}, sortState = { col:'mcu', dir:'desc' }, dpChart = null;
 let _currentDetailSym = null;
@@ -1861,10 +1883,22 @@ function openDetail(sym) {
   $('dp-en').textContent   = LANG === 'en' ? (m.name_cn || '') : (m.name_en || '');
   $('dp-tag').textContent  = `${sym} · ${m.market || ''} · ${T('founded')} ${m.founded_year||'?'} / ${T('listed')} ${m.listed_year||'?'}`;
 
-  // Strategy
-  $('dp-strat-badge').textContent = STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '?';
-  const confColor = CONF_BORDER[m.mcu_confidence || 'na'];
-  $('dp-strat-badge').style.borderLeft = `3px solid ${confColor}`;
+  // Strategy badge — colored by strategy type
+  const sc = STRAT_COLORS[m.mcu_strategy] || STRAT_CLR_DEF;
+  const stratBadge = $('dp-strat-badge');
+  stratBadge.textContent = STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '?';
+  stratBadge.style.cssText = `background:${sc.bg};color:${sc.fg};border-color:${sc.bd};`;
+
+  // Confidence badge
+  const conf = m.mcu_confidence || 'na';
+  const confBadge = $('dp-conf-badge');
+  const confFg = CONF_COLORS[conf] || CONF_COLORS.na;
+  const confLbl = LANG === 'en'
+    ? { high:'HIGH', medium:'MEDIUM', low:'LOW', na:'N/A' }[conf]
+    : { high:'高置信', medium:'中置信', low:'低置信', na:'—' }[conf];
+  confBadge.textContent = confLbl;
+  confBadge.style.cssText = `background:${confFg}22;color:${confFg};border-color:${confFg}66;`;
+
   let noteText = m.mcu_note || '';
   if (m.mcu_multiplier != null && m.mcu_strategy === 'total_proxy') {
     noteText = `MCU ≈ 总营收 × ${m.mcu_multiplier}` + (noteText ? `\n${noteText}` : '');
