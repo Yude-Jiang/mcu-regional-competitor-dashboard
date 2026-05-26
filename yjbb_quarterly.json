@@ -1,3 +1,340 @@
-[
-  { "q": "2024Q1", "data": [] }
-]
+{
+  "generated_at": "2026-05-20",
+  "periods": [
+    "20221231",
+    "20231231",
+    "20241231"
+  ],
+  "records": [
+    {
+      "year": 2022,
+      "symbol": "603986",
+      "total_revenue_cny_100m": 8129992424.99,
+      "revenue_yoy_pct": -4.4679325418,
+      "net_income_cny_100m": 2052884263.32,
+      "net_income_yoy_pct": -12.16,
+      "gross_margin_pct": 47.6585529219,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "300327",
+      "total_revenue_cny_100m": 1601894105.25,
+      "revenue_yoy_pct": 7.2284512661,
+      "net_income_cny_100m": 322999516.38,
+      "net_income_yoy_pct": -12.86,
+      "gross_margin_pct": 45.7675779596,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688380",
+      "total_revenue_cny_100m": 636793746.12,
+      "revenue_yoy_pct": -42.5810427954,
+      "net_income_cny_100m": 59344214.0,
+      "net_income_yoy_pct": -92.46,
+      "gross_margin_pct": 41.1003567489,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "300077",
+      "total_revenue_cny_100m": 1195410943.37,
+      "revenue_yoy_pct": 17.4725537308,
+      "net_income_cny_100m": -32485009.01,
+      "net_income_yoy_pct": -114.83,
+      "gross_margin_pct": 37.8505606779,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688279",
+      "total_revenue_cny_100m": 322972933.77,
+      "revenue_yoy_pct": -2.2468977959,
+      "net_income_cny_100m": 142001194.05,
+      "net_income_yoy_pct": 4.98,
+      "gross_margin_pct": 57.4199371183,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "002180",
+      "total_revenue_cny_100m": 25855355245.38,
+      "revenue_yoy_pct": 13.4421844719,
+      "net_income_cny_100m": 1862890140.81,
+      "net_income_yoy_pct": 60.15,
+      "gross_margin_pct": 32.614901518,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688385",
+      "total_revenue_cny_100m": 3538908884.94,
+      "revenue_yoy_pct": 37.3127143675,
+      "net_income_cny_100m": 1076843340.68,
+      "net_income_yoy_pct": 109.31,
+      "gross_margin_pct": 64.6707144501,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688766",
+      "total_revenue_cny_100m": 924828277.26,
+      "revenue_yoy_pct": -16.1475974443,
+      "net_income_cny_100m": 83146348.73,
+      "net_income_yoy_pct": -71.44,
+      "gross_margin_pct": 29.8507098061,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688595",
+      "total_revenue_cny_100m": 617672465.8,
+      "revenue_yoy_pct": -6.2827993151,
+      "net_income_cny_100m": 2821927.69,
+      "net_income_yoy_pct": -97.08,
+      "gross_margin_pct": 39.1892834816,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688391",
+      "total_revenue_cny_100m": 709904738.51,
+      "revenue_yoy_pct": 42.1681469299,
+      "net_income_cny_100m": 200053541.23,
+      "net_income_yoy_pct": 97.29,
+      "gross_margin_pct": 51.3294132287,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2022,
+      "symbol": "688018",
+      "total_revenue_cny_100m": 1271127201.38,
+      "revenue_yoy_pct": -8.3126590469,
+      "net_income_cny_100m": 97323102.86,
+      "net_income_yoy_pct": -50.95,
+      "gross_margin_pct": 39.9842806816,
+      "source": "stock_yjbb_em 2022Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "603986",
+      "total_revenue_cny_100m": 5760823414.65,
+      "revenue_yoy_pct": -29.1410973897,
+      "net_income_cny_100m": 161141224.88,
+      "net_income_yoy_pct": -92.15,
+      "gross_margin_pct": 34.4224293811,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "300327",
+      "total_revenue_cny_100m": 1300231731.1,
+      "revenue_yoy_pct": -18.8316052329,
+      "net_income_cny_100m": 186306896.48,
+      "net_income_yoy_pct": -42.32,
+      "gross_margin_pct": 35.617345528,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688380",
+      "total_revenue_cny_100m": 713569748.57,
+      "revenue_yoy_pct": 12.0566514539,
+      "net_income_cny_100m": -21948515.62,
+      "net_income_yoy_pct": -136.99,
+      "gross_margin_pct": 17.4463993127,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "300077",
+      "total_revenue_cny_100m": 1036752756.19,
+      "revenue_yoy_pct": -13.2722716033,
+      "net_income_cny_100m": -571523582.15,
+      "net_income_yoy_pct": -1659.35,
+      "gross_margin_pct": 14.3097522533,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688279",
+      "total_revenue_cny_100m": 411359196.52,
+      "revenue_yoy_pct": 27.3664612444,
+      "net_income_cny_100m": 174846763.93,
+      "net_income_yoy_pct": 23.13,
+      "gross_margin_pct": 53.4732927842,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "002180",
+      "total_revenue_cny_100m": 24062010361.56,
+      "revenue_yoy_pct": -6.9360674676,
+      "net_income_cny_100m": -6185109897.95,
+      "net_income_yoy_pct": -432.02,
+      "gross_margin_pct": 31.5417777935,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688385",
+      "total_revenue_cny_100m": 3536259423.6,
+      "revenue_yoy_pct": -0.0748666164,
+      "net_income_cny_100m": 719494375.58,
+      "net_income_yoy_pct": -33.18,
+      "gross_margin_pct": 61.2113306149,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688766",
+      "total_revenue_cny_100m": 1127050035.41,
+      "revenue_yoy_pct": 21.8658710079,
+      "net_income_cny_100m": -48274289.54,
+      "net_income_yoy_pct": -158.06,
+      "gross_margin_pct": 24.2888766531,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688595",
+      "total_revenue_cny_100m": 432946141.25,
+      "revenue_yoy_pct": -29.9068413728,
+      "net_income_cny_100m": -143451438.11,
+      "net_income_yoy_pct": -5183.46,
+      "gross_margin_pct": 28.2643478786,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688391",
+      "total_revenue_cny_100m": 603045632.83,
+      "revenue_yoy_pct": -15.0525978886,
+      "net_income_cny_100m": 131434862.23,
+      "net_income_yoy_pct": -34.3,
+      "gross_margin_pct": 49.6548413086,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2023,
+      "symbol": "688018",
+      "total_revenue_cny_100m": 1433064910.56,
+      "revenue_yoy_pct": 12.7396934787,
+      "net_income_cny_100m": 136204637.19,
+      "net_income_yoy_pct": 39.95,
+      "gross_margin_pct": 40.5598188049,
+      "source": "stock_yjbb_em 2023Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "603986",
+      "total_revenue_cny_100m": 7355977677.11,
+      "revenue_yoy_pct": 27.6896920396,
+      "net_income_cny_100m": 1102542801.68,
+      "net_income_yoy_pct": 584.21,
+      "gross_margin_pct": 38.001106064,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "300327",
+      "total_revenue_cny_100m": 1343449000.69,
+      "revenue_yoy_pct": 3.3238128678,
+      "net_income_cny_100m": 134127226.86,
+      "net_income_yoy_pct": -28.01,
+      "gross_margin_pct": 33.6035646622,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688380",
+      "total_revenue_cny_100m": 911654675.0,
+      "revenue_yoy_pct": 27.7597147058,
+      "net_income_cny_100m": 136833872.76,
+      "net_income_yoy_pct": 723.4311018068,
+      "gross_margin_pct": 29.8645948709,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "300077",
+      "total_revenue_cny_100m": 1167550263.68,
+      "revenue_yoy_pct": 12.6160752126,
+      "net_income_cny_100m": -235342415.12,
+      "net_income_yoy_pct": 58.82,
+      "gross_margin_pct": 20.8839998598,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688279",
+      "total_revenue_cny_100m": 600324711.69,
+      "revenue_yoy_pct": 45.9368641247,
+      "net_income_cny_100m": 222362312.77,
+      "net_income_yoy_pct": 27.18,
+      "gross_margin_pct": 53.2384829954,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "002180",
+      "total_revenue_cny_100m": 26414800571.28,
+      "revenue_yoy_pct": 9.7780284123,
+      "net_income_cny_100m": 749196224.77,
+      "net_income_yoy_pct": 112.11,
+      "gross_margin_pct": 32.2688270853,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688385",
+      "total_revenue_cny_100m": 3590223828.23,
+      "revenue_yoy_pct": 1.5260307055,
+      "net_income_cny_100m": 572595101.31,
+      "net_income_yoy_pct": -20.42,
+      "gross_margin_pct": 55.947010113,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688766",
+      "total_revenue_cny_100m": 1803569661.85,
+      "revenue_yoy_pct": 60.0256958595,
+      "net_income_cny_100m": 292416562.47,
+      "net_income_yoy_pct": 705.7397535135,
+      "gross_margin_pct": 33.5524942341,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688595",
+      "total_revenue_cny_100m": 702306080.34,
+      "revenue_yoy_pct": 62.215576818,
+      "net_income_cny_100m": -172873624.69,
+      "net_income_yoy_pct": -20.5102067763,
+      "gross_margin_pct": 34.1550557179,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688391",
+      "total_revenue_cny_100m": 591868213.05,
+      "revenue_yoy_pct": -1.8534948554,
+      "net_income_cny_100m": 93593564.79,
+      "net_income_yoy_pct": -28.79,
+      "gross_margin_pct": 44.0990107468,
+      "source": "stock_yjbb_em 2024Q4"
+    },
+    {
+      "year": 2024,
+      "symbol": "688018",
+      "total_revenue_cny_100m": 2006919686.57,
+      "revenue_yoy_pct": 40.043878807,
+      "net_income_cny_100m": 339323927.38,
+      "net_income_yoy_pct": 149.13,
+      "gross_margin_pct": 43.9079310217,
+      "source": "stock_yjbb_em 2024Q4"
+    }
+  ]
+}

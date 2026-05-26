@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCU.CN — 管理后台</title>
+<style>
+/* ── Design system ── */
+:root {
+  --navy-1:#03234b; --navy-2:#425a78; --navy-3:#8191a5; --navy-4:#c0c8d2;
+  --cyan-1:#3cb4e6; --cyan-2:#6dc7ec; --cyan-3:#9dd9f2;
+  --yel-1:#ffd200;
+  --mag-1:#e6007e; --mag-2:#ec409e;
+  --bg-0:#f4f6f9; --bg-1:#ffffff; --bg-2:#f8fafc; --bg-3:#eef2f7;
+  --border:#dbe2eb; --border-b:#b8c4d2;
+  --text:var(--navy-1); --text-dim:var(--navy-2); --text-faint:var(--navy-3);
+  --pos:#1a8a4e; --neg:var(--mag-1); --accent:var(--cyan-1);
+}
+[data-theme="dark"] {
+  --bg-0:#07101e; --bg-1:#0c1726; --bg-2:#122033; --bg-3:#1a2c44;
+  --border:#1f3050; --border-b:#2e4a73;
+  --text:#d7e4f3; --text-dim:#7d94b3; --text-faint:#4d6280;
+  --pos:#5ad498; --neg:var(--mag-2);
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body {
+  font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  background:var(--bg-0); color:var(--text);
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+
+/* ── Header ── */
+.hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; background:var(--navy-1); color:#fff; height:40px;
+}
+.brand { display:flex; align-items:center; gap:10px; }
+.mark {
+  position:relative; width:26px; height:26px; background:var(--cyan-1);
+  display:inline-flex; align-items:center; justify-content:center;
+  font:700 12px/1 sans-serif; color:var(--navy-1); flex-shrink:0;
+}
+.mark::after {
+  content:""; position:absolute; right:-3px; bottom:-3px;
+  width:7px; height:7px; background:var(--yel-1);
+}
+.brand .ttl { font:700 13px/1 sans-serif; letter-spacing:.16em; color:#fff; }
+.brand .sep { color:var(--cyan-2); opacity:.5; margin:0 2px; }
+.brand .sub { font:10px/1 sans-serif; color:var(--cyan-2); letter-spacing:.14em; text-transform:uppercase; }
+.hdr-r { display:flex; align-items:center; gap:12px; }
+.theme-btn {
+  background:transparent; border:1px solid var(--navy-2); color:var(--cyan-3);
+  font:10px/1 sans-serif; padding:4px 8px; cursor:pointer; border-radius:2px;
+  letter-spacing:.05em; white-space:nowrap;
+}
+.theme-btn:hover { background:var(--navy-2); color:#fff; }
+
+/* ── Tab bar ── */
+.tab-bar {
+  display:flex; align-items:stretch; height:38px;
+  background:var(--bg-1); border-bottom:2px solid var(--border);
+  padding:0 16px; gap:0;
+}
+.tab-btn {
+  background:transparent; border:none; border-bottom:2px solid transparent;
+  color:var(--text-dim); font:600 11px/1 sans-serif; letter-spacing:.08em;
+  padding:0 16px; cursor:pointer; margin-bottom:-2px; transition:color .15s,border-color .15s;
+}
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--cyan-1); border-bottom-color:var(--cyan-1); }
+
+/* ── Content area ── */
+.tab-content { display:none; padding:20px 16px; }
+.tab-content.active { display:block; }
+
+/* ── Doc matrix ── */
+.matrix-notice {
+  background:var(--bg-3); border:1px solid var(--border); border-left:3px solid var(--yel-1);
+  padding:10px 14px; margin-bottom:16px; font:11px/1.5 sans-serif; color:var(--text-dim);
+}
+.matrix-wrap {
+  overflow:auto; max-height:480px; border:1px solid var(--border); border-radius:3px;
+  margin-bottom:24px;
+}
+.matrix-table {
+  border-collapse:collapse; min-width:100%; font:11px/1 sans-serif;
+}
+.matrix-table th {
+  position:sticky; top:0; z-index:2;
+  background:var(--bg-2); border:1px solid var(--border);
+  padding:6px 8px; font:600 10px/1 sans-serif; letter-spacing:.06em;
+  color:var(--text-dim); white-space:nowrap;
+}
+.matrix-table th.row-hdr {
+  position:sticky; left:0; z-index:3; background:var(--bg-2); min-width:120px;
+}
+.matrix-table td {
+  border:1px solid var(--border); padding:4px 6px; vertical-align:top;
+  min-width:90px; position:relative;
+}
+.matrix-table td.row-hdr-cell {
+  position:sticky; left:0; z-index:1; background:var(--bg-1);
+  font:600 10px/1.3 sans-serif; white-space:nowrap; min-width:120px;
+  padding:6px 8px;
+}
+.cell-badge {
+  display:inline-block; font:9px/1.4 sans-serif; padding:2px 5px; border-radius:2px;
+  margin:1px 1px; cursor:pointer; white-space:nowrap;
+}
+.badge-extracted { background:var(--pos); color:#fff; }
+.badge-downloaded { background:var(--cyan-1); color:var(--navy-1); }
+.badge-missing { background:var(--bg-3); color:var(--text-faint); cursor:default; }
+
+/* ── Popover ── */
+.popover {
+  position:fixed; z-index:100; background:var(--bg-1); border:1px solid var(--border-b);
+  border-radius:4px; padding:10px 12px; box-shadow:0 4px 16px rgba(0,0,0,.18);
+  font:10px/1.6 "Courier New",monospace; max-width:380px; color:var(--text);
+  pointer-events:none;
+}
+.popover-close { pointer-events:auto; cursor:pointer; float:right; font:14px/1 sans-serif; color:var(--text-faint); }
+.popover.hidden { display:none; }
+
+/* ── Download trigger section ── */
+.section-title {
+  font:700 11px/1 sans-serif; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-dim); margin-bottom:12px; padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+.form-row { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
+.form-label { font:600 10px/1 sans-serif; letter-spacing:.05em; color:var(--text-dim); }
+.form-input, .form-textarea, .form-select {
+  background:var(--bg-1); border:1px solid var(--border-b); color:var(--text);
+  font:11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  padding:6px 8px; border-radius:2px; width:100%;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  outline:none; border-color:var(--cyan-1);
+}
+.form-textarea { resize:vertical; min-height:60px; }
+.checkbox-group { display:flex; flex-wrap:wrap; gap:10px; }
+.checkbox-item { display:flex; align-items:center; gap:4px; font:11px/1 sans-serif; cursor:pointer; }
+.checkbox-item input { cursor:pointer; accent-color:var(--cyan-1); }
+.radio-item { display:flex; align-items:center; gap:4px; font:11px/1 sans-serif; cursor:pointer; }
+.radio-item input { cursor:pointer; accent-color:var(--cyan-1); }
+
+.submit-btn {
+  background:var(--cyan-1); border:none; color:var(--navy-1);
+  font:600 11px/1 sans-serif; letter-spacing:.06em; padding:8px 18px;
+  border-radius:2px; cursor:pointer; transition:opacity .15s;
+}
+.submit-btn:hover { opacity:.85; }
+.submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* ── Add company form ── */
+.add-form { max-width:600px; }
+.form-row-inline { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.hidden { display:none !important; }
+
+/* ── Alerts ── */
+.alert {
+  padding:10px 14px; border-radius:3px; margin-top:16px;
+  font:11px/1.6 "Courier New",monospace; white-space:pre-wrap;
+}
+.alert-success { background:#e6f9ef; border:1px solid #5ad498; color:#0a4e29; }
+.alert-error { background:#fde8ef; border:1px solid var(--mag-1); color:#7a0030; }
+[data-theme="dark"] .alert-success { background:#0c2e1e; color:#5ad498; border-color:#1a6040; }
+[data-theme="dark"] .alert-error { background:#2a0b18; color:#ec409e; border-color:#7a1040; }
+
+/* ── Loading spinner ── */
+.spinner {
+  display:inline-block; width:12px; height:12px; border:2px solid var(--border-b);
+  border-top-color:var(--cyan-1); border-radius:50%; animation:spin .6s linear infinite;
+  vertical-align:middle; margin-right:6px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="hdr">
+  <div class="brand">
+    <span class="mark">M</span>
+    <span class="ttl">MCU.CN</span>
+    <span class="sep">/</span>
+    <span class="sub">管理后台</span>
+  </div>
+  <div class="hdr-r">
+    <a href="/" class="theme-btn" style="text-decoration:none">← 返回看板</a>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">◑ Dark</button>
+  </div>
+</header>
+
+<!-- ── Tab bar ── -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-btn-matrix" onclick="switchTab('matrix')">文档矩阵</button>
+  <button class="tab-btn" id="tab-btn-add" onclick="switchTab('add')">新增公司</button>
+</div>
+
+<!-- ── Tab 1: 文档矩阵 ── -->
+<div class="tab-content active" id="tab-matrix">
+
+  <div id="bq-notice" class="matrix-notice hidden">
+    BigQuery 离线，显示本地 data.json 骨架
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix-table" id="matrix-table">
+      <thead id="matrix-thead"></thead>
+      <tbody id="matrix-tbody">
+        <tr><td colspan="20" style="text-align:center;padding:20px;color:var(--text-faint)">
+          <span class="spinner"></span> 加载中…
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Popover -->
+  <div class="popover hidden" id="popover">
+    <span class="popover-close" onclick="hidePopover()">✕</span>
+    <div id="popover-body"></div>
+  </div>
+
+  <!-- 触发下载 -->
+  <div class="section-title">触发下载</div>
+
+  <div class="form-row">
+    <label class="form-label">CNINFO Cookie</label>
+    <textarea class="form-textarea" id="dl-cookie" placeholder="routeId=.uc2; SID=..." style="min-height:80px"></textarea>
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">年份</label>
+    <div class="checkbox-group">
+      <label class="checkbox-item"><input type="checkbox" name="dl-year" value="2024"> 2024</label>
+      <label class="checkbox-item"><input type="checkbox" name="dl-year" value="2025"> 2025</label>
+      <label class="checkbox-item"><input type="checkbox" name="dl-year" value="2026" checked> 2026</label>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label class="form-label">公司筛选</label>
+    <div class="checkbox-group" id="dl-companies">
+      <label class="radio-item"><input type="radio" name="dl-co-mode" value="all" checked> 全部</label>
+    </div>
+  </div>
+
+  <button class="submit-btn" onclick="triggerDownload()">📥 开始下载</button>
+  <div id="dl-result"></div>
+
+</div>
+
+<!-- ── Tab 2: 新增公司 ── -->
+<div class="tab-content" id="tab-add">
+  <div class="add-form">
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">股票代码 *</label>
+        <input class="form-input" id="f-symbol" type="text" pattern="\d{6}" maxlength="6"
+               placeholder="603986" required>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">交易所 *</label>
+        <select class="form-select" id="f-market">
+          <option value="SH">SH主板</option>
+          <option value="SZ">SZ主板</option>
+          <option value="STAR">STAR科创板</option>
+          <option value="ChiNext">ChiNext创业板</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">公司名称（中文）*</label>
+        <input class="form-input" id="f-name-cn" type="text" placeholder="兆易创新" required>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">公司名称（英文）*</label>
+        <input class="form-input" id="f-name-en" type="text" placeholder="GigaDevice" required>
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">成立年份</label>
+        <input class="form-input" id="f-founded" type="number" min="1980" max="2030" placeholder="2005">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">上市年份</label>
+        <input class="form-input" id="f-listed" type="number" min="1990" max="2030" placeholder="2016">
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">核心架构</label>
+        <input class="form-input" id="f-core" type="text" placeholder="ARM Cortex-M0/M4">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">代工厂</label>
+        <input class="form-input" id="f-foundry" type="text" placeholder="TSMC / SMIC">
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">MCU策略 *</label>
+        <select class="form-select" id="f-strategy" onchange="onStrategyChange()">
+          <option value="total_revenue">total_revenue</option>
+          <option value="total_proxy">total_proxy</option>
+          <option value="segment_reported">segment_reported</option>
+          <option value="segment_estimated">segment_estimated</option>
+          <option value="subsidiary_geehy">subsidiary_geehy</option>
+          <option value="estimated">estimated</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0" id="f-multiplier-row">
+        <label class="form-label">MCU系数 (0–1)</label>
+        <input class="form-input" id="f-multiplier" type="number" min="0" max="1" step="0.0001" placeholder="0.9988">
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">MCU置信度 *</label>
+        <select class="form-select" id="f-confidence">
+          <option value="high">high</option>
+          <option value="medium">medium</option>
+          <option value="low">low</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label class="form-label">CNINFO orgId</label>
+        <input class="form-input" id="f-orgid" type="text" placeholder="9900026561">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">MCU备注</label>
+      <textarea class="form-textarea" id="f-note" placeholder="可选备注…"></textarea>
+    </div>
+
+    <button class="submit-btn" id="add-btn" onclick="submitAddCompany()">➕ 添加公司</button>
+    <div id="add-result"></div>
+
+  </div>
+</div>
+
+<script>
+// ── Theme ──────────────────────────────────────────────────────────────────
+(function(){
+  const t = localStorage.getItem('mcu-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('theme-btn').textContent = t === 'dark' ? '◑ Light' : '◑ Dark';
+})();
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('mcu-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '◑ Light' : '◑ Dark';
+}
+
+// ── Tab switching ───────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-btn-' + name).classList.add('active');
+}
+
+// ── Companies list (fixed order) ────────────────────────────────────────────
+const COMPANIES = [
+  { symbol: '603986', name: '兆易创新' },
+  { symbol: '300327', name: '中颖电子' },
+  { symbol: '688380', name: '中微半导' },
+  { symbol: '300077', name: '国民技术' },
+  { symbol: '688279', name: '峰岹科技' },
+  { symbol: '002180', name: '纳思达' },
+  { symbol: '688385', name: '复旦微电' },
+  { symbol: '688766', name: '普冉股份' },
+  { symbol: '688595', name: '芯海科技' },
+  { symbol: '688391', name: '钜泉科技' },
+  { symbol: '688018', name: '乐鑫科技' },
+];
+const YEARS = ['2018','2019','2020','2021','2022','2023','2024','2025','2026'];
+const REPORT_TYPES = ['年报','一季报','半年报','三季报'];
+
+// ── Document matrix ─────────────────────────────────────────────────────────
+let matrixData = {};
+
+async function loadMatrix() {
+  try {
+    const res = await fetch('/api/doc-status');
+    const json = await res.json();
+
+    if (!json.available) {
+      document.getElementById('bq-notice').classList.remove('hidden');
+    }
+    matrixData = json.matrix || {};
+    renderMatrix();
+  } catch(e) {
+    document.getElementById('matrix-tbody').innerHTML =
+      `<tr><td colspan="20" style="text-align:center;padding:20px;color:var(--neg)">加载失败: ${e.message}</td></tr>`;
+  }
+}
+
+function renderMatrix() {
+  // Header
+  const thead = document.getElementById('matrix-thead');
+  let hrow = '<tr><th class="row-hdr">公司</th>';
+  for (const yr of YEARS) hrow += `<th>${yr}</th>`;
+  hrow += '</tr>';
+  thead.innerHTML = hrow;
+
+  // Body
+  const tbody = document.getElementById('matrix-tbody');
+  let rows = '';
+  for (const co of COMPANIES) {
+    rows += `<tr><td class="row-hdr-cell">${co.symbol}<br>${co.name}</td>`;
+    for (const yr of YEARS) {
+      const yearData = (matrixData[co.symbol] || {})[yr] || {};
+      rows += `<td>` + renderCell(co.symbol, yr, yearData) + `</td>`;
+    }
+    rows += '</tr>';
+  }
+  tbody.innerHTML = rows || '<tr><td colspan="20" style="padding:20px;text-align:center;color:var(--text-faint)">暂无数据</td></tr>';
+}
+
+function renderCell(symbol, year, yearData) {
+  let badges = '';
+  for (const rt of REPORT_TYPES) {
+    const info = yearData[rt];
+    if (!info && rt !== '年报') continue; // only show optional types if present
+    if (!info) {
+      // 年报 not present
+      badges += `<span class="cell-badge badge-missing">—</span>`;
+      continue;
+    }
+    const extracted = info.extraction_status === 'extracted';
+    const downloaded = info.download_status === 'downloaded';
+    const cls = extracted ? 'badge-extracted' : (downloaded ? 'badge-downloaded' : 'badge-missing');
+    const label = extracted ? '✓ 已提取' : (downloaded ? '📄 已上传' : '—');
+    const payload = encodeURIComponent(JSON.stringify({ symbol, year, report_type: rt, ...info }));
+    badges += `<span class="cell-badge ${cls}" onclick="showPopover(event,'${payload}')">${rt} ${label}</span>`;
+  }
+  return badges || `<span class="cell-badge badge-missing">—</span>`;
+}
+
+// ── Popover ─────────────────────────────────────────────────────────────────
+function showPopover(evt, encoded) {
+  const data = JSON.parse(decodeURIComponent(encoded));
+  const pop = document.getElementById('popover');
+  const lines = [
+    `symbol:           ${data.symbol}`,
+    `year:             ${data.year}`,
+    `report_type:      ${data.report_type}`,
+    `download_status:  ${data.download_status || '—'}`,
+    `extraction_status:${data.extraction_status || '—'}`,
+    `file_size_kb:     ${data.file_size_kb || '—'}`,
+    `gcs_path:         ${data.gcs_path || '—'}`,
+  ];
+  document.getElementById('popover-body').textContent = lines.join('\n');
+  pop.classList.remove('hidden');
+
+  // Position near click, but keep in viewport
+  const x = Math.min(evt.clientX + 12, window.innerWidth - 400);
+  const y = Math.min(evt.clientY + 12, window.innerHeight - 200);
+  pop.style.left = x + 'px';
+  pop.style.top = y + 'px';
+
+  evt.stopPropagation();
+}
+
+function hidePopover() {
+  document.getElementById('popover').classList.add('hidden');
+}
+document.addEventListener('click', hidePopover);
+
+// ── Download trigger ─────────────────────────────────────────────────────────
+function buildCompanyCheckboxes() {
+  const grp = document.getElementById('dl-companies');
+  // Keep "全部" radio first
+  for (const co of COMPANIES) {
+    const lbl = document.createElement('label');
+    lbl.className = 'checkbox-item';
+    lbl.innerHTML = `<input type="checkbox" name="dl-co" value="${co.symbol}"> ${co.symbol} ${co.name}`;
+    grp.appendChild(lbl);
+  }
+}
+
+async function triggerDownload() {
+  const result = document.getElementById('dl-result');
+  try {
+    const res = await fetch('/api/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cookie: document.getElementById('dl-cookie').value,
+        years: [...document.querySelectorAll('input[name="dl-year"]:checked')].map(el => el.value),
+        companies: [...document.querySelectorAll('input[name="dl-co"]:checked')].map(el => el.value),
+      })
+    });
+    if (res.status === 501) {
+      result.innerHTML = `<div class="alert alert-error">Phase 3 尚未实现，请在 Cloud Shell 手动运行 download_reports.py</div>`;
+    } else {
+      const j = await res.json();
+      result.innerHTML = `<div class="alert alert-success">${JSON.stringify(j, null, 2)}</div>`;
+    }
+  } catch(e) {
+    result.innerHTML = `<div class="alert alert-error">请求失败: ${e.message}</div>`;
+  }
+}
+
+// ── Add company form ─────────────────────────────────────────────────────────
+function onStrategyChange() {
+  const v = document.getElementById('f-strategy').value;
+  const row = document.getElementById('f-multiplier-row');
+  if (v === 'total_proxy') {
+    row.classList.remove('hidden');
+  } else {
+    row.classList.add('hidden');
+    document.getElementById('f-multiplier').value = '';
+  }
+}
+// Init: hide multiplier by default (since default is total_revenue)
+onStrategyChange();
+
+async function submitAddCompany() {
+  const btn = document.getElementById('add-btn');
+  const result = document.getElementById('add-result');
+
+  // Collect + validate
+  const symbol = document.getElementById('f-symbol').value.trim();
+  if (!/^\d{6}$/.test(symbol)) {
+    result.innerHTML = `<div class="alert alert-error">股票代码必须为6位数字</div>`;
+    return;
+  }
+  const name_cn = document.getElementById('f-name-cn').value.trim();
+  const name_en = document.getElementById('f-name-en').value.trim();
+  if (!name_cn || !name_en) {
+    result.innerHTML = `<div class="alert alert-error">公司名称（中文/英文）为必填项</div>`;
+    return;
+  }
+
+  const strategy = document.getElementById('f-strategy').value;
+  const multiplierVal = document.getElementById('f-multiplier').value;
+
+  const payload = {
+    symbol,
+    name_cn,
+    name_en,
+    market: document.getElementById('f-market').value,
+    mcu_strategy: strategy,
+    mcu_confidence: document.getElementById('f-confidence').value,
+  };
+
+  const founded = document.getElementById('f-founded').value;
+  if (founded) payload.founded_year = parseInt(founded, 10);
+
+  const listed = document.getElementById('f-listed').value;
+  if (listed) payload.listed_year = parseInt(listed, 10);
+
+  const core = document.getElementById('f-core').value.trim();
+  if (core) payload.core_license = core;
+
+  const foundry = document.getElementById('f-foundry').value.trim();
+  if (foundry) payload.foundry_fab = foundry;
+
+  if (strategy === 'total_proxy' && multiplierVal) {
+    payload.mcu_multiplier = parseFloat(multiplierVal);
+  } else {
+    payload.mcu_multiplier = null;
+  }
+
+  const orgid = document.getElementById('f-orgid').value.trim();
+  if (orgid) payload.cninfo_org_id = orgid;
+
+  const note = document.getElementById('f-note').value.trim();
+  if (note) payload.mcu_note = note;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>提交中…';
+  result.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/company/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (res.status === 201) {
+      result.innerHTML = `<div class="alert alert-success">${JSON.stringify(json, null, 2)}\n\n⚠️  还需手动添加到 fetch_mcu_data.py / fetch_yjbb_quarterly.py / validate_data.py 的 MCU_SYMBOLS 列表</div>`;
+    } else {
+      result.innerHTML = `<div class="alert alert-error">${JSON.stringify(json, null, 2)}</div>`;
+    }
+  } catch(e) {
+    result.innerHTML = `<div class="alert alert-error">请求失败: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '➕ 添加公司';
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+buildCompanyCheckboxes();
+loadMatrix();
+</script>
+</body>
+</html>
