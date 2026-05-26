@@ -330,7 +330,12 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
-def process_symbol(symbol: str, meta: dict, known_mcu: dict) -> dict:
+def process_symbol(
+    symbol: str,
+    meta: dict,
+    known_mcu: dict,
+    known_emp: dict,
+) -> dict:
     log.info("Processing %s (%s)…", meta["name_cn"], symbol)
 
     fin = fetch_profit_sheet(symbol)
@@ -350,10 +355,18 @@ def process_symbol(symbol: str, meta: dict, known_mcu: dict) -> dict:
         if fin:
             log.info("  [%s] seeded %d skeleton rows from mcu_known_data", symbol, len(fin))
 
-    emp = fetch_employee_count(symbol)
-    for yr, cnt in emp.items():
+    # Employee counts: AKShare (live) takes priority; employee_known_data.json fills gaps
+    emp_api = fetch_employee_count(symbol)
+    for yr, cnt in emp_api.items():
         if yr in fin:
             fin[yr]["employee_count"] = cnt
+    for yr_str, cnt in known_emp.items():
+        try:
+            yr = int(yr_str)
+        except ValueError:
+            continue
+        if yr in fin and fin[yr].get("employee_count") is None:
+            fin[yr]["employee_count"] = cnt  # PDF-extracted fallback
 
     fin = apply_mcu_strategy(fin, meta, known_mcu)
     fin = compute_metrics(fin)
@@ -378,6 +391,9 @@ def main() -> None:
     companies_meta: dict = json.loads((HERE / "companies_meta.json").read_text())
     mcu_known: dict = json.loads((HERE / "mcu_known_data.json").read_text())
 
+    emp_known_path = HERE / "employee_known_data.json"
+    emp_known: dict = json.loads(emp_known_path.read_text()) if emp_known_path.exists() else {}
+
     # Optional: filter to a single symbol passed as CLI arg
     target = sys.argv[1] if len(sys.argv) > 1 else None
     if target and target not in companies_meta:
@@ -399,7 +415,11 @@ def main() -> None:
     symbols = [target] if target else list(companies_meta)
     for symbol in symbols:
         meta = companies_meta[symbol]
-        result = process_symbol(symbol, meta, mcu_known.get(symbol, {}))
+        result = process_symbol(
+            symbol, meta,
+            mcu_known.get(symbol, {}),
+            emp_known.get(symbol, {}),
+        )
         output["companies"][symbol] = result
 
     out_path.write_text(json.dumps(output, ensure_ascii=False, indent=2))

@@ -42,6 +42,7 @@ log = logging.getLogger(__name__)
 
 HERE      = Path(__file__).parent
 DATA_JSON = HERE / "data.json"
+EMP_JSON  = HERE / "employee_known_data.json"
 
 PROJECT = os.environ.get("GCP_PROJECT", "st-china-ai-force")
 BUCKET  = os.environ.get("GCS_BUCKET", "st-finance-reports")
@@ -205,9 +206,11 @@ def extract_employee_from_pdf(blob_name: str, company: str, year: int, api_key: 
 
 
 def update_data_json(updates: dict, dry_run: bool = False) -> None:
-    """将 {symbol: {year: employee_count}} 写入 data.json。"""
+    """将 {symbol: {year: employee_count}} 写入 data.json 和 employee_known_data.json。"""
     with open(DATA_JSON) as f:
         data = json.load(f)
+
+    emp_known: dict = json.loads(EMP_JSON.read_text()) if EMP_JSON.exists() else {}
 
     changed = 0
     for sym, year_map in updates.items():
@@ -223,6 +226,8 @@ def update_data_json(updates: dict, dry_run: bool = False) -> None:
             if count is not None and old != count:
                 if not dry_run:
                     fin["employee_count"] = count
+                    # Persist to employee_known_data.json so fetch_mcu_data.py preserves it
+                    emp_known.setdefault(sym, {})[str(yr_str)] = count
                 log.info("  %s %s: employee_count %s → %s", sym, yr_str, old, count)
                 changed += 1
 
@@ -233,7 +238,8 @@ def update_data_json(updates: dict, dry_run: bool = False) -> None:
     if changed:
         with open(DATA_JSON, "w") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        log.info("Wrote %d employee_count updates to data.json", changed)
+        EMP_JSON.write_text(json.dumps(emp_known, ensure_ascii=False, indent=2))
+        log.info("Wrote %d employee_count updates to data.json + employee_known_data.json", changed)
     else:
         log.info("No changes to write")
 
@@ -316,9 +322,10 @@ def main():
     if updates:
         update_data_json(updates, dry_run=args.dry_run)
         if not args.dry_run:
-            print("\n✅ data.json updated. Next steps:")
+            print("\n✅ data.json + employee_known_data.json updated. Next steps:")
             print("   python validate_data.py")
-            print("   git add data.json && git commit -m 'feat(data): add historical employee counts from annual reports'")
+            print("   git add data.json employee_known_data.json")
+            print("   git commit -m 'feat(data): add historical employee counts from annual reports'")
             print("   git push")
     else:
         log.info("No updates to write.")
