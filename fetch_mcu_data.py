@@ -267,12 +267,14 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
         rev = row.get("total_revenue_yuan")
         rd = row.get("rd_expense_yuan")
         mcu = row.get("mcu_revenue_yuan")
+        net_inc = row.get("net_income_yuan")
 
         row["rd_pct"] = round(rd / rev * 100, 1) if (rev and rd) else None
         row["mcu_weight_pct"] = round(mcu / rev * 100, 1) if (rev and mcu) else None
 
         prev_rev = prev.get("total_revenue_yuan") if prev else None
         prev_mcu = prev.get("mcu_revenue_yuan") if prev else None
+        prev_net = prev.get("net_income_yuan") if prev else None
 
         row["revenue_yoy_pct"] = (
             round((rev / prev_rev - 1) * 100, 1)
@@ -282,6 +284,11 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
         row["mcu_yoy_pct"] = (
             round((mcu / prev_mcu - 1) * 100, 1)
             if (mcu and prev_mcu and prev_mcu != 0)
+            else None
+        )
+        row["net_income_yoy_pct"] = (
+            round((net_inc / prev_net - 1) * 100, 1)
+            if (net_inc is not None and prev_net and prev_net != 0)
             else None
         )
 
