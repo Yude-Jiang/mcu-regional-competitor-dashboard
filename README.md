@@ -97,6 +97,79 @@ python extract_mcu_segments.py
 
 ## 运维日志
 
+### 2026-05-26 — UI 优化 + 部署流程规范化 + 数据持久化修复
+
+#### 完成内容
+
+1. **User Guide HTML 重构**
+   - 字体放大、stats bar 宽度对齐正文、正文区域加宽
+   - 新增 AI 竞情问答章节（含可拖拽放大答案框、建议问题 chips）
+   - 各图表 description 补充异常原因说明（国民技术/芯海科技亏损背景）
+   - 删除各公司 MCU 口径详情卡片（已在 dashboard 详情面板展示，避免重复）
+   - 联系邮箱更新：jania.jiang@gmail.com → yude.jiang@st.com
+
+2. **Dashboard 工具栏合并**
+   - 将独立的「年份下拉 + 搜索」控件条合并进图表筛选栏，两行合一
+
+3. **Favicon**
+   - dashboard.html 和 user_guide.html 均添加内联 SVG favicon（深蓝芯片图标）
+
+4. **员工数持久化 Bug 修复（fetch_mcu_data.py）**
+   - 根本原因：`employee_known_data.json` 回填逻辑在 `apply_mcu_strategy()` **之前**执行
+   - AKShare 断网时 `fin` 为空，员工数无行可写
+   - 修复：回填逻辑移至 `apply_mcu_strategy()` + `compute_metrics()` **之后**
+   - 同步手动将 66 条员工数据从 `employee_known_data.json` 回填至 `data.json`
+
+5. **companies_meta.json MCU 口径说明全面更新**
+   - 11 家公司 `mcu_note` 重写为准确表述，删除所有「需手工录入」等历史遗留错误
+   - 修正 300077 国民技术和 688595 芯海科技的 `mcu_strategy` 字段（`segment_reported` → `estimated`）
+
+#### 经验与教训
+
+**【高频复现】data.json 本地改动阻塞 git checkout**
+- 根本原因：fetch 脚本每次运行都修改 `data.json`，产生未提交改动
+- `git checkout -- data.json` 无法解决（恢复到当前 HEAD，但 HEAD 与目标分支仍不同）
+- **正确做法**：`git stash` 再 checkout；已封装进 `deploy` alias
+- **规律**：每次切换到 main 之前必须先 stash，这是固定动作
+
+**Cloud Run 部署必须两步，缺一不可**
+- `gcloud builds submit` = 构建镜像推送至 Artifact Registry（**Cloud Run 不变**）
+- `gcloud run deploy` = 用新镜像替换运行实例（**这步才真正生效**）
+- 只跑第一步时页面无变化，排查困难；`deploy` alias 已将两步合并
+
+```bash
+# ~/.bashrc 中的 deploy alias
+alias deploy="git stash && git checkout main && git pull origin main && \
+  gcloud builds submit --project st-china-ai-force && \
+  gcloud run deploy mcu-regional-competitor-dashboard \
+  --image asia-east1-docker.pkg.dev/st-china-ai-force/mcu/mcu-regional-competitor-dashboard \
+  --region asia-east1 --platform managed --allow-unauthenticated \
+  --set-env-vars GCP_PROJECT=st-china-ai-force,BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports \
+  --set-secrets VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest \
+  --project st-china-ai-force"
+```
+
+**git checkout 失败时 gcloud builds submit 打包的是旧代码**
+- `&&` 短路：checkout 失败则 pull 不执行，builds submit 打包当前目录（旧代码）
+- 表现：STATUS: SUCCESS 但部署内容是旧版本，极难排查
+- **验证**：部署前先 `git log --oneline -3` 确认 HEAD 是最新 commit
+
+**计算结果未持久化至 mcu_known_data.json → 下次 fetch 丢失**
+- `fetch_mcu_data.py` 将 AKShare 计算的 `gross_margin_pct`、`employee_count` 写入 `data.json`
+- 断网环境（AKShare 不可用）重跑 fetch 后，这些计算值全部丢失
+- **正确做法**：运行完 fetch 后，手动将需持久化字段同步到 `mcu_known_data.json`
+- `employee_count` 已通过 Bug 修复解决（移后执行）；`gross_margin_pct` 仍需在 Cloud Shell fetch 后手动同步
+
+**浏览器缓存导致部署后页面无变化**
+- `companies_meta.json`、`data.json` 等文件被浏览器缓存，部署后刷新无效
+- **解决**：`Ctrl+Shift+R`（Mac: `Cmd+Shift+R`）强制刷新，或无痕模式打开
+
+**Cloud Shell 会话重置后项目配置丢失**
+- 长时间不操作后新实例的 hostname 从 `cloudshell` 变为 `cs-xxxxxxxxx-default`
+- **恢复**：`gcloud config set project st-china-ai-force && source ~/.bashrc`
+
+---
+
 ### 2026-05-25 — Dashboard 可读性大升级 + 历史员工数补录（56条）
 
 #### 完成内容
