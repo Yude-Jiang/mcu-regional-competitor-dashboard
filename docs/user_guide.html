@@ -113,6 +113,23 @@
     .st2 { background:rgba(20,184,166,.14); color:#0f766e; border:1px solid rgba(20,184,166,.3); }
     .so { background:rgba(251,146,60,.15); color:#c2410c; border:1px solid rgba(251,146,60,.35); }
     .sp { background:rgba(167,139,250,.15); color:#6d28d9; border:1px solid rgba(167,139,250,.35); }
+    .sl2 { background:rgba(239,68,68,.12); color:#b91c1c; border:1px solid rgba(239,68,68,.3); }
+
+    /* Per-company scope cards */
+    .scope-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:4px 0 8px; }
+    @media(max-width:720px) { .scope-grid { grid-template-columns:1fr; } }
+    .scope-card { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); padding:14px 16px; }
+    .scope-hdr { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:8px; }
+    .scope-co { font:600 15px/1.2 "DM Sans",sans-serif; color:var(--std); }
+    .scope-tick { font:500 12px/1 "DM Mono",monospace; color:var(--s400); background:var(--s100); padding:2px 6px; border-radius:3px; }
+    .scope-yr { font-size:13px; color:var(--s500); margin-bottom:6px; }
+    .scope-yr span { font-weight:600; color:var(--std); font-family:"DM Mono",monospace; }
+    .scope-desc { font-size:14px; color:var(--s600); line-height:1.55; }
+    .scope-caveat { font-size:13px; color:var(--s400); margin-top:6px; padding-top:6px; border-top:1px solid var(--s100); }
+    .conf-pip { display:inline-block; width:8px; height:8px; border-radius:50%; flex-shrink:0; vertical-align:middle; margin-right:2px; }
+    .conf-h { background:#22c55e; }
+    .conf-m { background:#f59e0b; }
+    .conf-l { background:#ef4444; }
 
     .faq { display:flex; flex-direction:column; gap:7px; margin-top:16px; }
     .fi2 { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); overflow:hidden; }
@@ -415,6 +432,181 @@
       <span class="strat-tag st2" style="align-self:start;">SEG·EST</span><span><b style="color:var(--std);"><span class="zh">分部估算</span><span class="en">Segment Estimated</span></b><span class="zh"> — 从年报非标准披露中推算，有一定误差</span><span class="en"> — Estimated from non-standard annual report disclosure; some margin of error</span></span>
       <span class="strat-tag so" style="align-self:start;">TOTAL×k</span><span><b style="color:var(--std);"><span class="zh">总收入系数推算</span><span class="en">Total Revenue × Multiplier</span></b><span class="zh"> — 总营收乘以固定系数，适用于 MCU 占比相对稳定的公司</span><span class="en"> — Total revenue × a fixed ratio; used when MCU share is relatively stable</span></span>
       <span class="strat-tag sp" style="align-self:start;">SUBSID.</span><span><b style="color:var(--std);"><span class="zh">子公司口径</span><span class="en">Subsidiary</span></b><span class="zh"> — 纳思达：仅使用极海微电子子公司「芯片」产品线数据，集团总收入约 264 亿元不纳入分析</span><span class="en"> — Nasda: only Geehy subsidiary "chip" line used; group total ~¥26.4B excluded from analysis</span></span>
+    </div>
+
+    <h3 style="font-size:16px;color:var(--std);margin:28px 0 12px;"><span class="zh">各公司 MCU 口径详情</span><span class="en">Per-Company MCU Scope</span></h3>
+    <div class="scope-grid">
+
+      <!-- 603986 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">兆易创新</span><span class="en">GigaDevice</span></span>
+          <span class="scope-tick">603986</span>
+          <span class="strat-tag sg">SEG·RPT</span>
+          <span><span class="conf-pip conf-h"></span><span style="font-size:12px;color:#22c55e;font-weight:600;">HIGH</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2018–2025</span></div>
+        <div class="scope-desc">
+          <span class="zh">年报「微控制器及模拟产品线」直接披露，与 NOR Flash 和传感器产品线完全独立分列；8 年数据完整覆盖</span>
+          <span class="en">Annual report "Microcontroller & Analog" segment — fully independent from NOR Flash and Sensors; all 8 years covered</span>
+        </div>
+      </div>
+
+      <!-- 300327 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">中颖电子</span><span class="en">SinoWealth</span></span>
+          <span class="scope-tick">300327</span>
+          <span class="strat-tag sb">SEG·IND</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2019–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（2018年无披露）</span><span class="en">(2018 not disclosed)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">年报「工业控制芯片」分产品表直接披露，含工规 MCU + BMIC 电池管理芯片，不含 AMOLED 显示驱动</span>
+          <span class="en">Annual report "Industrial Control IC" segment, directly reported — includes MCU + BMIC; excludes AMOLED display drivers</span>
+        </div>
+        <div class="scope-caveat"><span class="zh">注：BMIC 非纯 MCU，使口径略偏高</span><span class="en">Note: BMIC inclusion makes scope slightly broader than pure MCU</span></div>
+      </div>
+
+      <!-- 688380 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">中微半导</span><span class="en">Cmsemicon</span></span>
+          <span class="scope-tick">688380</span>
+          <span class="strat-tag so">TOTAL×0.99</span>
+          <span><span class="conf-pip conf-h"></span><span style="font-size:12px;color:#22c55e;font-weight:600;">HIGH</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2018–2025</span></div>
+        <div class="scope-desc">
+          <span class="zh">纯 MCU 公司，非 MCU 业务不足 1%，总营收 × 0.99 直接作为 MCU 口径，误差极小</span>
+          <span class="en">Pure-play MCU company; non-MCU revenue &lt;1%; total revenue × 0.99 used directly as MCU proxy</span>
+        </div>
+      </div>
+
+      <!-- 300077 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">国民技术</span><span class="en">NationZ</span></span>
+          <span class="scope-tick">300077</span>
+          <span class="strat-tag so">ESTIMATE</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2022–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（2018–2021 无数据）</span><span class="en">(2018–2021 unavailable)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">来源：2026 年港股招股书「芯片产品」审计数据，含通用 MCU + 安全 MCU/USBKey + BMS 芯片 + RF 芯片</span>
+          <span class="en">Source: 2026 HK IPO prospectus "Chip Products" audited figures — includes general MCU + security MCU/USBKey + BMS + RF chips</span>
+        </div>
+        <div class="scope-caveat"><span class="zh">注：纯通用 MCU 约占芯片产品收入 90%（灼识咨询估算）；非纯 MCU 口径，BMS/RF 已含入</span><span class="en">Note: Pure general MCU ~90% of chip revenue (Frost & Sullivan est.); BMS &amp; RF chips included in total</span></div>
+      </div>
+
+      <!-- 688279 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">峰岹科技</span><span class="en">Fortior Tech</span></span>
+          <span class="scope-tick">688279</span>
+          <span class="strat-tag so">TOTAL×0.67</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2018–2025</span></div>
+        <div class="scope-desc">
+          <span class="zh">年报无产品线收入拆分；MCU/ASIC 合计按总收入 × 0.67 估算；不含 HVIC 驱动芯片、MOSFET 功率器件、IPM（约占 30–35%）</span>
+          <span class="en">No segment breakdown in annual report; MCU/ASIC estimated as total revenue × 0.67; excludes HVIC, MOSFET, IPM (~30–35% of total)</span>
+        </div>
+      </div>
+
+      <!-- 002180 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">纳思达（极海微）</span><span class="en">Geehy (Nasda sub.)</span></span>
+          <span class="scope-tick">002180</span>
+          <span class="strat-tag sp">SUBSID.</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2018–2025</span></div>
+        <div class="scope-desc">
+          <span class="zh">极海微电子（APM32 系列）子公司营收，从纳思达集团年报「集成电路」分部提取；集团总收入 264 亿含打印耗材完全排除</span>
+          <span class="en">Geehy Micro (APM32) subsidiary revenue extracted from Nasda group "IC" segment; group total ~¥26.4B (printer consumables) entirely excluded</span>
+        </div>
+      </div>
+
+      <!-- 688385 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">复旦微电子</span><span class="en">FDM</span></span>
+          <span class="scope-tick">688385</span>
+          <span class="strat-tag st2">SEG·EST</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2021–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（2018–2020 暂缺）</span><span class="en">(2018–2020 unavailable)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">年报「智能电表芯片产品线」直接披露，含电表 MCU、通用 MCU、车规 MCU 及相关模组；与 FPGA 和安全芯片独立列示</span>
+          <span class="en">Annual report "Smart Meter IC" product line — includes meter MCU, general MCU, auto MCU &amp; related modules; separate from FPGA &amp; security chips</span>
+        </div>
+      </div>
+
+      <!-- 688766 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">普冉股份</span><span class="en">Puya</span></span>
+          <span class="scope-tick">688766</span>
+          <span class="strat-tag sg">SEG·RPT</span>
+          <span><span class="conf-pip conf-h"></span><span style="font-size:12px;color:#22c55e;font-weight:600;">HIGH</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2022–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（2022 年上市，前期不追溯）</span><span class="en">(IPO 2022, prior years not retroactively filed)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">年报「MCU 产品线」与 NOR Flash 独立拆分，含独立毛利率披露；数据质量最高的直接披露口径之一</span>
+          <span class="en">Annual report "MCU Product Line" split separately from NOR Flash, with standalone gross margin; among the highest-quality direct disclosures</span>
+        </div>
+      </div>
+
+      <!-- 688595 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">芯海科技</span><span class="en">Chipsea</span></span>
+          <span class="scope-tick">688595</span>
+          <span class="strat-tag so">TOTAL×0.45</span>
+          <span><span class="conf-pip conf-l"></span><span style="font-size:12px;color:#ef4444;font-weight:600;">LOW</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2020–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（均为估算值）</span><span class="en">(all estimated)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">年报无产品线收入拆分表；MCU 口径按总收入 × 0.45 估算（来源：IR 活动记录）</span>
+          <span class="en">No revenue segment table in annual reports; MCU estimated as total revenue × 0.45 based on IR activity records</span>
+        </div>
+        <div class="scope-caveat"><span class="zh">⚠ 系数来自非正式 IR 渠道，无年报依据，置信度最低，建议交叉验证</span><span class="en">⚠ Multiplier from informal IR source only; no annual-report basis; lowest confidence — cross-check before use</span></div>
+      </div>
+
+      <!-- 688391 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">钜泉科技</span><span class="en">Hi-Trend</span></span>
+          <span class="scope-tick">688391</span>
+          <span class="strat-tag so">TOTAL×0.34</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2018–2025</span></div>
+        <div class="scope-desc">
+          <span class="zh">计量 MCU/SoC 芯片按总收入 × 0.34 估算；不含计量模块和系统解决方案；应用场景高度单一（电力计量）</span>
+          <span class="en">Metering MCU/SoC estimated as total revenue × 0.34; excludes meter modules &amp; system solutions; highly niche application (electricity metering only)</span>
+        </div>
+        <div class="scope-caveat"><span class="zh">注：与通用 MCU 市场口径差异较大，不建议直接与其他公司横向对比</span><span class="en">Note: Very niche scope — direct cross-company comparison with general MCU makers is limited</span></div>
+      </div>
+
+      <!-- 688018 -->
+      <div class="scope-card">
+        <div class="scope-hdr">
+          <span class="scope-co"><span class="zh">乐鑫科技</span><span class="en">Espressif</span></span>
+          <span class="scope-tick">688018</span>
+          <span class="strat-tag st2">SEG·EST</span>
+          <span><span class="conf-pip conf-m"></span><span style="font-size:12px;color:#f59e0b;font-weight:600;">MEDIUM</span></span>
+        </div>
+        <div class="scope-yr"><span class="zh">数据年份：</span><span class="en">Data Years: </span><span>2019–2025</span><span style="font-size:12px;color:var(--s400);margin-left:6px;"><span class="zh">（2018 暂缺）</span><span class="en">(2018 unavailable)</span></span></div>
+        <div class="scope-desc">
+          <span class="zh">年报「芯片收入」直接披露（芯片/模组二段拆分），不含模组收入；产品兼具 MCU + WiFi SoC 属性</span>
+          <span class="en">Annual report "Chip Revenue" directly disclosed (chip/module two-segment split); excludes module sales; products are hybrid MCU + WiFi SoC</span>
+        </div>
+        <div class="scope-caveat"><span class="zh">注：部分分析师将乐鑫归类为 WiFi SoC 而非 MCU 厂商，跨厂商对比时需注意</span><span class="en">Note: Some analysts classify Espressif as WiFi SoC rather than MCU — be mindful when comparing</span></div>
+      </div>
+
     </div>
 
     <div class="tip" style="margin-top:18px;">

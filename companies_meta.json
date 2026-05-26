@@ -11,7 +11,7 @@
     "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
     "mcu_confidence": "high",
-    "mcu_note": "年报有分产品表，MCU单独披露，2018-2023需手工录入"
+    "mcu_note": "年报「微控制器及模拟产品线」直接披露，与NOR Flash和传感器产品线完全独立分列；2018–2025数据完整"
   },
   "300327": {
     "name_cn": "中颖电子",
@@ -25,7 +25,7 @@
     "mcu_strategy": "segment_industrial",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "工业控制芯片口径（年报分产品表直接披露，含BMIC电池管理芯片，非纯工规MCU）"
+    "mcu_note": "年报「工业控制芯片」分产品表直接披露；含工规MCU+BMIC电池管理芯片，不含AMOLED显示驱动；2019–2025有数据（2018年无披露）"
   },
   "688380": {
     "name_cn": "中微半导",
@@ -39,7 +39,7 @@
     "mcu_strategy": "total_proxy",
     "mcu_multiplier": 0.99,
     "mcu_confidence": "high",
-    "mcu_note": "纯MCU，口径99%+，直接用总收入×0.99"
+    "mcu_note": "纯MCU公司，非MCU业务不足1%，总营收×0.99直接作为MCU口径；2018–2025数据完整"
   },
   "300077": {
     "name_cn": "国民技术",
@@ -52,10 +52,10 @@
     "hk_stock_code": "2701",
     "core_license": "ARM Cortex-M0/M4",
     "foundry_fab": "SMIC",
-    "mcu_strategy": "segment_reported",
-    "mcu_multiplier": 1.0,
+    "mcu_strategy": "estimated",
+    "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "芯片产品收入（港股招股书审计数据，含通用MCU+专业市场芯片+BMS+RF；纯通用MCU约占芯片产品90%，来源：灼识咨询2024年排名数据）",
+    "mcu_note": "口径：2026年港股招股书「芯片产品」审计数据；含通用MCU+安全MCU/USBKey+BMS芯片+RF芯片（纯通用MCU约占90%，来源：灼识咨询）；2022–2025有数据，2018–2021暂无",
     "business_lines": ["通用MCU", "专业市场芯片（安全MCU/USBKey）", "BMS芯片", "RF芯片", "锂电池负极材料"],
     "chip_revenue_pct_2024": 0.476,
     "prospectus_url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0313/2026031300050_c.pdf"
@@ -72,7 +72,7 @@
     "mcu_strategy": "total_proxy",
     "mcu_multiplier": 0.67,
     "mcu_confidence": "medium",
-    "mcu_note": "MCU/ASIC按总收入×0.67估算，不含HVIC/MOSFET/IPM（约占30-35%）"
+    "mcu_note": "年报无产品线收入拆分；MCU/ASIC合计按总收入×0.67估算；不含HVIC驱动芯片、MOSFET功率器件、IPM（约占30–35%）；2018–2025数据完整"
   },
   "002180": {
     "name_cn": "纳思达",
@@ -86,7 +86,7 @@
     "mcu_strategy": "subsidiary_geehy",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "极海（Geehy）为MCU子公司，需逐季度手工汇总；总收入含打印耗材"
+    "mcu_note": "极海微电子（APM32系列）子公司营收，从年报「集成电路」分部提取；纳思达集团总收入264亿含打印耗材完全排除；2018–2025数据完整"
   },
   "688385": {
     "name_cn": "复旦微电子",
@@ -100,7 +100,7 @@
     "mcu_strategy": "segment_estimated",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "年报分芯片/模组两段，MCU口径需从年报正文提取电表芯片分段"
+    "mcu_note": "年报「智能电表芯片产品线」直接披露，含电表MCU/通用MCU/车规MCU及相关模组；与FPGA和安全芯片独立列示；2021–2025有数据，2018–2020暂缺"
   },
   "688766": {
     "name_cn": "普冉股份",
@@ -114,7 +114,7 @@
     "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
     "mcu_confidence": "high",
-    "mcu_note": "2022年上市，2022+年报单独披露MCU产品线；上市前数据不追溯"
+    "mcu_note": "年报「MCU产品线」与NOR Flash独立拆分并含独立毛利率披露；2022年上市，上市前数据不追溯；2022–2025数据完整"
   },
   "688595": {
     "name_cn": "芯海科技",
@@ -125,10 +125,10 @@
     "listed_year": 2020,
     "core_license": "ARM Cortex-M0",
     "foundry_fab": "TSMC / SMIC",
-    "mcu_strategy": "segment_reported",
-    "mcu_multiplier": null,
-    "mcu_confidence": "medium",
-    "mcu_note": "口径：年报「MCU和AIoT芯片」产品线（管理层讨论章节披露）；2024-2025已核验，2020-2023待重新提取确认"
+    "mcu_strategy": "estimated",
+    "mcu_multiplier": 0.45,
+    "mcu_confidence": "low",
+    "mcu_note": "年报无产品线收入拆分表；MCU口径按总收入×0.45估算（来源：IR活动记录）；置信度低；2020–2025有估算数据"
   },
   "688391": {
     "name_cn": "钜泉科技",
@@ -142,7 +142,7 @@
     "mcu_strategy": "total_proxy",
     "mcu_multiplier": 0.34,
     "mcu_confidence": "medium",
-    "mcu_note": "计量MCU/SoC按总收入×0.34估算，其余为计量模块和方案服务，应用场景单一"
+    "mcu_note": "计量MCU/SoC按总收入×0.34估算；不含计量模块和系统解决方案；应用场景单一（电力计量）；2018–2025数据完整"
   },
   "688018": {
     "name_cn": "乐鑫科技",
@@ -156,6 +156,6 @@
     "mcu_strategy": "segment_estimated",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "年报区分芯片/模组两段，MCU口径=芯片/total，需从年报正文提取"
+    "mcu_note": "年报「芯片收入」直接披露（年报芯片/模组二段拆分），不含模组收入；产品兼MCU+WiFi SoC属性（部分分析师归类为SoC）；2019–2025有数据，2018暂缺"
   }
 }
