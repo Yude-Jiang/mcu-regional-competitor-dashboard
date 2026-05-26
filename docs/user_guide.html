@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCU 竞品数据仪表盘 — 使用指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --std: #03234b;
+      --stl: #3cb4e6;
+      --sty: #ffd200;
+      --s100: #f1f5f9;
+      --s200: #e2e8f0;
+      --s400: #94a3b8;
+      --s500: #64748b;
+      --s600: #475569;
+      --r8: 8px;
+      --r12: 12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"DM Sans","Segoe UI",system-ui,sans-serif; color:var(--s600); line-height:1.65; background:var(--s100); font-size:14px; -webkit-font-smoothing:antialiased; }
+
+    .lang-en .zh { display:none !important; }
+    .lang-zh .en { display:none !important; }
+
+    .lt { position:fixed; top:14px; right:18px; z-index:300; display:flex; gap:3px; background:rgba(3,35,75,.92); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.12); border-radius:9px; padding:3px; }
+    .lt button { background:transparent; border:none; color:rgba(255,255,255,.5); padding:4px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500; font-family:inherit; transition:all .18s; }
+    .lt button:hover { color:#fff; }
+    .lt button.on { background:var(--sty); color:var(--std); }
+
+    .sidenav { position:fixed; top:50%; left:0; transform:translateY(-50%); z-index:200; display:flex; flex-direction:column; gap:4px; padding:12px 8px; background:rgba(3,35,75,.88); backdrop-filter:blur(10px); border-radius:0 12px 12px 0; border:1px solid rgba(255,255,255,.08); border-left:none; }
+    .sidenav a { display:block; width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.25); transition:all .2s; cursor:pointer; position:relative; text-decoration:none; }
+    .sidenav a:hover, .sidenav a.active { background:var(--sty); transform:scale(1.3); }
+    .sidenav a[data-label]:hover::after { content:attr(data-label); position:absolute; left:18px; top:50%; transform:translateY(-50%); background:rgba(3,35,75,.95); color:#fff; font-size:11px; font-family:"DM Sans",sans-serif; white-space:nowrap; padding:3px 9px; border-radius:5px; pointer-events:none; }
+    @media(max-width:700px) { .sidenav { display:none; } }
+
+    .hero { background:var(--std); color:#fff; padding:48px 24px 40px; position:relative; overflow:hidden; }
+    .hgrid { position:absolute; inset:0; background-image:linear-gradient(rgba(60,180,230,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(60,180,230,.05) 1px,transparent 1px); background-size:40px 40px; }
+    .hg1 { position:absolute; top:-100px; right:-60px; width:400px; height:400px; background:radial-gradient(circle,rgba(60,180,230,.2) 0%,transparent 65%); pointer-events:none; }
+    .hg2 { position:absolute; bottom:-60px; left:-40px; width:260px; height:260px; background:radial-gradient(circle,rgba(255,210,0,.1) 0%,transparent 65%); pointer-events:none; }
+    .hi { max-width:820px; margin:0 auto; position:relative; z-index:1; }
+
+    .eyebrow { display:inline-flex; align-items:center; gap:7px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:3px 12px 3px 9px; font-size:11px; font-weight:500; color:var(--stl); letter-spacing:.04em; margin-bottom:14px; }
+    .edot { width:5px; height:5px; border-radius:50%; background:var(--sty); }
+    .hero h1 { font-size:32px; font-weight:600; letter-spacing:-.5px; line-height:1.2; margin-bottom:8px; }
+    .hero h1 em { font-style:normal; color:var(--stl); }
+    .sub { font-size:13px; opacity:.6; max-width:500px; margin-bottom:18px; font-weight:300; line-height:1.6; }
+    .badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; }
+    .badge { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); padding:2px 9px; border-radius:5px; font-size:11px; font-weight:500; color:rgba(255,255,255,.65); font-family:"DM Mono",monospace; }
+
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); background:#fff; border-bottom:1px solid var(--s200); }
+    @media(max-width:580px) { .stats { grid-template-columns:repeat(2,1fr); } }
+    .sc { padding:14px 22px; border-right:1px solid var(--s200); }
+    .sc:last-child { border-right:none; }
+    .sn { font-size:20px; font-weight:600; color:var(--std); letter-spacing:-.3px; line-height:1; }
+    .sn span { color:var(--stl); }
+    .sl { font-size:11px; color:var(--s400); margin-top:2px; }
+
+    .C { max-width:860px; margin:0 auto; padding:0 24px; }
+    .sec { padding:36px 0; }
+    .sec+.sec { border-top:1px solid var(--s200); }
+    .wbg { background:#fff; }
+
+    .slabel { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600; letter-spacing:.08em; color:var(--stl); text-transform:uppercase; margin-bottom:6px; }
+    .slabel-line { width:14px; height:1.5px; background:var(--stl); border-radius:1px; }
+    h2 { font-size:18px; font-weight:600; color:var(--std); letter-spacing:-.2px; margin-bottom:5px; }
+    .lead { font-size:13px; color:var(--s500); margin-bottom:18px; line-height:1.65; max-width:640px; }
+    p { margin-bottom:8px; color:var(--s600); }
+
+    .fg { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:4px; }
+    @media(max-width:680px) { .fg { grid-template-columns:repeat(2,1fr); } }
+    .fc { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); padding:14px; transition:box-shadow .2s,transform .2s; }
+    .fc:hover { box-shadow:0 4px 14px rgba(0,0,0,.08); transform:translateY(-2px); }
+    .fi { width:30px; height:30px; border-radius:7px; background:var(--std); display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
+    .fi svg { width:14px; height:14px; stroke:var(--stl); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .fc h4 { font-size:12px; font-weight:600; color:var(--std); margin-bottom:3px; }
+    .fc p { font-size:11px; color:var(--s400); line-height:1.45; margin:0; }
+
+    .steps { display:flex; flex-direction:column; gap:8px; }
+    .step { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); padding:18px 22px; }
+    .sh { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+    .snum { width:32px; height:32px; border-radius:8px; background:var(--std); color:var(--sty); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; font-family:"DM Mono",monospace; }
+    .stb { padding-top:2px; }
+    .step h3 { font-size:13px; font-weight:600; color:var(--std); margin-bottom:1px; }
+    .step ul { list-style:none; padding:0; margin-bottom:8px; }
+    .step li { display:flex; gap:7px; align-items:flex-start; padding:5px 0; font-size:13px; color:var(--s600); border-bottom:1px solid var(--s100); }
+    .step li:last-child { border-bottom:none; }
+    .step li::before { content:''; width:4px; height:4px; border-radius:50%; background:var(--stl); flex-shrink:0; margin-top:7px; }
+    .step b { font-weight:600; color:var(--std); }
+
+    .tip { background:#fffbeb; border:1px solid rgba(255,210,0,.3); border-radius:var(--r8); padding:8px 11px; font-size:12px; color:var(--s600); display:flex; gap:7px; align-items:flex-start; margin-top:8px; }
+
+    .diagram { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); padding:16px 14px; margin:10px 0 4px; overflow-x:auto; }
+
+    /* Confidence dots legend */
+    .dot-row { display:flex; gap:20px; flex-wrap:wrap; margin:10px 0 4px; }
+    .dot-item { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--s600); }
+    .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dc { background:#22c55e; }
+    .dd { background:#38bdf8; }
+    .dp { background:#f97316; }
+    .du { background:#f43f5e; }
+
+    /* Strategy legend */
+    .strat-row { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px; }
+    .strat-tag { display:inline-block; font:600 11px/1.5 "DM Mono",monospace; padding:3px 9px; border-radius:3px; letter-spacing:.04em; }
+    .sg { background:rgba(34,197,94,.15); color:#16a34a; border:1px solid rgba(34,197,94,.35); }
+    .sb { background:rgba(56,189,248,.14); color:#0369a1; border:1px solid rgba(56,189,248,.3); }
+    .st2 { background:rgba(20,184,166,.14); color:#0f766e; border:1px solid rgba(20,184,166,.3); }
+    .so { background:rgba(251,146,60,.15); color:#c2410c; border:1px solid rgba(251,146,60,.35); }
+    .sp { background:rgba(167,139,250,.15); color:#6d28d9; border:1px solid rgba(167,139,250,.35); }
+
+    .faq { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+    .fi2 { background:#fff; border:1px solid var(--s200); border-radius:var(--r12); overflow:hidden; }
+    .fq { display:flex; justify-content:space-between; align-items:center; padding:11px 16px; cursor:pointer; gap:10px; user-select:none; }
+    .fq-text { font-size:13px; font-weight:500; color:var(--std); }
+    .fq-icon { width:18px; height:18px; border-radius:50%; background:var(--sty); color:var(--std); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; transition:transform .2s; }
+    .fi2.open .fq-icon { transform:rotate(45deg); }
+    .fa { font-size:13px; color:var(--s500); line-height:1.65; border-top:1px solid var(--s100); padding:10px 16px; display:none; }
+    .fi2.open .fa { display:block; }
+
+    .wb { display:inline-block; background:rgba(255,210,0,.15); color:#7a5c00; border-radius:4px; padding:1px 6px; font-size:11px; font-weight:600; font-family:"DM Mono",monospace; }
+    .badge-prosp { display:inline-block; background:rgba(139,92,246,.18); color:#7c3aed; border:1px solid rgba(139,92,246,.35); border-radius:3px; padding:1px 6px; font-size:11px; font-weight:600; font-family:"DM Mono",monospace; }
+
+    footer { background:var(--std); color:rgba(255,255,255,.35); text-align:center; padding:24px; font-size:11px; line-height:2; }
+    .fb { font-size:13px; font-weight:500; color:rgba(255,255,255,.65); margin-bottom:2px; }
+    .fdot { display:inline-block; width:2px; height:2px; border-radius:50%; background:rgba(255,255,255,.2); vertical-align:middle; margin:0 7px; }
+
+    @media(max-width:580px) { .hero h1 { font-size:24px; } .hero { padding:40px 16px 32px; } .sec { padding:28px 0; } h2 { font-size:16px; } .step { padding:14px 16px; } .lt { top:10px; right:12px; } .fg { grid-template-columns:repeat(2,1fr); } }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .hi > * { animation:fadeUp .4s ease both; }
+    .hi > *:nth-child(1) { animation-delay:.05s; }
+    .hi > *:nth-child(2) { animation-delay:.1s; }
+    .hi > *:nth-child(3) { animation-delay:.15s; }
+    .hi > *:nth-child(4) { animation-delay:.2s; }
+
+    @media print {
+      body { background:#fff; font-size:12px; }
+      .sec, .step { page-break-inside:avoid; }
+      .lt, .sidenav { display:none; }
+      .st th { background:var(--std); color:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    }
+  </style>
+</head>
+<body class="lang-zh">
+
+<nav class="sidenav" id="sidenav"></nav>
+<div class="lt">
+  <button class="lt-zh on" onclick="setLang('zh')">中文</button>
+  <button class="lt-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- Hero -->
+<header class="hero" id="sec-hero" data-label-zh="顶部" data-label-en="Top">
+  <div class="hgrid"></div>
+  <div class="hg1"></div>
+  <div class="hg2"></div>
+  <div class="hi">
+    <div class="eyebrow">
+      <div class="edot"></div>
+      <span class="zh">竞争情报仪表盘 · 使用手册</span>
+      <span class="en">Competitor Intelligence Dashboard · User Guide</span>
+    </div>
+    <h1>MCU <em>竞品</em> 数据仪表盘<span class="en" style="display:none"> MCU <em>Competitor</em> Dashboard</span></h1>
+    <p class="sub">
+      <span class="zh">中国大陆 11 家 MCU 上市公司 · 年报与推算数据 · 2018–2025 · 中英双语</span>
+      <span class="en">11 China A-Share MCU Companies · Annual Reports & Estimates · 2018–2025 · Bilingual</span>
+    </p>
+    <div class="badges">
+      <span class="badge">11 Companies</span>
+      <span class="badge">2018–2025</span>
+      <span class="badge">5 Charts</span>
+      <span class="badge">中英双语</span>
+      <span class="badge">USD / CNY</span>
+    </div>
+  </div>
+</header>
+
+<!-- Stats bar -->
+<div class="stats">
+  <div class="sc">
+    <div class="sn">11</div>
+    <div class="sl"><span class="zh">覆盖上市公司</span><span class="en">Listed companies</span></div>
+  </div>
+  <div class="sc">
+    <div class="sn">8<span>年</span></div>
+    <div class="sl"><span class="zh">历史数据（2018–2025）</span><span class="en">Years of history</span></div>
+  </div>
+  <div class="sc">
+    <div class="sn">5</div>
+    <div class="sl"><span class="zh">交互式图表</span><span class="en">Interactive charts</span></div>
+  </div>
+  <div class="sc">
+    <div class="sn">2</div>
+    <div class="sl"><span class="zh">显示货币（USD / CNY）</span><span class="en">Currencies (USD / CNY)</span></div>
+  </div>
+</div>
+
+<!-- Overview -->
+<section class="sec wbg" id="sec-overview" data-label-zh="概览" data-label-en="Overview">
+  <div class="C">
+    <div class="slabel"><div class="slabel-line"></div><span class="zh">功能概览</span><span class="en">Overview</span></div>
+    <h2><span class="zh">一屏掌握中国大陆 MCU 竞争格局</span><span class="en">China MCU Competitive Landscape at a Glance</span></h2>
+    <p class="lead">
+      <span class="zh">仪表盘汇聚兆易创新、中颖电子、中微半导等 11 家公司的年报财务数据，支持按年份、公司多维筛选，一键切换中英文与美元/人民币，点击任意公司即可深入查看 8 年历史详情。</span>
+      <span class="en">The dashboard aggregates annual report data from 11 companies including GigaDevice, SinoWealth, and Cmsemicon. Filter by year or company, switch language and currency with one click, and drill into 8 years of history for any company.</span>
+    </p>
+    <div class="fg">
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+        <h4><span class="zh">营收趋势图</span><span class="en">Revenue Trends</span></h4>
+        <p><span class="zh">按公司或年份查看总营收变化，支持多公司同屏对比</span><span class="en">Total revenue by company or year, multi-company comparison</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+        <h4><span class="zh">MCU 专项营收</span><span class="en">MCU Revenue</span></h4>
+        <p><span class="zh">MCU 口径营收独立展示，并显示占总营收比例</span><span class="en">MCU-specific revenue with share-of-total %</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h4><span class="zh">净利润率走势</span><span class="en">Net Margin Trend</span></h4>
+        <p><span class="zh">11 家公司净利润率历年变化，跨周期对比直观</span><span class="en">Net margin history across all 11 companies</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <h4><span class="zh">堆叠对比图</span><span class="en">Stacked Chart</span></h4>
+        <p><span class="zh">各年度 MCU 合计体量，直观看每家公司的份额演变</span><span class="en">Annual aggregate with each company's share evolution</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <h4><span class="zh">YoY 热力图</span><span class="en">YoY Heatmap</span></h4>
+        <p><span class="zh">同比增速矩阵，绿=增长 红=下滑，全局一眼看出</span><span class="en">YoY growth matrix — green up, red down at a glance</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h4><span class="zh">公司详情面板</span><span class="en">Company Detail Panel</span></h4>
+        <p><span class="zh">点击任意公司行，右侧弹出 8 年完整财务历史</span><span class="en">Click any row to open the 8-year history panel</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <h4><span class="zh">中英双语</span><span class="en">Bilingual</span></h4>
+        <p><span class="zh">右上角一键切换，公司名称、图表标签同步翻译</span><span class="en">One-click switch — company names and chart labels all translate</span></p>
+      </div>
+      <div class="fc">
+        <div class="fi"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h4><span class="zh">美元 / 人民币切换</span><span class="en">USD / CNY Toggle</span></h4>
+        <p><span class="zh">金额列一键切换货币，汇率按年度均值换算</span><span class="en">Switch currency with one click; rates use annual averages</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Charts guide -->
+<section class="sec" id="sec-charts" data-label-zh="图表" data-label-en="Charts">
+  <div class="C">
+    <div class="slabel"><div class="slabel-line"></div><span class="zh">图表使用</span><span class="en">Using Charts</span></div>
+    <h2><span class="zh">5 个交互式图表，逐一说明</span><span class="en">5 Interactive Charts Explained</span></h2>
+    <p class="lead">
+      <span class="zh">每个图表区均支持年份筛选（顶部年份胶囊）和公司筛选（右侧公司胶囊），点击可开/关，灰色表示已隐藏。</span>
+      <span class="en">Each chart supports year filtering (top year pills) and company filtering (right company pills). Click to toggle; grayed = hidden.</span>
+    </p>
+
+    <!-- Chart 1 -->
+    <div style="background:#fff;border:1px solid var(--s200);border-radius:var(--r12);padding:18px 20px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:var(--std);color:var(--sty);font:600 11px/1 'DM Mono',monospace;padding:3px 9px;border-radius:3px;">01</span>
+        <span style="font:600 14px/1 'DM Sans',sans-serif;color:var(--std);"><span class="zh">总营收 — 按公司</span><span class="en">Total Revenue — By Company</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;">
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">分组柱状图，每组为一家公司，颜色代表年份；可对比同一公司多年营收走势</span><span class="en">Grouped bars per company, colors = years; compare multi-year trends for each company</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">切换到「按年份」视图：每组为一个年份，可横向对比当年各家体量差异</span><span class="en">Switch to "By Year" view — each group is a year, compare all companies side by side</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">图表右上角「排序」按钮可按营收大小重新排列公司顺序</span><span class="en">The "Sort" button top-right reorders companies by revenue size</span></li>
+      </ul>
+    </div>
+
+    <!-- Chart 2 -->
+    <div style="background:#fff;border:1px solid var(--s200);border-radius:var(--r12);padding:18px 20px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:var(--std);color:var(--sty);font:600 11px/1 'DM Mono',monospace;padding:3px 9px;border-radius:3px;">02</span>
+        <span style="font:600 14px/1 'DM Sans',sans-serif;color:var(--std);"><span class="zh">净利润率 %</span><span class="en">Net Margin %</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;">
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">折线图，每条线代表一家公司历年净利润率（净利润 ÷ 营收 × 100%）</span><span class="en">Line chart — each line = one company's net margin (Net Income ÷ Revenue × 100%)</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">国民技术 2018 年约 −268%，系当年治理危机引发大额资产减值，属历史特殊事件，不影响其他年份判读</span><span class="en">NationZ 2018 shows ~−268% — a one-off governance crisis impairment; does not affect other year readings</span></li>
+      </ul>
+    </div>
+
+    <!-- Chart 3 -->
+    <div style="background:#fff;border:1px solid var(--s200);border-radius:var(--r12);padding:18px 20px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:var(--std);color:var(--sty);font:600 11px/1 'DM Mono',monospace;padding:3px 9px;border-radius:3px;">03</span>
+        <span style="font:600 14px/1 'DM Sans',sans-serif;color:var(--std);"><span class="zh">MCU 营收 — 按公司</span><span class="en">MCU Revenue — By Company</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;">
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">仅 MCU 相关口径收入，非集团总营收；各公司口径略有差异（详见详情面板说明）</span><span class="en">MCU-scope revenue only, not group total; each company's scope varies — see detail panel</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">数据点旁的彩色圆点表示数据质量（见下方置信度说明）</span><span class="en">Colored dots beside data points indicate data quality — see confidence legend below</span></li>
+      </ul>
+    </div>
+
+    <!-- Chart 4 -->
+    <div style="background:#fff;border:1px solid var(--s200);border-radius:var(--r12);padding:18px 20px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:var(--std);color:var(--sty);font:600 11px/1 'DM Mono',monospace;padding:3px 9px;border-radius:3px;">04</span>
+        <span style="font:600 14px/1 'DM Sans',sans-serif;color:var(--std);"><span class="zh">MCU 合计堆叠图</span><span class="en">MCU Aggregate Stacked Chart</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;">
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">每年一根柱，按公司颜色分层叠加；直观看出哪年市场整体规模最大</span><span class="en">One bar per year, stacked by company color — see overall market size and each company's share</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">图表下方显示「11 家合计」当年总值及同比增速</span><span class="en">Below the chart: 11-company aggregate total and YoY growth for the selected year</span></li>
+      </ul>
+    </div>
+
+    <!-- Chart 5 -->
+    <div style="background:#fff;border:1px solid var(--s200);border-radius:var(--r12);padding:18px 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:var(--std);color:var(--sty);font:600 11px/1 'DM Mono',monospace;padding:3px 9px;border-radius:3px;">05</span>
+        <span style="font:600 14px/1 'DM Sans',sans-serif;color:var(--std);"><span class="zh">YoY 同比热力图</span><span class="en">YoY Heatmap</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;">
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--s100);"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">横轴为年份，纵轴为公司；颜色深浅反映增速幅度，绿色=增长，红色=下滑</span><span class="en">X-axis = year, Y-axis = company; color intensity reflects growth rate — green up, red down</span></li>
+        <li style="display:flex;gap:7px;padding:4px 0;font-size:13px;"><span style="color:var(--stl);flex-shrink:0;margin-top:1px;">→</span><span class="zh">上排为总营收 YoY，下排为 MCU 营收 YoY；空白格表示该年份数据不足以计算同比</span><span class="en">Top row = total revenue YoY, bottom = MCU revenue YoY; blank = insufficient data</span></li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <span>💡</span>
+      <span>
+        <b><span class="zh">提示：</span><span class="en">Tip: </span></b>
+        <span class="zh">所有图表的年份胶囊和公司胶囊相互联动——在一个图表中筛选后，切换到其他图表筛选条件依然保持。</span>
+        <span class="en">Year and company filters are global — selections persist when you switch between charts.</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- Table & Detail Panel -->
+<section class="sec wbg" id="sec-table" data-label-zh="表格" data-label-en="Table">
+  <div class="C">
+    <div class="slabel"><div class="slabel-line"></div><span class="zh">表格与详情</span><span class="en">Table & Details</span></div>
+    <h2><span class="zh">公司排名表 · 详情面板</span><span class="en">Company Rankings & Detail Panel</span></h2>
+    <div class="steps">
+
+      <div class="step">
+        <div class="sh">
+          <div class="snum">01</div>
+          <div class="stb"><h3><span class="zh">主表格：排序、搜索、年份</span><span class="en">Main Table: Sort, Search, Year</span></h3></div>
+        </div>
+        <ul>
+          <li><span class="zh"><b>点击列标题</b>可按该列排序（再次点击切换升/降序）；默认按 MCU 营收从大到小排列</span><span class="en"><b>Click any column header</b> to sort; click again to reverse. Default: MCU revenue descending</span></li>
+          <li><span class="zh"><b>搜索框</b>支持公司中文名、英文名、股票代码实时筛选</span><span class="en"><b>Search box</b> filters by company Chinese/English name or ticker in real time</span></li>
+          <li><span class="zh"><b>年份选择器</b>切换表格显示哪一年的数据；YoY 列也随之变化</span><span class="en"><b>Year selector</b> changes which year's figures are shown; YoY column updates accordingly</span></li>
+          <li><span class="zh"><b>USD / 亿元</b>按钮一键切换金额列的货币单位，百分比列不受影响</span><span class="en"><b>USD / 亿元</b> button toggles the currency for value columns; percentage columns are unaffected</span></li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <div class="sh">
+          <div class="snum">02</div>
+          <div class="stb"><h3><span class="zh">点击公司行 → 右侧详情面板</span><span class="en">Click a Company Row → Right Detail Panel</span></h3></div>
+        </div>
+        <ul>
+          <li><span class="zh">面板顶部显示公司名称、股票代码、上市市场、成立年份</span><span class="en">Panel header: company name, ticker, market, founded year</span></li>
+          <li><span class="zh"><b>MCU 口径策略</b>彩色徽章说明该公司 MCU 数据的来源与推算方式（详见下一节）</span><span class="en"><b>MCU Strategy</b> color badge explains how this company's MCU data is sourced or estimated</span></li>
+          <li><span class="zh"><b>8 年趋势图：</b>总营收（蓝柱）vs MCU 营收（深色柱），叠加毛利率折线（有数据时显示）</span><span class="en"><b>8-Year Chart:</b> total revenue (blue) vs MCU revenue (dark), with gross margin line when available</span></li>
+          <li><span class="zh"><b>关键指标：</b>7 项 KPI，点击每项右上角 <b>?</b> 可查看计算公式与数据说明</span><span class="en"><b>Key Metrics:</b> 7 KPIs — click the <b>?</b> icon on any metric to see its formula and data notes</span></li>
+          <li><span class="zh"><b>年报历史表：</b>8 年逐年明细；上市前年份显示紫色 <span class="badge-prosp">招股书</span> 徽章；表下方有数据来源脚注</span><span class="en"><b>History Table:</b> 8-year detail; pre-listing years show a purple <span class="badge-prosp">Prospectus</span> badge; footnotes explain data sources</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Confidence & Strategy -->
+<section class="sec" id="sec-confidence" data-label-zh="置信度" data-label-en="Confidence">
+  <div class="C">
+    <div class="slabel"><div class="slabel-line"></div><span class="zh">数据说明</span><span class="en">Data Indicators</span></div>
+    <h2><span class="zh">置信度与口径策略说明</span><span class="en">Confidence Dots & MCU Strategy Badges</span></h2>
+    <p class="lead">
+      <span class="zh">由于 11 家公司的年报披露详细程度不同，MCU 营收数据通过不同方式获取，颜色点和策略徽章帮助您快速判断数据可信程度。</span>
+      <span class="en">Because annual report disclosure depth varies across companies, MCU revenue is sourced in different ways. Color dots and strategy badges help you gauge data reliability at a glance.</span>
+    </p>
+
+    <h3 style="font-size:14px;color:var(--std);margin:0 0 8px;"><span class="zh">置信度圆点（MCU 营收列旁边）</span><span class="en">Confidence Dots (next to MCU Revenue figures)</span></h3>
+    <div class="dot-row">
+      <div class="dot-item"><div class="dot dc"></div><b><span class="zh">绿色 — 直接披露</span><span class="en">Green — Directly Reported</span></b></div>
+      <div class="dot-item"><div class="dot dd"></div><b><span class="zh">青色 — 推算（高置信）</span><span class="en">Cyan — Derived (High Confidence)</span></b></div>
+      <div class="dot-item"><div class="dot dp"></div><b><span class="zh">橙色 — 估算（低置信）</span><span class="en">Orange — Estimated (Low Confidence)</span></b></div>
+      <div class="dot-item"><div class="dot du"></div><b><span class="zh">红色 — 数据缺失</span><span class="en">Red — Data Unavailable</span></b></div>
+    </div>
+    <p style="font-size:12px;color:var(--s400);margin:6px 0 20px;">
+      <span class="zh">绿色和青色数据可直接用于决策参考；橙色数据建议结合公开资料交叉验证；红色表示该年份暂无可用数据。</span>
+      <span class="en">Green and cyan can be used directly for reference; orange warrants cross-checking with public filings; red means no data is currently available for that year.</span>
+    </p>
+
+    <h3 style="font-size:14px;color:var(--std);margin:0 0 8px;"><span class="zh">MCU 口径策略徽章（详情面板顶部）</span><span class="en">MCU Strategy Badges (detail panel header)</span></h3>
+    <div class="strat-row">
+      <span class="strat-tag sg">SEG·RPT</span>
+      <span class="strat-tag sb">SEG·IND</span>
+      <span class="strat-tag st2">SEG·EST</span>
+      <span class="strat-tag so">TOTAL×k</span>
+      <span class="strat-tag sp">SUBSID.</span>
+    </div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin-top:10px;font-size:13px;">
+      <span class="strat-tag sg" style="align-self:start;">SEG·RPT</span><span><b style="color:var(--std);"><span class="zh">年报直接披露</span><span class="en">Segment Reported</span></b><span class="zh"> — 年报分产品表中有明确的 MCU 一行，数据直接来源，置信度最高</span><span class="en"> — Annual report has a dedicated MCU line item; highest confidence</span></span>
+      <span class="strat-tag sb" style="align-self:start;">SEG·IND</span><span><b style="color:var(--std);"><span class="zh">工业控制口径</span><span class="en">Industrial Segment</span></b><span class="zh"> — 年报「工业控制芯片」分部，含 BMIC 等非纯 MCU 产品，稍偏高</span><span class="en"> — "Industrial control IC" segment includes BMIC; slightly above pure MCU</span></span>
+      <span class="strat-tag st2" style="align-self:start;">SEG·EST</span><span><b style="color:var(--std);"><span class="zh">分部估算</span><span class="en">Segment Estimated</span></b><span class="zh"> — 从年报非标准披露中推算，有一定误差</span><span class="en"> — Estimated from non-standard annual report disclosure; some margin of error</span></span>
+      <span class="strat-tag so" style="align-self:start;">TOTAL×k</span><span><b style="color:var(--std);"><span class="zh">总收入系数推算</span><span class="en">Total Revenue × Multiplier</span></b><span class="zh"> — 总营收乘以固定系数，适用于 MCU 占比相对稳定的公司</span><span class="en"> — Total revenue × a fixed ratio; used when MCU share is relatively stable</span></span>
+      <span class="strat-tag sp" style="align-self:start;">SUBSID.</span><span><b style="color:var(--std);"><span class="zh">子公司口径</span><span class="en">Subsidiary</span></b><span class="zh"> — 纳思达：仅使用极海微电子子公司「芯片」产品线数据，集团总收入约 264 亿元不纳入分析</span><span class="en"> — Nasda: only Geehy subsidiary "chip" line used; group total ~¥26.4B excluded from analysis</span></span>
+    </div>
+
+    <div class="tip" style="margin-top:16px;">
+      <span>💡</span>
+      <span>
+        <b><span class="zh">关于「招股书」数据：</span><span class="en">About Prospectus data: </span></b>
+        <span class="zh">7 家公司上市前年份的营收来自 IPO 招股说明书，而非年报。这些年份在详情面板历史表中显示紫色 <span class="badge-prosp">招股书</span> 徽章，且毛利率与员工数通常为「—」（招股书未规范列报）。</span>
+        <span class="en">7 companies' pre-listing revenue comes from their IPO prospectus, not annual reports. These years show a purple <span class="badge-prosp">Prospectus</span> badge in the history table; gross margin and headcount are typically "—" as prospectuses don't standardize these fields.</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec wbg" id="sec-faq" data-label-zh="FAQ" data-label-en="FAQ">
+  <div class="C">
+    <div class="slabel"><div class="slabel-line"></div><span class="zh">常见问题</span><span class="en">FAQ</span></div>
+    <h2><span class="zh">常见问题解答</span><span class="en">Frequently Asked Questions</span></h2>
+    <div class="faq">
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">毛利率为什么很多格子显示「—」？</span><span class="en">Why do so many gross margin cells show "—"?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">部分公司（中微半导、峰岹科技、芯海科技、钜泉科技、乐鑫科技）的毛利率暂未覆盖，数据获取中；其余公司毛利率来自年报或 AKShare 财务数据接口，近年逐渐补全。上市前年份（招股书来源）的毛利率因格式未规范，暂未提取，显示「—」。</span>
+          <span class="en">Gross margin for 5 companies (Cmsemicon, Fortior, Chipsea, Hi-Trend, Espressif) is being sourced. For others, data comes from annual reports or the AKShare API and fills in gradually. Pre-listing years (prospectus source) don't have standardized gross margin disclosure, so they show "—".</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">MCU 营收和总营收有什么区别？</span><span class="en">What's the difference between MCU Revenue and Total Revenue?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh"><b>总营收</b>是公司全部业务的营业收入；<b>MCU 营收</b>仅统计 MCU 相关产品线。例如兆易创新同时有 NOR Flash 业务，普冉股份有 SRAM/NOR Flash，乐鑫有模组业务，这些均不计入 MCU 营收。MCU 占比列显示两者之比。</span>
+          <span class="en"><b>Total Revenue</b> covers all business lines; <b>MCU Revenue</b> is the MCU-specific product line only. For example, GigaDevice also has NOR Flash, Puya has SRAM/NOR Flash, and Espressif has module revenue — none counted in MCU. The MCU Mix% column shows the ratio.</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">纳思达（002180）的数据为什么没有总营收？</span><span class="en">Why does Nasda (002180) have no Total Revenue?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">纳思达集团总营收约 264 亿元（主业为打印耗材），与 MCU 分析无直接关联，故不显示。仪表盘仅展示其极海微电子子公司的「芯片」产品线数据，作为 MCU 营收的参考口径。</span>
+          <span class="en">Nasda Group's total revenue (~¥26.4B, mainly printer consumables) is unrelated to MCU analysis and is excluded. The dashboard only shows its Geehy subsidiary's "chip" product line as the MCU revenue proxy.</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">如何比较多家公司在同一年的表现？</span><span class="en">How do I compare multiple companies in the same year?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">① 在图表顶部选择目标年份，点击「按年份」视图可横向对比当年各家；② 主表格切换到目标年份，点击「MCU 营收」列表头排序；③ 查看 YoY 热力图该年所在竖列，颜色越深增速越快。</span>
+          <span class="en">① Select the target year at top, switch to "By Year" chart view to compare all companies side by side; ② In the main table, select the year and sort by MCU Revenue; ③ Check the heatmap column for that year — deeper color = faster growth.</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">数据更新频率是多少？</span><span class="en">How often is data updated?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">每年 4 月年报季后更新全年数据，覆盖当年财年报告。页面右上角「数据截至」日期显示当前数据版本。临时补录（如毛利率、历史员工数）会随时推送。</span>
+          <span class="en">Data is updated every April after annual reporting season. The "Data as of" date in the top-right shows the current version. Ad-hoc patches (e.g. gross margin, historical headcount) are pushed as they become available.</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">如何切换中英文显示？</span><span class="en">How do I switch the display language?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">点击仪表盘右上角的 <b>EN</b> 按钮即可切换为英文；点击 <b>中</b> 切回中文。切换后公司名称、图表标题、图例、详情面板内容均同步翻译，偏好保存在浏览器中，刷新后保持。</span>
+          <span class="en">Click the <b>EN</b> button in the top-right of the dashboard to switch to English; click <b>中</b> to return to Chinese. Company names, chart titles, legends, and the detail panel all switch instantly. The preference is saved in your browser and persists on refresh.</span>
+        </div>
+      </div>
+
+      <div class="fi2">
+        <div class="fq" onclick="toggleFAQ(this)">
+          <span class="fq-text"><span class="zh">遇到问题或数据有疑问怎么联系？</span><span class="en">Who do I contact for issues or data questions?</span></span>
+          <div class="fq-icon">+</div>
+        </div>
+        <div class="fa">
+          <span class="zh">联系 <strong>jania.jiang@gmail.com</strong> 反馈数据问题或功能建议。</span>
+          <span class="en">Contact <strong>jania.jiang@gmail.com</strong> for data issues or feature requests.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fb">MCU Regional Competitor Dashboard</div>
+  <div>
+    <span class="zh">中国大陆 MCU 竞争情报</span><span class="en">China MCU Competitive Intelligence</span>
+    <span class="fdot"></span>jania.jiang@gmail.com<span class="fdot"></span>2026
+  </div>
+</footer>
+
+<script>
+  var LANG = 'zh';
+  var SECS = ['sec-hero','sec-overview','sec-charts','sec-table','sec-confidence','sec-faq'];
+
+  function setLang(l) {
+    LANG = l;
+    document.body.className = 'lang-' + l;
+    document.querySelector('.lt-zh').classList.toggle('on', l === 'zh');
+    document.querySelector('.lt-en').classList.toggle('on', l === 'en');
+    updateNavLabels(l);
+    // Hero h1 swap
+    var h1 = document.querySelector('.hero h1');
+    if (h1) {
+      if (l === 'en') {
+        h1.innerHTML = 'MCU <em>Competitor</em> Dashboard';
+      } else {
+        h1.innerHTML = 'MCU <em>竞品</em> 数据仪表盘';
+      }
+    }
+  }
+
+  function updateNavLabels(l) {
+    document.querySelectorAll('.sidenav a').forEach(function(a) {
+      var id = a.getAttribute('data-id');
+      var sec = document.getElementById(id);
+      if (sec) a.setAttribute('data-label', sec.getAttribute('data-label-' + l) || '');
+    });
+  }
+
+  function toggleFAQ(btn) { btn.closest('.fi2').classList.toggle('open'); }
+
+  // Build sidebar dots
+  var nav = document.getElementById('sidenav');
+  SECS.forEach(function(id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    var a = document.createElement('a');
+    a.setAttribute('data-id', id);
+    a.setAttribute('data-label', sec.getAttribute('data-label-zh') || '');
+    a.href = '#';
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById(id).scrollIntoView({ behavior:'smooth' });
+    });
+    nav.appendChild(a);
+  });
+
+  // Scroll spy
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.sidenav a').forEach(function(a) {
+          a.classList.toggle('active', a.getAttribute('data-id') === e.target.id);
+        });
+      }
+    });
+  }, { threshold: 0.35 });
+  SECS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) obs.observe(el);
+  });
+
+  setLang('zh');
+</script>
+</body>
+</html>
