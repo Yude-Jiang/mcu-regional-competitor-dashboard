@@ -362,21 +362,23 @@ def process_symbol(
         if fin:
             log.info("  [%s] seeded %d skeleton rows from mcu_known_data", symbol, len(fin))
 
-    # Employee counts: AKShare (live) takes priority; employee_known_data.json fills gaps
+    # Employee counts: AKShare (live) — applied before strategy so rows exist
     emp_api = fetch_employee_count(symbol)
     for yr, cnt in emp_api.items():
         if yr in fin:
             fin[yr]["employee_count"] = cnt
+
+    fin = apply_mcu_strategy(fin, meta, known_mcu)
+    fin = compute_metrics(fin)
+
+    # employee_known_data.json fills gaps AFTER strategy (ensures year rows exist)
     for yr_str, cnt in known_emp.items():
         try:
             yr = int(yr_str)
         except ValueError:
             continue
         if yr in fin and fin[yr].get("employee_count") is None:
-            fin[yr]["employee_count"] = cnt  # PDF-extracted fallback
-
-    fin = apply_mcu_strategy(fin, meta, known_mcu)
-    fin = compute_metrics(fin)
+            fin[yr]["employee_count"] = cnt
 
     # ── BigQuery sync (graceful no-op if BQ not configured) ──────────────────
     if bq_writer.is_available():
