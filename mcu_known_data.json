@@ -125,52 +125,55 @@
   "688018": {
     "2019": {
       "mcu_revenue_yuan": 520672245.57,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.4703,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2019年报第28页 主营业务分产品情况表「芯片」行（区别于模组收入）— Gemini-3.5-flash提取"
     },
     "2020": {
       "mcu_revenue_yuan": 441378003.21,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.4129,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2020年报第29页 分产品营业收入表「芯片」行 — Gemini-3.5-flash提取"
     },
     "2021": {
       "mcu_revenue_yuan": 552713033.07,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.396,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2021年报第35页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
     },
     "2022": {
       "mcu_revenue_yuan": 405986184.48,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.3998,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2022年报 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
     },
     "2023": {
       "mcu_revenue_yuan": 547438532.96,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.4056,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2023年报第39页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
     },
     "2024": {
       "mcu_revenue_yuan": 783046926.91,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.4391,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2024年报第40页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
     },
     "2025": {
       "mcu_revenue_yuan": 980061726.23,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.4663,
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2025年报第44页 管理层讨论与分析主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+    },
+    "2018": {
+      "mcu_gross_margin": 0.5066
     }
   },
   "002180": {
@@ -336,37 +339,127 @@
       "mcu_revenue_yuan": 103761750,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2021年报 MCU芯片29,515.85万YoY+184.46%反推2020年值≈10,376万（Gemini提取103,761,750，差值<250元）"
+      "source": "芯海科技2021年报 MCU芯片29,515.85万YoY+184.46%反推2020年值≈10,376万（Gemini提取103,761,750，差值<250元）",
+      "mcu_gross_margin": 0.4834
     },
     "2021": {
       "mcu_revenue_yuan": 295158500,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2021年报 管理层讨论「MCU芯片2021年实现销售29,515.85万元，较上年同期增长184.46%」"
+      "source": "芯海科技2021年报 管理层讨论「MCU芯片2021年实现销售29,515.85万元，较上年同期增长184.46%」",
+      "mcu_gross_margin": 0.5218
     },
     "2022": {
       "mcu_revenue_yuan": 288995900,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2022年报 管理层讨论「MCU芯片2022年实现销售28,899.59万元，较上年同期下降2.09%」"
+      "source": "芯海科技2022年报 管理层讨论「MCU芯片2022年实现销售28,899.59万元，较上年同期下降2.09%」",
+      "mcu_gross_margin": 0.3919
     },
     "2023": {
       "mcu_revenue_yuan": 194614600,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2023年报 管理层讨论「MCU芯片2023年实现销售19,461.46万元」"
+      "source": "芯海科技2023年报 管理层讨论「MCU芯片2023年实现销售19,461.46万元」",
+      "mcu_gross_margin": 0.2826
     },
     "2024": {
       "mcu_revenue_yuan": 326228400,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2024年报 管理层讨论「MCU芯片2024年度实现销售32,622.84万元，较上年增长67.63%」"
+      "source": "芯海科技2024年报 管理层讨论「MCU芯片2024年度实现销售32,622.84万元，较上年增长67.63%」",
+      "mcu_gross_margin": 0.3416
     },
     "2025": {
       "mcu_revenue_yuan": 339862396,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2025年报审计意见附注「MCU芯片业务营收339,862,395.82元，占营业收入40.05%」"
+      "source": "芯海科技2025年报审计意见附注「MCU芯片业务营收339,862,395.82元，占营业收入40.05%」",
+      "mcu_gross_margin": 0.352
+    },
+    "2018": {
+      "mcu_gross_margin": 0.4504
+    },
+    "2019": {
+      "mcu_gross_margin": 0.448
+    }
+  },
+  "688380": {
+    "2018": {
+      "mcu_gross_margin": 0.4503
+    },
+    "2019": {
+      "mcu_gross_margin": 0.4391
+    },
+    "2020": {
+      "mcu_gross_margin": 0.4069
+    },
+    "2021": {
+      "mcu_gross_margin": 0.6894
+    },
+    "2022": {
+      "mcu_gross_margin": 0.411
+    },
+    "2023": {
+      "mcu_gross_margin": 0.1745
+    },
+    "2024": {
+      "mcu_gross_margin": 0.2986
+    },
+    "2025": {
+      "mcu_gross_margin": 0.3428
+    }
+  },
+  "688279": {
+    "2018": {
+      "mcu_gross_margin": 0.4466
+    },
+    "2019": {
+      "mcu_gross_margin": 0.4761
+    },
+    "2020": {
+      "mcu_gross_margin": 0.5027
+    },
+    "2021": {
+      "mcu_gross_margin": 0.5744
+    },
+    "2022": {
+      "mcu_gross_margin": 0.5742
+    },
+    "2023": {
+      "mcu_gross_margin": 0.5347
+    },
+    "2024": {
+      "mcu_gross_margin": 0.5324
+    },
+    "2025": {
+      "mcu_gross_margin": 0.5257
+    }
+  },
+  "688391": {
+    "2018": {
+      "mcu_gross_margin": 0.3822
+    },
+    "2019": {
+      "mcu_gross_margin": 0.364
+    },
+    "2020": {
+      "mcu_gross_margin": 0.3824
+    },
+    "2021": {
+      "mcu_gross_margin": 0.4545
+    },
+    "2022": {
+      "mcu_gross_margin": 0.5133
+    },
+    "2023": {
+      "mcu_gross_margin": 0.4965
+    },
+    "2024": {
+      "mcu_gross_margin": 0.441
+    },
+    "2025": {
+      "mcu_gross_margin": 0.3923
     }
   }
 }
