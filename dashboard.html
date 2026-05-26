@@ -116,15 +116,7 @@ html,body {
 }
 
 /* ── Controls ── */
-.controls {
-  display:flex; align-items:center; gap:16px; padding:0 20px; min-height:46px; flex-shrink:0;
-  background:var(--bg-1); border-bottom:1px solid var(--border); flex-wrap:wrap;
-}
 .ctrl-grp { display:flex; align-items:center; gap:8px; }
-.ctrl-grp label {
-  font:600 var(--fz-xs)/1 var(--font); color:var(--text-faint);
-  text-transform:uppercase; letter-spacing:.07em; white-space:nowrap;
-}
 .ctrl-sel, .ctrl-inp {
   padding:5px 10px; border:1px solid var(--border-b); border-radius:3px;
   background:var(--bg-0); color:var(--text); font:var(--fz-sm)/1 var(--font);
@@ -618,7 +610,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
 }
 @media (max-width: 680px) {
   .hdr { padding: 0 12px; }
-  .controls { padding: 8px 12px; gap: 10px; }
   .legend { margin-left: 0; }
   .ctrl-inp { width: 140px; }
   .detail-panel { width: 100%; }
@@ -659,22 +650,18 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <div id="pipe-cards" style="display:contents"></div>
 </div>
 
-<!-- ── Controls ── -->
-<div class="controls">
-  <div class="ctrl-grp">
-    <label data-i18n="lbl_year">年份</label>
-    <select class="ctrl-sel" id="year-sel"></select>
-  </div>
-  <div class="ctrl-grp">
-    <label data-i18n="lbl_search">搜索</label>
-    <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
-  </div>
-</div>
-
 <!-- ── Chart filter / sort bar ── -->
 <div class="chart-ctrl" id="chart-ctrl-bar">
   <div class="chart-ctrl-grp">
     <span class="chart-ctrl-lbl" data-i18n="lbl_year">年份</span>
+    <select class="ctrl-sel" id="year-sel"></select>
+  </div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl" data-i18n="lbl_search">搜索</span>
+    <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
+  </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
     <div class="yr-toggles" id="yr-toggles"></div>
     <button class="yr-all-btn" id="yr-all-btn" data-i18n="btn_all">全部</button>
   </div>
