@@ -683,8 +683,11 @@ def update_mcu_known_data(symbol: str, year: int, result: dict) -> None:
         "confidence":       conf_map.get(result.get("confidence", "medium"), "medium"),
         "source":           result.get("mcu_revenue_note", f"LLM提取 {result.get('_model','')}"),
     }
-    if result.get("mcu_gross_margin") is not None:
-        entry["mcu_gross_margin"] = result["mcu_gross_margin"]
+    # LLM returns "gross_margin_pct" (a percentage like 36.07); store as decimal
+    gm_raw = result.get("gross_margin_pct") if result.get("gross_margin_pct") is not None \
+             else result.get("mcu_gross_margin")
+    if gm_raw is not None:
+        entry["mcu_gross_margin"] = round(gm_raw / 100 if gm_raw > 1 else gm_raw, 4)
     # Write total_revenue_yuan if extracted (e.g. 纳思达 集成电路产业合计)
     if result.get("total_revenue_yuan") is not None:
         entry["total_revenue_yuan"] = result["total_revenue_yuan"]
