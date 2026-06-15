@@ -85,35 +85,7 @@ html,body {
 .lang-btn:hover { background:var(--navy-2); color:#fff; }
 .lang-btn.active { background:var(--cyan-1); border-color:var(--cyan-1); color:#03234b; }
 
-/* ── Pipeline strip ── */
-.pipeline {
-  display:flex; align-items:stretch; height:56px; flex-shrink:0;
-  background:var(--bg-1); border-bottom:1px solid var(--border);
-  overflow-x:auto; overflow-y:hidden;
-}
-.pipeline::-webkit-scrollbar { height:3px; }
-.pipeline::-webkit-scrollbar-thumb { background:var(--border-b); }
-.pipe-lbl {
-  display:flex; align-items:center; gap:6px; padding:0 14px;
-  background:var(--bg-2); border-right:1px solid var(--border);
-  font:700 var(--fz-xs)/1 var(--font); color:var(--navy-1);
-  text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; flex-shrink:0;
-}
-.pipe-lbl::before { content:""; width:3px; height:16px; background:var(--cyan-1); border-radius:1px; }
-.fp-card {
-  display:inline-flex; flex-direction:column; justify-content:center; gap:3px;
-  padding:0 12px; border-right:1px solid var(--border);
-  border-left:3px solid transparent; min-width:96px; flex-shrink:0;
-  cursor:pointer; transition:background .1s;
-}
-.fp-card:hover { background:var(--bg-2); }
-.fp-sym  { font:600 var(--fz-xs)/1 monospace; color:var(--text-dim); }
-.fp-name { font:600 var(--fz-sm)/1.2 var(--font); color:var(--text); white-space:nowrap; }
-.fp-badge {
-  font:500 var(--fz-2xs)/1 monospace; letter-spacing:.05em; text-transform:uppercase;
-  padding:1px 4px; border-radius:2px; background:var(--bg-3);
-  color:var(--text-dim); width:fit-content;
-}
+/* Pipeline strip removed */
 
 /* ── Controls ── */
 .ctrl-grp { display:flex; align-items:center; gap:8px; }
@@ -617,8 +589,35 @@ body.panel-open .table-wrap { padding-right:50vw; }
   .qa-panel { width: calc(100vw - 32px); right: 16px; }
   .chart-inner { min-height: 180px; padding: 10px 12px 6px; }
   .chart-box { padding: 10px 12px 6px; }
-  .pipeline { height: auto; min-height: 44px; flex-wrap: wrap; }
-  .fp-card { min-width: 80px; padding: 6px 8px; }
+}
+
+/* Grouped header for table */
+.grp-hdr {
+  text-align:center !important; font-size:var(--fz-2xs); font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:4px 6px 3px;
+  border-bottom:2px solid var(--border-b);
+}
+.g-rev.grp-hdr { border-bottom-color:#1a8a4e; }
+.g-mcu.grp-hdr { border-bottom-color:var(--navy-1); }
+.g-rd.grp-hdr  { border-bottom-color:#5c6bc0; }
+
+/* Triple chart row */
+.chart-triple {
+  display:grid; grid-template-columns:2fr 1fr 1fr;
+  background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.chart-triple-main { border-right:1px solid var(--border); min-width:0; }
+.chart-triple-side  { border-right:1px solid var(--border); min-width:0; }
+.chart-triple-side:last-child { border-right:none; }
+.chart-triple-main .cs-hdr,
+.chart-triple-side  .cs-hdr { padding:8px 16px 0; }
+.chart-triple-main .cs-body,
+.chart-triple-side  .cs-body { padding:10px 16px 8px; min-height:220px; }
+@media (max-width:960px) {
+  .chart-triple { grid-template-columns:1fr; }
+  .chart-triple-main { border-right:0; border-bottom:1px solid var(--border); }
+  .chart-triple-side { border-right:0; border-bottom:1px solid var(--border); }
+  .chart-triple-side:last-child { border-bottom:0; }
 }
 </style>
 </head>
@@ -644,12 +643,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
 </header>
 
-<!-- ── Pipeline strip ── -->
-<div class="pipeline">
-  <div class="pipe-lbl">FY&nbsp;<span id="pipe-year">2024</span></div>
-  <div id="pipe-cards" style="display:contents"></div>
-</div>
-
 <!-- ── Chart filter / sort bar ── -->
 <div class="chart-ctrl" id="chart-ctrl-bar">
   <div class="chart-ctrl-grp">
@@ -671,7 +664,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <select class="ctrl-sel" id="chart-sort-field">
       <option value="mcu" selected data-i18n="sort_mcu_rev">MCU 营收</option>
       <option value="rev" data-i18n="sort_total_rev">总营收</option>
-      <option value="name" data-i18n="sort_name">公司名</option>
     </select>
     <select class="ctrl-sel" id="chart-sort-year"></select>
     <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向" data-i18n="sort_desc">↓ 降序</button>
@@ -695,66 +687,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
   </div>
 </div>
-<!-- FX rates bar -->
-<div class="fx-bar" id="fx-bar">
-  <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
-</div>
-
-<!-- ── 总营收 + 净利润率 dual row ── -->
-<div class="chart-dual">
-  <div class="chart-dual-main">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
-      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
-      <span class="cs-unit" id="cs-unit-rev">M USD</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
-    <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
-  </div>
-  <div class="chart-dual-side">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
-      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
-    <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
-  </div>
-</div>
-<div class="rev-summary" id="rev-summary"></div>
-
-<!-- ── MCU grouped + Stacked dual row ── -->
-<div class="chart-dual">
-  <div class="chart-dual-main">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
-      <span class="cs-title" data-i18n="chart_mcu_title">按公司 · MCU 营收 (推算)</span>
-      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_mcu">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
-    <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
-    <div class="rev-summary" id="mcu-summary"></div>
-  </div>
-  <div class="chart-dual-side">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#3cb4e6;color:#03234b" data-i18n="tag_stacked">堆叠</span>
-      <span class="cs-title" data-i18n="chart_stacked_title">按年度 · 公司堆叠</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_stacked">11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。</div>
-    <div class="cs-body"><canvas id="c-stacked"></canvas></div>
-  </div>
-</div>
-
-<!-- ── YoY% 热力图 ── -->
-<div class="yoy-heatmap" id="yoy-heatmap">
-  <div class="yoy-heatmap-hdr">
-    <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_heatmap">热力图</span>
-    <span class="cs-title" data-i18n="chart_heatmap_title">YoY% 营收热力图</span>
-    <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="heatmap_sub">上：总营收YoY &nbsp;下：MCU YoY</span>
-  </div>
-  <div class="cs-desc" data-i18n="desc_heatmap">绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。</div>
-  <div class="yoy-heatmap-grid" id="yoy-heatmap-grid"></div>
-</div>
-
 <!-- ── Table section header + legend ── -->
 <div class="tbl-section-hdr">
   <span class="cs-tag" style="background:var(--navy-1)" data-i18n="tag_tbl">数据表</span>
@@ -779,21 +711,26 @@ body.panel-open .table-wrap { padding-right:50vw; }
 <table id="tbl">
 <thead>
   <tr>
-    <th class="sticky" rowspan="2">公司</th>
-    <th rowspan="2">成立<br>上市</th>
-    <th rowspan="2">核心架构</th>
+    <th class="sticky" rowspan="2" data-i18n="th_company">公司</th>
+    <th rowspan="2" data-i18n-html="th_founded">成立<br>上市</th>
+    <th rowspan="2" data-i18n="th_arch">核心架构</th>
+    <th class="g-rev grp-hdr" colspan="3" data-i18n="grp_total_rev">总营收</th>
+    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
+    <th class="g-mcu grp-hdr" colspan="4" data-i18n="grp_mcu_rev">MCU 营收</th>
+    <th class="g-etc" rowspan="2" data-i18n="th_foundry">代工厂</th>
+    <th class="g-rd grp-hdr" colspan="2" data-i18n="grp_rd">研发</th>
+    <th class="g-etc sortable" data-col="emp" rowspan="2" data-i18n="th_emp">员工<span class="si"></span></th>
+  </tr>
+  <tr>
     <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
-    <th class="g-rev sortable" data-col="cagr">CAGR<span class="si"></span></th>
-    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
+    <th class="g-rev sortable" data-col="cagr">CAGR 18-25<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="gm">毛利率<span class="si"></span></th>
-    <th class="g-etc" rowspan="2">代工厂</th>
+    <th class="g-mcu sortable" data-col="wt" data-i18n="th_mcu_pct">占比%<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="gm" data-i18n="th_gm">毛利率<span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd">研发 <span id="tbl-unit-rd">M$</span><span class="si"></span></th>
-    <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
-    <th class="g-etc sortable" data-col="emp">员工<span class="si"></span></th>
+    <th class="g-rd sortable" data-col="rd_pct" data-i18n="th_rd_pct">研发%<span class="si"></span></th>
   </tr>
 </thead>
 <tbody id="tbody">
@@ -804,8 +741,63 @@ body.panel-open .table-wrap { padding-right:50vw; }
 </table>
 </div>
 
+<!-- ── MCU grouped + Stacked dual row ── -->
+<div class="chart-dual">
+  <div class="chart-dual-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
+      <span class="cs-title" data-i18n="chart_mcu_title">按公司 · MCU 营收 (推算)</span>
+      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_mcu">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
+    <div class="rev-summary" id="mcu-summary"></div>
+    <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
+  </div>
+  <div class="chart-dual-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#3cb4e6;color:#03234b" data-i18n="tag_stacked">堆叠</span>
+      <span class="cs-title" data-i18n="chart_stacked_title">按年度 · 公司堆叠</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_stacked">11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。</div>
+    <div class="cs-body"><canvas id="c-stacked"></canvas></div>
+  </div>
+</div>
+
+<!-- ── 总营收 + 毛利率 + 净利润率 triple row ── -->
+<div class="chart-triple">
+  <div class="chart-triple-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
+      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
+      <span class="cs-unit" id="cs-unit-rev">M USD</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
+    <div class="rev-summary" id="rev-summary"></div>
+    <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
+  </div>
+  <div class="chart-triple-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_gm">毛利率</span>
+      <span class="cs-title" data-i18n="chart_gm_title">按公司 · 毛利率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_gm">毛利率 = (营收 − 营业成本) ÷ 营收 × 100%。中微/峰岹/芯海/钜泉/乐鑫历史数据待年报 PDF 提取。</div>
+    <div class="cs-body"><canvas id="c-gross-margin"></canvas></div>
+  </div>
+  <div class="chart-triple-side">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
+      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
+    <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
+  </div>
+</div>
+
 <!-- ── Footer ── -->
 <footer>
+  <div class="fx-bar" id="fx-bar" style="border-bottom:none;border-top:1px solid var(--border);margin-top:4px;padding:3px 16px">
+    <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
+  </div>
   MCU Regional Competitor Analysis &nbsp;|&nbsp;
   <span data-i18n="footer_src">数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书</span> &nbsp;|&nbsp;
   <span data-i18n="footer_creator">创建: yude.jiang@st.com</span> &nbsp;|&nbsp;
@@ -892,6 +884,9 @@ const I18N = {
     sort_desc:'↓ 降序', sort_asc:'↑ 升序',
     lbl_companies:'公司', lbl_currency:'货币',
     tag_rev:'总营收', chart_rev_title:'按公司 · 总营收 (来自年报)',
+    tag_gm:'毛利率', chart_gm_title:'按公司 · 毛利率 %', gm_yaxis:'毛利率 %',
+    desc_gm:'毛利率 = (营收 − 营业成本) ÷ 营收 × 100%。中微/峰岹/芯海/钜泉/乐鑫历史数据待年报 PDF 提取。',
+    grp_total_rev:'总营收', grp_mcu_rev:'MCU 营收', grp_rd:'研发',
     tag_net_margin:'净利率', chart_net_title:'按公司 · 净利润率 %', net_margin_yaxis:'净利润率',
     tag_mcu:'MCU', chart_mcu_title:'按公司 · MCU 营收 (推算)',
     tag_stacked:'堆叠', chart_stacked_title:'按年度 · 公司堆叠',
@@ -950,6 +945,9 @@ const I18N = {
     sort_desc:'↓ Desc', sort_asc:'↑ Asc',
     lbl_companies:'Companies', lbl_currency:'Currency',
     tag_rev:'Total Rev', chart_rev_title:'By Company · Total Revenue (Annual Reports)',
+    tag_gm:'Gross Mgn', chart_gm_title:'By Company · Gross Margin %', gm_yaxis:'Gross Margin %',
+    desc_gm:'Gross Margin = (Revenue − COGS) ÷ Revenue × 100%. Historical data for Cmsemicon/Fortior/Chipsea/Hi-Trend/Espressif pending PDF extraction.',
+    grp_total_rev:'Total Revenue', grp_mcu_rev:'MCU Revenue', grp_rd:'R&D',
     tag_net_margin:'Net Margin', chart_net_title:'By Company · Net Profit Margin %', net_margin_yaxis:'Net Margin %',
     tag_mcu:'MCU', chart_mcu_title:'By Company · MCU Revenue (Estimates)',
     tag_stacked:'Stacked', chart_stacked_title:'By Year · Company Stack',
@@ -1033,8 +1031,6 @@ function setLang(lang) {
   const year = sel ? +sel.value : 2024;
   const srch = document.getElementById('search');
   if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
-  // Re-render pipeline strip (uses company names)
-  if (typeof G !== 'undefined' && G) renderPipeline(G, year);
   // Update company pill labels in-place (no event listener re-attach needed)
   if (typeof G !== 'undefined' && G) {
     document.querySelectorAll('.co-pill[data-sym]').forEach(pill => {
@@ -1133,7 +1129,7 @@ function curFmt(raw) {
 const CF = {
   years:     new Set([2018,2019,2020,2021,2022,2023,2024,2025]),
   companies: new Set(ORDER),
-  sortField: 'mcu',   // 'mcu' | 'rev' | 'name'
+  sortField: 'mcu',   // 'mcu' | 'rev'
   sortYear:  2024,
   sortDir:   'desc',
 };
@@ -1141,15 +1137,7 @@ const CF = {
 function cfYears()  { return Object.keys(YEAR_PAL).map(Number).filter(y => CF.years.has(y) && (G?.years||[]).includes(y)); }
 function cfSyms()   {
   let ss = ORDER.filter(s => G?.companies[s] && CF.companies.has(s));
-  if (CF.sortField === 'name') {
-    ss = ss.slice().sort((a,b) => {
-      const f = m => (LANG==='en' ? m.name_en : m.name_cn) || '';
-      const na = f(G.companies[a].meta||{})||a;
-      const nb = f(G.companies[b].meta||{})||b;
-      const loc = LANG==='en' ? 'en' : 'zh';
-      return CF.sortDir === 'asc' ? na.localeCompare(nb,loc) : nb.localeCompare(na,loc);
-    });
-  } else {
+  {
     const field = CF.sortField === 'mcu' ? curF('mcu_revenue') : curF('total_revenue');
     ss = ss.slice().sort((a,b) => {
       const va = (G.companies[a].financials?.[CF.sortYear]||{})[field] ?? -1/0;
@@ -1162,12 +1150,12 @@ function cfSyms()   {
 
 function rerenderCharts() {
   renderTotalRevChart();
+  renderGrossMarginChart();
   renderNetMarginChart();
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   _updateMcuSummary(cfYears(), cfSyms());
   renderStacked();
-  renderYoYHeatmap();
 }
 
 // ── Chart control bar init ────────────────────────────────────────────────
@@ -1343,24 +1331,6 @@ function sparkline(values, w=76, h=22) {
   </svg>`;
 }
 
-// ── Pipeline ──────────────────────────────────────────────────────────────
-function renderPipeline(data, year) {
-  $('pipe-year').textContent = year;
-  $('pipe-cards').innerHTML = ORDER.filter(s => data.companies[s]).map(sym => {
-    const co = data.companies[sym];
-    const m  = co.meta || {};
-    const f  = (co.financials || {})[String(year)] || {};
-    const conf = m.mcu_confidence || 'na';
-    const strat = STRAT_LBL[m.mcu_strategy] || '?';
-    const border = CONF_BORDER[conf] || CONF_BORDER.na;
-    return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}" onclick="openDetail('${sym}')">
-      <span class="fp-sym">${sym}</span>
-      <span class="fp-name">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</span>
-      <span class="fp-badge">${strat}</span>
-    </div>`;
-  }).join('');
-}
-
 // ── Table sort helper ─────────────────────────────────────────────────────
 function sortVal(sym, year, col) {
   const f = (G.companies[sym].financials || {})[String(year)] || {};
@@ -1426,16 +1396,16 @@ function renderTable(year, query) {
       </td>
       <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
       <td class="l" style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
-      <td>${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
+      <td class="c">${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="c">${cagr}</td>
       <td class="c" style="padding:4px 8px">${sparkline(spkVals)}</td>
-      <td>${mcuN2(f[curF('mcu_revenue')], dt)}</td>
+      <td class="c">${mcuN2(f[curF('mcu_revenue')], dt)}</td>
       <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
       <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
       <td class="c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="l" style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
-      <td>${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
+      <td class="c">${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
     </tr>`;
@@ -1540,6 +1510,7 @@ function renderTotalRevChart() {
     data: ss.map(s => { const v=(G.companies[s].financials[y]||{})[field]; return v!=null?v*scale:null; }),
     backgroundColor: YEAR_PAL[y],
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    maxBarThickness: 22,
     spanGaps: false,
   }));
 
@@ -1587,6 +1558,7 @@ function renderNetMarginChart() {
     data: ss.map(s => netMarginPct(G.companies[s].financials[y]||{})),
     backgroundColor: YEAR_PAL[y],
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    maxBarThickness: 22,
     spanGaps: false,
   }));
 
@@ -1613,6 +1585,46 @@ function renderNetMarginChart() {
   });
 }
 
+function renderGrossMarginChart() {
+  const years  = cfYears();
+  const ss     = cfSyms();
+  const labels = ss.map(s => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; });
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const datasets = years.map(y => ({
+    label: String(y),
+    data: ss.map(s => (G.companies[s].financials[y]||{}).gross_margin_pct ?? null),
+    backgroundColor: YEAR_PAL[y],
+    borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    maxBarThickness: 22,
+    spanGaps: false,
+  }));
+
+  const ctx = $('c-gross-margin').getContext('2d');
+  if (charts.grossMargin) charts.grossMargin.destroy();
+  charts.grossMargin = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6 } },
+        tooltip:{ callbacks:{
+          label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`,
+        }},
+      },
+      scales:{
+        x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
+        y:{ ticks:{font:{size:11,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
+            grid:{color:grid},
+            title:{display:true,text:T('gm_yaxis'),color:tick,font:{size:10}} },
+      },
+    },
+  });
+}
+
 function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {}) {
   const years  = cfYears();
   const ss     = cfSyms();
@@ -1629,6 +1641,7 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {
     backgroundColor: YEAR_PAL[y],
     borderWidth: y === 2024 ? 2 : 0,
     borderColor: y === 2024 ? '#fff' : undefined,
+    maxBarThickness: 22,
     spanGaps: false,
   }));
 
@@ -1676,7 +1689,7 @@ function renderStacked() {
     label: (() => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; })(),
     data:  years.map(y => { const v = (G.companies[s].financials[y]||{})[mcuField]; return v != null ? v * stScale : null; }),
     backgroundColor: CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length],
-    stack: 'a', spanGaps: false,
+    stack: 'a', maxBarThickness: 22, spanGaps: false,
   }));
 
   const yearTotals = years.map(y =>
@@ -2212,25 +2225,24 @@ async function loadData() {
       renderTable(+sel.value, e.target.value)
     );
 
-    // Year change — charts are all-years so no re-render needed; only table + pipeline
+    // Year change — charts are all-years so no re-render needed; only table
     sel.addEventListener('change', () => {
       const y = +sel.value;
-      renderPipeline(G, y);
       renderTable(y, $('search').value);
       if (_currentDetailSym && $('detail-panel').classList.contains('open'))
         _updateDetailMetrics(_currentDetailSym, y);
     });
 
     // Initial render
-    renderPipeline(G, defYear);
     renderTable(defYear, '');
     initChartCtrl();
     rerenderCharts();
 
-    watchResize('c-total-rev',   'totalRev');
-    watchResize('c-net-margin',  'netMargin');
-    watchResize('c-mcu-grp',     'mcuGrp');
-    watchResize('c-stacked',     'stacked');
+    watchResize('c-total-rev',    'totalRev');
+    watchResize('c-gross-margin', 'grossMargin');
+    watchResize('c-net-margin',   'netMargin');
+    watchResize('c-mcu-grp',      'mcuGrp');
+    watchResize('c-stacked',      'stacked');
     applyChartTheme();
     applyI18n();
 
