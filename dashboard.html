@@ -549,23 +549,25 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .view-toggle-btn:hover:not(.active) { background:var(--border-b); }
 .view-toggle-btn.active { background:var(--navy-1); color:#fff; }
 .chart-swap-body canvas.chart-swap-hidden { display:none !important; }
-.cs-wrap .cs-body { min-height:200px; }
 
-/* ── Dual chart row ── */
-.chart-dual {
+/* ── 2×2 chart grid (MCU / 总营收 / 毛利率 / 净利率) ── */
+.chart-quad {
   display:grid; grid-template-columns:1fr 1fr;
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
 }
-.chart-dual-main { border-right:1px solid var(--border); min-width:0; }
-.chart-dual-side  { min-width:0; }
-.chart-dual-main .cs-hdr,
-.chart-dual-side  .cs-hdr {
-  padding:8px 16px 0;
+.chart-quad-cell {
+  min-width:0; display:flex; flex-direction:column;
+  border-right:1px solid var(--border); border-bottom:1px solid var(--border);
 }
-.chart-dual-main .cs-body,
-.chart-dual-side  .cs-body {
-  padding:10px 16px 8px; min-height:220px;
+.chart-quad-cell:nth-child(2n) { border-right:0; }
+.chart-quad-cell:nth-child(n+3) { border-bottom:0; }
+.chart-quad-cell .cs-hdr { padding:8px 16px 0; }
+.chart-quad-body {
+  flex:1; padding:10px 16px 8px;
+  height:220px; min-height:220px; max-height:220px;
+  position:relative;
 }
+.chart-quad-cell .rev-summary { border-bottom:0; flex-shrink:0; }
 
 /* ── YoY Heatmap ── */
 .yoy-heatmap {
@@ -629,10 +631,9 @@ body.panel-open .table-wrap { padding-right:50vw; }
   }
   .chart-box:last-child { border-bottom: 0; }
   .brand .sub { display: none; }
-  .chart-dual {
-    grid-template-columns: 1fr;
-  }
-  .chart-dual-main { border-right: 0; border-bottom: 1px solid var(--border); }
+  .chart-quad { grid-template-columns:1fr; }
+  .chart-quad-cell { border-right:0; }
+  .chart-quad-cell:not(:last-child) { border-bottom:1px solid var(--border); }
 }
 @media (max-width: 680px) {
   .hdr { padding: 0 12px; }
@@ -723,19 +724,9 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
 </div>
 
-<!-- ── 净利润率 ── -->
-<div class="cs-wrap">
-  <div class="cs-hdr">
-    <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
-    <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
-  </div>
-  <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
-  <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
-</div>
-
-<!-- ── MCU (toggle) + 总营收 dual row ── -->
-<div class="chart-dual">
-  <div class="chart-dual-main">
+<!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
+<div class="chart-quad">
+  <div class="chart-quad-cell">
     <div class="cs-hdr">
       <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
       <span class="cs-title" id="mcu-chart-title">按公司 · MCU 营收 (推算)</span>
@@ -746,21 +737,37 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
     </div>
     <div class="cs-desc" id="mcu-chart-desc">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
-    <div class="cs-body chart-swap-body">
+    <div class="chart-quad-body chart-swap-body">
       <canvas id="c-mcu-grp"></canvas>
       <canvas id="c-stacked" class="chart-swap-hidden"></canvas>
     </div>
     <div class="rev-summary" id="mcu-summary"></div>
   </div>
-  <div class="chart-dual-side">
+  <div class="chart-quad-cell">
     <div class="cs-hdr">
       <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
       <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
       <span class="cs-unit" id="cs-unit-rev">M USD</span>
     </div>
     <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
-    <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
+    <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
     <div class="rev-summary" id="rev-summary"></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">毛利率</span>
+      <span class="cs-title" data-i18n="chart_gm_title">按公司 · 毛利率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_gm">优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。</div>
+    <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
+      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
+    <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
   </div>
 </div>
 
@@ -913,6 +920,8 @@ const I18N = {
     lbl_companies:'公司', lbl_currency:'货币',
     tag_rev:'总营收', chart_rev_title:'按公司 · 总营收 (来自年报)',
     tag_net_margin:'净利率', chart_net_title:'按公司 · 净利润率 %', net_margin_yaxis:'净利润率',
+    tag_gross_margin:'毛利率', chart_gm_title:'按公司 · 毛利率 %', gross_margin_yaxis:'毛利率',
+    desc_gm:'优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。',
     tag_mcu:'MCU', chart_mcu_title:'按公司 · MCU 营收 (推算)',
     chart_stacked_title:'按年度 · 公司堆叠',
     mcu_view_company:'按公司', mcu_view_stacked:'堆叠',
@@ -972,6 +981,8 @@ const I18N = {
     lbl_companies:'Companies', lbl_currency:'Currency',
     tag_rev:'Total Rev', chart_rev_title:'By Company · Total Revenue (Annual Reports)',
     tag_net_margin:'Net Margin', chart_net_title:'By Company · Net Profit Margin %', net_margin_yaxis:'Net Margin %',
+    tag_gross_margin:'Gross Margin', chart_gm_title:'By Company · Gross Margin %', gross_margin_yaxis:'Gross Margin %',
+    desc_gm:'Product-segment gross margin from annual reports (preferred); some historical years pending PDF extraction (shown as —). Normal range for chip companies: ~30–60%.',
     tag_mcu:'MCU', chart_mcu_title:'By Company · MCU Revenue (Estimates)',
     chart_stacked_title:'By Year · Company Stack',
     mcu_view_company:'By Co.', mcu_view_stacked:'Stacked',
@@ -1185,6 +1196,7 @@ function cfSyms()   {
 
 function rerenderCharts() {
   renderTotalRevChart();
+  renderGrossMarginChart();
   renderNetMarginChart();
   const suf = ' ' + curShort();
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
@@ -1621,7 +1633,47 @@ function renderTotalRevChart() {
   });
 }
 
-// ── 净利润率 grouped bars (right panel of 总营收 dual row) ─────────────────
+// ── 毛利率 grouped bars ─────────────────────────────────────────────────────
+function renderGrossMarginChart() {
+  const years  = cfYears();
+  const ss     = cfSyms();
+  const labels = ss.map(s => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; });
+  const dark   = document.documentElement.dataset.theme === 'dark';
+  const tick   = dark ? '#7d94b3' : '#8191a5';
+  const grid   = dark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
+
+  const datasets = years.map(y => ({
+    label: String(y),
+    data: ss.map(s => (G.companies[s].financials[y]||{}).gross_margin_pct ?? null),
+    backgroundColor: YEAR_PAL[y],
+    borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
+    spanGaps: false,
+  }));
+
+  const ctx = $('c-gross-margin').getContext('2d');
+  if (charts.grossMargin) charts.grossMargin.destroy();
+  charts.grossMargin = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:10,family:'Arial'}, boxWidth:11, color:tick, padding:6 } },
+        tooltip:{ callbacks:{
+          label: c => `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`,
+        }},
+      },
+      scales:{
+        x:{ ticks:{font:{size:11,family:'Arial'},color:tick,maxRotation:30}, grid:{color:grid} },
+        y:{ ticks:{font:{size:11,family:'Arial'},color:tick,callback:v=>v.toFixed(0)+'%'},
+            grid:{color:grid},
+            title:{display:true,text:T('gross_margin_yaxis'),color:tick,font:{size:10}} },
+      },
+    },
+  });
+}
+
+// ── 净利润率 grouped bars ─────────────────────────────────────────────────
 function renderNetMarginChart() {
   const years  = cfYears();
   const ss     = cfSyms();
@@ -2289,8 +2341,9 @@ async function loadData() {
     initMcuViewToggle();
     rerenderCharts();
 
-    watchResize('c-total-rev',   'totalRev');
-    watchResize('c-net-margin',  'netMargin');
+    watchResize('c-total-rev',     'totalRev');
+    watchResize('c-gross-margin',  'grossMargin');
+    watchResize('c-net-margin',    'netMargin');
     watchResize('c-mcu-grp',     'mcuGrp');
     watchResize('c-stacked',     'stacked');
     applyChartTheme();
