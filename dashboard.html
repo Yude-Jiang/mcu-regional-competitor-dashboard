@@ -396,10 +396,24 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 /* ── Chart filter / sort bar ── */
 .chart-ctrl {
-  display:flex; align-items:center; gap:14px; padding:7px 20px; flex-shrink:0;
+  display:flex; flex-direction:column; flex-shrink:0;
   background:var(--bg-2); border-bottom:2px solid var(--border);
-  flex-wrap:wrap; min-height:42px;
 }
+.chart-ctrl-row {
+  display:flex; align-items:center; gap:10px; padding:6px 16px;
+  flex-wrap:wrap; min-height:36px;
+}
+.chart-ctrl-row + .chart-ctrl-row {
+  border-top:1px solid var(--border); padding-top:5px; padding-bottom:5px;
+}
+.chart-ctrl-row-main { justify-content:space-between; }
+.chart-ctrl-search { flex:1; min-width:200px; max-width:360px; }
+.pipe-year-sel {
+  padding:2px 6px; border:1px solid var(--border-b); border-radius:3px;
+  background:var(--bg-1); color:var(--navy-1); font:700 var(--fz-xs)/1 var(--font);
+  outline:none; cursor:pointer;
+}
+.pipe-year-sel:focus { border-color:var(--cyan-1); }
 .chart-ctrl-lbl {
   font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
   text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
@@ -647,53 +661,50 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 <!-- ── Pipeline strip ── -->
 <div class="pipeline">
-  <div class="pipe-lbl">FY&nbsp;<span id="pipe-year">2024</span></div>
+  <div class="pipe-lbl">FY&nbsp;<select class="pipe-year-sel" id="year-sel" title="表格年份"></select></div>
   <div id="pipe-cards" style="display:contents"></div>
 </div>
 
 <!-- ── Chart filter / sort bar ── -->
 <div class="chart-ctrl" id="chart-ctrl-bar">
-  <div class="chart-ctrl-grp">
-    <span class="chart-ctrl-lbl" data-i18n="lbl_year">年份</span>
-    <select class="ctrl-sel" id="year-sel"></select>
-  </div>
-  <div class="chart-ctrl-grp">
-    <span class="chart-ctrl-lbl" data-i18n="lbl_search">搜索</span>
-    <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
-  </div>
-  <div class="chart-ctrl-sep"></div>
-  <div class="chart-ctrl-grp">
-    <div class="yr-toggles" id="yr-toggles"></div>
-    <button class="yr-all-btn" id="yr-all-btn" data-i18n="btn_all">全部</button>
-  </div>
-  <div class="chart-ctrl-sep"></div>
-  <div class="chart-ctrl-grp">
-    <span class="chart-ctrl-lbl" data-i18n="lbl_sort">排序</span>
-    <select class="ctrl-sel" id="chart-sort-field">
-      <option value="mcu" selected data-i18n="sort_mcu_rev">MCU 营收</option>
-      <option value="rev" data-i18n="sort_total_rev">总营收</option>
-      <option value="name" data-i18n="sort_name">公司名</option>
-    </select>
-    <select class="ctrl-sel" id="chart-sort-year"></select>
-    <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向" data-i18n="sort_desc">↓ 降序</button>
-  </div>
-  <div class="chart-ctrl-sep"></div>
-  <div class="chart-ctrl-grp">
-    <span class="chart-ctrl-lbl" data-i18n="lbl_companies">公司</span>
-    <div class="co-toggles" id="co-toggles"></div>
-    <button class="yr-all-btn" id="co-all-btn" data-i18n="btn_all">全部</button>
-  </div>
-  <div class="chart-ctrl-sep"></div>
-  <div class="chart-ctrl-grp">
-    <span class="chart-ctrl-lbl" data-i18n="lbl_currency">货币</span>
-    <div class="cur-toggle">
-      <button class="cur-btn active" id="cur-btn-usd" onclick="setCur('usd')">USD</button>
-      <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
+  <div class="chart-ctrl-row chart-ctrl-row-main">
+    <div class="chart-ctrl-grp chart-ctrl-search">
+      <span class="chart-ctrl-lbl" data-i18n="lbl_search">搜索</span>
+      <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
+    </div>
+    <div class="chart-ctrl-grp">
+      <span class="chart-ctrl-lbl" data-i18n="lbl_currency">货币</span>
+      <div class="cur-toggle">
+        <button class="cur-btn active" id="cur-btn-usd" onclick="setCur('usd')">USD</button>
+        <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
+      </div>
     </div>
   </div>
-  <div class="chart-ctrl-sep feature-hidden" id="csv-export-sep"></div>
-  <div class="chart-ctrl-grp feature-hidden" id="csv-export-grp">
-    <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
+  <div class="chart-ctrl-row">
+    <div class="chart-ctrl-grp">
+      <div class="yr-toggles" id="yr-toggles"></div>
+      <button class="yr-all-btn" id="yr-all-btn" data-i18n="btn_all">全部</button>
+    </div>
+    <div class="chart-ctrl-sep"></div>
+    <div class="chart-ctrl-grp">
+      <span class="chart-ctrl-lbl" data-i18n="lbl_companies">公司</span>
+      <div class="co-toggles" id="co-toggles"></div>
+      <button class="yr-all-btn" id="co-all-btn" data-i18n="btn_all">全部</button>
+    </div>
+    <div class="chart-ctrl-grp feature-hidden" id="chart-sort-grp">
+      <span class="chart-ctrl-lbl" data-i18n="lbl_sort">排序</span>
+      <select class="ctrl-sel" id="chart-sort-field">
+        <option value="mcu" selected data-i18n="sort_mcu_rev">MCU 营收</option>
+        <option value="rev" data-i18n="sort_total_rev">总营收</option>
+        <option value="name" data-i18n="sort_name">公司名</option>
+      </select>
+      <select class="ctrl-sel" id="chart-sort-year"></select>
+      <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向" data-i18n="sort_desc">↓ 降序</button>
+    </div>
+    <div class="chart-ctrl-sep feature-hidden" id="csv-export-sep"></div>
+    <div class="chart-ctrl-grp feature-hidden" id="csv-export-grp">
+      <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
+    </div>
   </div>
 </div>
 <!-- FX rates bar -->
@@ -1346,7 +1357,6 @@ function sparkline(values, w=76, h=22) {
 
 // ── Pipeline ──────────────────────────────────────────────────────────────
 function renderPipeline(data, year) {
-  $('pipe-year').textContent = year;
   $('pipe-cards').innerHTML = ORDER.filter(s => data.companies[s]).map(sym => {
     const co = data.companies[sym];
     const m  = co.meta || {};
