@@ -531,14 +531,25 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .tbl-legend-sep { width:1px; height:12px; background:var(--border-b); }
 .tbl-legend .pos { font-weight:700; }
 .tbl-legend .neg { font-weight:700; }
-/* 总营收 chart: fixed compact height */
-.cs-wrap .cs-body { height:200px; min-height:200px; max-height:200px; }
-/* Revenue summary bar below 总营收 chart */
+/* Revenue summary bar below chart */
 .rev-summary {
   padding:5px 20px 6px; font-size:var(--fz-xs); color:var(--text-faint);
   background:var(--bg-2); border-bottom:1px solid var(--border);
   display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; line-height:1.5;
 }
+.chart-view-toggle {
+  display:flex; border:1px solid var(--border-b); border-radius:4px; overflow:hidden;
+  flex-shrink:0;
+}
+.view-toggle-btn {
+  padding:3px 10px; border:none; background:var(--bg-1); color:var(--text-dim);
+  font:600 var(--fz-2xs)/1 var(--font); cursor:pointer; white-space:nowrap;
+  transition:background .1s, color .1s;
+}
+.view-toggle-btn:hover:not(.active) { background:var(--border-b); }
+.view-toggle-btn.active { background:var(--navy-1); color:#fff; }
+.chart-swap-body canvas.chart-swap-hidden { display:none !important; }
+.cs-wrap .cs-body { min-height:200px; }
 
 /* ── Dual chart row ── */
 .chart-dual {
@@ -712,9 +723,36 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
 </div>
 
-<!-- ── 总营收 + 净利润率 dual row ── -->
+<!-- ── 净利润率 ── -->
+<div class="cs-wrap">
+  <div class="cs-hdr">
+    <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
+    <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
+  </div>
+  <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
+  <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
+</div>
+
+<!-- ── MCU (toggle) + 总营收 dual row ── -->
 <div class="chart-dual">
   <div class="chart-dual-main">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
+      <span class="cs-title" id="mcu-chart-title">按公司 · MCU 营收 (推算)</span>
+      <div class="chart-view-toggle" id="mcu-view-toggle">
+        <button type="button" class="view-toggle-btn active" id="mcu-view-company" data-i18n="mcu_view_company">按公司</button>
+        <button type="button" class="view-toggle-btn" id="mcu-view-stacked" data-i18n="mcu_view_stacked">堆叠</button>
+      </div>
+      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
+    </div>
+    <div class="cs-desc" id="mcu-chart-desc">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
+    <div class="cs-body chart-swap-body">
+      <canvas id="c-mcu-grp"></canvas>
+      <canvas id="c-stacked" class="chart-swap-hidden"></canvas>
+    </div>
+    <div class="rev-summary" id="mcu-summary"></div>
+  </div>
+  <div class="chart-dual-side">
     <div class="cs-hdr">
       <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
       <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
@@ -722,37 +760,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     </div>
     <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
     <div class="cs-body"><canvas id="c-total-rev"></canvas></div>
-  </div>
-  <div class="chart-dual-side">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
-      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
-    <div class="cs-body"><canvas id="c-net-margin"></canvas></div>
-  </div>
-</div>
-<div class="rev-summary" id="rev-summary"></div>
-
-<!-- ── MCU grouped + Stacked dual row ── -->
-<div class="chart-dual">
-  <div class="chart-dual-main">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
-      <span class="cs-title" data-i18n="chart_mcu_title">按公司 · MCU 营收 (推算)</span>
-      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_mcu">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
-    <div class="cs-body"><canvas id="c-mcu-grp"></canvas></div>
-    <div class="rev-summary" id="mcu-summary"></div>
-  </div>
-  <div class="chart-dual-side">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#3cb4e6;color:#03234b" data-i18n="tag_stacked">堆叠</span>
-      <span class="cs-title" data-i18n="chart_stacked_title">按年度 · 公司堆叠</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_stacked">11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。</div>
-    <div class="cs-body"><canvas id="c-stacked"></canvas></div>
+    <div class="rev-summary" id="rev-summary"></div>
   </div>
 </div>
 
@@ -906,7 +914,8 @@ const I18N = {
     tag_rev:'总营收', chart_rev_title:'按公司 · 总营收 (来自年报)',
     tag_net_margin:'净利率', chart_net_title:'按公司 · 净利润率 %', net_margin_yaxis:'净利润率',
     tag_mcu:'MCU', chart_mcu_title:'按公司 · MCU 营收 (推算)',
-    tag_stacked:'堆叠', chart_stacked_title:'按年度 · 公司堆叠',
+    chart_stacked_title:'按年度 · 公司堆叠',
+    mcu_view_company:'按公司', mcu_view_stacked:'堆叠',
     tag_heatmap:'热力图', chart_heatmap_title:'YoY% 营收热力图',
     heatmap_sub:'上：总营收YoY  下：MCU YoY',
     desc_rev:'2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。',
@@ -964,7 +973,8 @@ const I18N = {
     tag_rev:'Total Rev', chart_rev_title:'By Company · Total Revenue (Annual Reports)',
     tag_net_margin:'Net Margin', chart_net_title:'By Company · Net Profit Margin %', net_margin_yaxis:'Net Margin %',
     tag_mcu:'MCU', chart_mcu_title:'By Company · MCU Revenue (Estimates)',
-    tag_stacked:'Stacked', chart_stacked_title:'By Year · Company Stack',
+    chart_stacked_title:'By Year · Company Stack',
+    mcu_view_company:'By Co.', mcu_view_stacked:'Stacked',
     tag_heatmap:'Heatmap', chart_heatmap_title:'YoY% Revenue Heatmap',
     heatmap_sub:'Top: Total Rev YoY  Bottom: MCU YoY',
     desc_rev:'2021–22 chip shortage drove revenue surge; 2023 inventory digestion caused broad declines; 2024 recovery diverged — GigaDevice & Espressif showed the strongest rebound.',
@@ -1067,6 +1077,7 @@ function setLang(lang) {
     const el = document.getElementById('hdr-meta');
     if (el) el.innerHTML = T('data_date_pfx') + `<b>${G.generated_at}</b>`;
   }
+  if (typeof setMcuView === 'function') setMcuView(MCU_VIEW, true);
 }
 
 const ORDER = [
@@ -1179,7 +1190,33 @@ function rerenderCharts() {
   renderGroupedByYear('c-mcu-grp', 'mcuGrp', curF('mcu_revenue'), suf);
   _updateMcuSummary(cfYears(), cfSyms());
   renderStacked();
+  setMcuView(MCU_VIEW, true);
   renderYoYHeatmap();
+}
+
+let MCU_VIEW = 'company';
+
+function setMcuView(mode, resize = true) {
+  MCU_VIEW = mode;
+  const isCompany = mode === 'company';
+  $('mcu-view-company')?.classList.toggle('active', isCompany);
+  $('mcu-view-stacked')?.classList.toggle('active', !isCompany);
+  $('c-mcu-grp')?.classList.toggle('chart-swap-hidden', !isCompany);
+  $('c-stacked')?.classList.toggle('chart-swap-hidden', isCompany);
+  const titleEl = $('mcu-chart-title');
+  const descEl = $('mcu-chart-desc');
+  if (titleEl) titleEl.textContent = T(isCompany ? 'chart_mcu_title' : 'chart_stacked_title');
+  if (descEl) descEl.textContent = T(isCompany ? 'desc_mcu' : 'desc_stacked');
+  if (resize) {
+    const key = isCompany ? 'mcuGrp' : 'stacked';
+    if (charts[key]) charts[key].resize();
+  }
+}
+
+function initMcuViewToggle() {
+  $('mcu-view-company')?.addEventListener('click', () => setMcuView('company'));
+  $('mcu-view-stacked')?.addEventListener('click', () => setMcuView('stacked'));
+  setMcuView(MCU_VIEW, false);
 }
 
 // ── Chart control bar init ────────────────────────────────────────────────
@@ -2249,6 +2286,7 @@ async function loadData() {
     renderPipeline(G, defYear);
     renderTable(defYear, '');
     initChartCtrl();
+    initMcuViewToggle();
     rerenderCharts();
 
     watchResize('c-total-rev',   'totalRev');
