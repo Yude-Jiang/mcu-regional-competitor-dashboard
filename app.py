@@ -41,6 +41,10 @@ app = Flask(__name__)
 HERE = Path(__file__).parent
 
 
+def _admin_enabled() -> bool:
+    return os.environ.get("ENABLE_ADMIN", "").lower() in ("1", "true", "yes")
+
+
 # ── Static files ──────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -50,7 +54,15 @@ def index():
 
 @app.route("/admin")
 def admin():
+    if not _admin_enabled():
+        return Response("Not Found", status=404)
     return send_file(HERE / "admin.html")
+
+
+@app.route("/api/ui-config")
+def api_ui_config():
+    enabled = _admin_enabled()
+    return jsonify({"show_admin": enabled, "show_csv_export": enabled})
 
 
 @app.route("/data.json")
@@ -116,6 +128,8 @@ VALID_CONFIDENCES = {"high", "medium", "low"}
 @app.route("/api/company/add", methods=["POST"])
 def api_company_add():
     """Validate and append a new company to companies_meta.json and data.json."""
+    if not _admin_enabled():
+        return Response("Not Found", status=404)
     body = request.get_json(force=True, silent=True) or {}
 
     # Validate required fields present

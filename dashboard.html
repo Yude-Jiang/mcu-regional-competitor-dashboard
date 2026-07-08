@@ -590,6 +590,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
   cursor:pointer; transition:background .1s; white-space:nowrap;
 }
 .csv-btn:hover { background:var(--cyan-1); color:var(--navy-1); border-color:var(--cyan-1); }
+.feature-hidden { display:none !important; }
 
 /* ── Responsive ── */
 @media (max-width: 960px) {
@@ -638,7 +639,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
   <div class="hdr-r">
     <span class="hdr-meta" id="hdr-meta"></span>
-    <a href="/admin" class="theme-btn" style="text-decoration:none" data-i18n="admin">⚙ 管理</a>
+    <a href="/admin" id="admin-link" class="theme-btn feature-hidden" style="text-decoration:none" data-i18n="admin">⚙ 管理</a>
     <button class="lang-btn" id="lang-btn" onclick="setLang(LANG==='zh'?'en':'zh')">EN</button>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">◑ Dark</button>
   </div>
@@ -690,8 +691,8 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
     </div>
   </div>
-  <div class="chart-ctrl-sep"></div>
-  <div class="chart-ctrl-grp">
+  <div class="chart-ctrl-sep feature-hidden" id="csv-export-sep"></div>
+  <div class="chart-ctrl-grp feature-hidden" id="csv-export-grp">
     <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
   </div>
 </div>
@@ -2160,6 +2161,19 @@ function setCur(cur) {
     openDetail(_currentDetailSym);
 }
 
+async function applyUiConfig() {
+  try {
+    const r = await fetch('/api/ui-config');
+    if (!r.ok) return;
+    const cfg = await r.json();
+    if (cfg.show_admin) $('admin-link')?.classList.remove('feature-hidden');
+    if (cfg.show_csv_export) {
+      $('csv-export-sep')?.classList.remove('feature-hidden');
+      $('csv-export-grp')?.classList.remove('feature-hidden');
+    }
+  } catch (_) {}
+}
+
 async function loadData() {
   try {
     const [res, profRes, fxRes] = await Promise.all([
@@ -2244,6 +2258,7 @@ async function loadData() {
 }
 
 applyI18n();
+applyUiConfig();
 loadData();
 
 // ── AI Q&A ─────────────────────────────────────────────────────────────────
