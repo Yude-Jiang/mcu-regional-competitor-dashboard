@@ -1002,6 +1002,10 @@ const I18N = {
     dp_key_metrics:'关键指标', dp_profile:'公司画像', dp_hist_title:'年报历史 · MCU',
     dp_close:'关闭', dp_arch:'核心架构', dp_foundry:'代工厂', dp_market:'市场',
     dp_mcu_strat:'MCU策略', dp_conf:'置信度', dp_note:'备注',
+    dp_proxy_pfx:'MCU ≈ 总营收 × {k}', dp_industrial_pfx:'年报分产品表·工业控制芯片口径',
+    dp_foundry_lbl:'晶圆厂:', dp_coreip_lbl:'核心IP:',
+    dp_chart_rev:'总营收', dp_chart_gm:'毛利率%', dp_chart_gm_tip:'毛利率:',
+    conf_high:'高置信', conf_medium:'中置信', conf_low:'低置信', conf_na:'—',
     dph_fy:'FY', dph_filed:'披露日', dph_rev:'总营收', dph_mcu:'MCU',
     dph_mcu_pct:'MCU%', dph_gm:'毛利率', dph_rd:'研发%', dph_emp:'员工数',
     mcu_total_pfx:'家合计（推算）：', rev_total_pfx:'家公司合计：',
@@ -1067,6 +1071,10 @@ const I18N = {
     dp_key_metrics:'Key Metrics', dp_profile:'Company Profile', dp_hist_title:'Annual History · MCU',
     dp_close:'Close', dp_arch:'Core Arch.', dp_foundry:'Foundry', dp_market:'Market',
     dp_mcu_strat:'MCU Strategy', dp_conf:'Confidence', dp_note:'Notes',
+    dp_proxy_pfx:'MCU ≈ Total Rev × {k}', dp_industrial_pfx:'Annual report segment · Industrial control chips',
+    dp_foundry_lbl:'Foundry:', dp_coreip_lbl:'Core IP:',
+    dp_chart_rev:'Total Rev', dp_chart_gm:'Gross Mgn %', dp_chart_gm_tip:'Gross Mgn:',
+    conf_high:'High', conf_medium:'Medium', conf_low:'Low', conf_na:'N/A',
     dph_fy:'FY', dph_filed:'Filed', dph_rev:'Total Rev', dph_mcu:'MCU',
     dph_mcu_pct:'MCU%', dph_gm:'Gross Mgn', dph_rd:'R&D%', dph_emp:'Employees',
     mcu_total_pfx:'-Co. Total (Est.):', rev_total_pfx:' Companies Total:',
@@ -1088,6 +1096,20 @@ const I18N = {
 };
 
 function T(key) { return (I18N[LANG] || I18N.zh)[key] ?? key; }
+
+function localeTag() { return LANG === 'en' ? 'en-US' : 'zh-CN'; }
+function localeNum(n) { return Number(n).toLocaleString(localeTag()); }
+function metaNote(m) {
+  if (!m) return '';
+  return LANG === 'en' ? (m.mcu_note_en || m.mcu_note || '') : (m.mcu_note || '');
+}
+function profileScope(prof) {
+  if (!prof) return '';
+  return LANG === 'en' ? (prof.mcu_revenue_scope_en || prof.mcu_revenue_scope || '') : (prof.mcu_revenue_scope || '');
+}
+function confLbl(conf) {
+  return T({ high:'conf_high', medium:'conf_medium', low:'conf_low', na:'conf_na' }[conf] || 'conf_na');
+}
 
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1154,6 +1176,25 @@ const STRAT_LBL = {
   segment_estimated:'SEG·EST', segment_industrial:'SEG·IND',
   estimated:'ESTIM.',
 };
+const STRAT_LBL_FULL = {
+  zh: {
+    segment_reported:'年报分产品直接披露', segment_industrial:'工业控制芯片分产品',
+    segment_estimated:'分产品线估算', total_proxy:'总营收×系数',
+    total_revenue:'总营收≈MCU', subsidiary_geehy:'子公司口径（极海微）',
+    estimated:'综合估算',
+  },
+  en: {
+    segment_reported:'Segment Reported', segment_industrial:'Industrial Segment',
+    segment_estimated:'Segment Estimated', total_proxy:'Total Rev × k',
+    total_revenue:'Total Rev = MCU', subsidiary_geehy:'Subsidiary (Geehy)',
+    estimated:'Estimated',
+  },
+};
+function stratLbl(key, full = false) {
+  if (!key) return '?';
+  if (full) return (STRAT_LBL_FULL[LANG] || STRAT_LBL_FULL.zh)[key] || key;
+  return STRAT_LBL[key] || key;
+}
 let PROFILES = {};
 const CONF_BORDER = {
   high:'var(--pos)', medium:'var(--yel-1)', low:'var(--neg)', na:'var(--text-faint)',
@@ -1267,9 +1308,7 @@ function setMcuView(mode, resize = true) {
   $('mcu-view-stacked')?.classList.toggle('active', !isCompany);
   $('c-mcu-grp')?.classList.toggle('chart-swap-hidden', !isCompany);
   $('c-stacked')?.classList.toggle('chart-swap-hidden', isCompany);
-  const titleEl = $('mcu-chart-title');
   const descEl = $('mcu-chart-desc');
-  if (titleEl) titleEl.textContent = T(isCompany ? 'chart_mcu_title' : 'chart_stacked_title');
   if (descEl) descEl.textContent = T(isCompany ? 'desc_mcu' : 'desc_stacked');
   if (resize) {
     const key = isCompany ? 'mcuGrp' : 'stacked';
@@ -1465,7 +1504,8 @@ function renderPipeline(data, year) {
     const conf = m.mcu_confidence || 'na';
     const strat = STRAT_LBL[m.mcu_strategy] || '?';
     const border = CONF_BORDER[conf] || CONF_BORDER.na;
-    return `<div class="fp-card" style="border-left-color:${border}" title="${(m.mcu_note||'').replace(/"/g,'&quot;')}" onclick="openDetail('${sym}')">
+    const note = metaNote(m).replace(/"/g, '&quot;');
+    return `<div class="fp-card" style="border-left-color:${border}" title="${note}" onclick="openDetail('${sym}')">
       <span class="fp-sym">${sym}</span>
       <span class="fp-name">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</span>
       <span class="fp-badge">${strat}</span>
@@ -1991,7 +2031,7 @@ function _updateDetailMetrics(sym, year) {
       sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
     { key:'mcu_pct',   lbl:T('m_mcu_pct'),    val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
-      sub: STRAT_LBL[m.mcu_strategy] || '' },
+      sub: stratLbl(m.mcu_strategy, true) },
     { key:'gross_mgn', lbl:T('m_gross_mgn'),  val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
       sub: f.mcu_confidence === 'high' ? T('m_mcu_basis') : (f.gross_margin_pct != null ? T('m_co_basis') : '') },
     { key:'rd_exp',    lbl:T('m_rd_exp'),     val: curFmt(f[curF('rd_expense')]),
@@ -1999,7 +2039,7 @@ function _updateDetailMetrics(sym, year) {
     { key:'net_inc',   lbl:T('m_net_inc'),    val: curFmt(f[curF('net_income')]),
       sub: f.net_income_yoy_pct != null ? (f.net_income_yoy_pct>=0?'+':'')+f.net_income_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.net_income_yoy_pct!=null ? (f.net_income_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
-    { key:'emp_count', lbl:T('m_emp'),        val: f.employee_count != null ? Number(f.employee_count).toLocaleString('zh-CN') : '—',
+    { key:'emp_count', lbl:T('m_emp'),        val: f.employee_count != null ? localeNum(f.employee_count) : '—',
       sub: '' },
   ];
   $('dp-metrics').innerHTML = metrics.map(me => `
@@ -2026,24 +2066,21 @@ function openDetail(sym) {
   // Strategy badge — colored by strategy type
   const sc = STRAT_COLORS[m.mcu_strategy] || STRAT_CLR_DEF;
   const stratBadge = $('dp-strat-badge');
-  stratBadge.textContent = STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '?';
+  stratBadge.textContent = stratLbl(m.mcu_strategy, true);
   stratBadge.style.cssText = `background:${sc.bg};color:${sc.fg};border-color:${sc.bd};`;
 
   // Confidence badge
   const conf = m.mcu_confidence || 'na';
   const confBadge = $('dp-conf-badge');
   const confFg = CONF_COLORS[conf] || CONF_COLORS.na;
-  const confLbl = LANG === 'en'
-    ? { high:'HIGH', medium:'MEDIUM', low:'LOW', na:'N/A' }[conf]
-    : { high:'高置信', medium:'中置信', low:'低置信', na:'—' }[conf];
-  confBadge.textContent = confLbl;
+  confBadge.textContent = confLbl(conf);
   confBadge.style.cssText = `background:${confFg}22;color:${confFg};border-color:${confFg}66;`;
 
-  let noteText = m.mcu_note || '';
+  let noteText = metaNote(m);
   if (m.mcu_multiplier != null && m.mcu_strategy === 'total_proxy') {
-    noteText = `MCU ≈ 总营收 × ${m.mcu_multiplier}` + (noteText ? `\n${noteText}` : '');
+    noteText = T('dp_proxy_pfx').replace('{k}', m.mcu_multiplier) + (noteText ? `\n${noteText}` : '');
   } else if (m.mcu_strategy === 'segment_industrial') {
-    noteText = '年报分产品表·工业控制芯片口径' + (noteText ? `\n${noteText}` : '');
+    noteText = T('dp_industrial_pfx') + (noteText ? `\n${noteText}` : '');
   }
   $('dp-strat-note').textContent = noteText;
 
@@ -2058,7 +2095,7 @@ function openDetail(sym) {
   } else {
     autoEl.style.display = 'none';
   }
-  const scopeText = prof.mcu_revenue_scope || '';
+  const scopeText = profileScope(prof);
   const scopeEl = $('dp-scope-note');
   scopeEl.textContent = scopeText;
   if (scopeText.startsWith('⚠')) {
@@ -2072,8 +2109,8 @@ function openDetail(sym) {
     scopeEl.style.padding = '';
   }
   const profileParts = [];
-  if (prof.foundry && prof.foundry.length) profileParts.push(`晶圆厂: ${prof.foundry.join(' / ')}`);
-  if (prof.core_ip && prof.core_ip.length) profileParts.push(`核心IP: ${prof.core_ip.join(', ')}`);
+  if (prof.foundry && prof.foundry.length) profileParts.push(`${T('dp_foundry_lbl')} ${prof.foundry.join(' / ')}`);
+  if (prof.core_ip && prof.core_ip.length) profileParts.push(`${T('dp_coreip_lbl')} ${prof.core_ip.join(', ')}`);
   $('dp-profile-info').textContent = profileParts.join('　　');
 
   // Mini chart — bars for revenue, line for gross margin on secondary axis
@@ -2092,11 +2129,11 @@ function openDetail(sym) {
   if (dpChart) { dpChart.destroy(); dpChart = null; }
 
   const datasets = [
-    { type:'bar',  label:'总营收', data:revData, backgroundColor:'rgba(61,180,230,.35)', yAxisID:'y',  spanGaps:false },
+    { type:'bar',  label:T('dp_chart_rev'), data:revData, backgroundColor:'rgba(61,180,230,.35)', yAxisID:'y',  spanGaps:false },
     { type:'bar',  label:'MCU',   data:mcuData, backgroundColor:'#03234b',              yAxisID:'y',  spanGaps:false },
   ];
   if (hasGM) datasets.push(
-    { type:'line', label:'毛利率%', data:gmData, borderColor:'#ffd200', backgroundColor:'transparent',
+    { type:'line', label:T('dp_chart_gm'), data:gmData, borderColor:'#ffd200', backgroundColor:'transparent',
       yAxisID:'y1', tension:0.3, spanGaps:true, pointRadius:3, borderWidth:2 }
   );
 
@@ -2109,8 +2146,8 @@ function openDetail(sym) {
         legend:{ position:'bottom', labels:{ font:{size:11,family:'Arial'}, boxWidth:10, color:tick, padding:6 } },
         tooltip:{ callbacks:{ label:c => {
           if (c.dataset.yAxisID === 'y1')
-            return `毛利率: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
-          return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' M$':'N/A'}`;
+            return `${T('dp_chart_gm_tip')} ${c.parsed.y!=null?c.parsed.y.toFixed(1)+'%':'N/A'}`;
+          return `${c.dataset.label}: ${c.parsed.y!=null?c.parsed.y.toFixed(1)+' '+curShort():'N/A'}`;
         }}},
       },
       scales:{
@@ -2134,10 +2171,11 @@ function openDetail(sym) {
     [T('dp_arch'),     m.core_license || '—'],
     [T('dp_foundry'),  m.foundry_fab  || '—'],
     [T('dp_market'),   `${m.market||'—'} · ${T('founded')} ${m.founded_year||'?'} / ${T('listed')} ${m.listed_year||'?'}`],
-    [T('dp_mcu_strat'), STRAT_LBL[m.mcu_strategy] || m.mcu_strategy || '—'],
-    [T('dp_conf'),     m.mcu_confidence || '—'],
+    [T('dp_mcu_strat'), stratLbl(m.mcu_strategy, true)],
+    [T('dp_conf'),     confLbl(m.mcu_confidence || 'na')],
   ];
-  if (m.mcu_note) infoRows.push([T('dp_note'), m.mcu_note]);
+  const note = metaNote(m);
+  if (note) infoRows.push([T('dp_note'), note]);
   $('dp-info-tbl').innerHTML = infoRows.map(([k,v]) =>
     `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
 
@@ -2163,7 +2201,7 @@ function openDetail(sym) {
       const mcuW  = hf.mcu_weight_pct != null ? hf.mcu_weight_pct.toFixed(1)+'%' : '—';
       const gm    = hf.gross_margin_pct != null ? hf.gross_margin_pct.toFixed(1)+'%' : '—';
       const rdP   = hf.rd_pct != null ? hf.rd_pct.toFixed(1)+'%' : '—';
-      const emp   = hf.employee_count != null ? Number(hf.employee_count).toLocaleString('zh-CN') : '—';
+      const emp   = hf.employee_count != null ? localeNum(hf.employee_count) : '—';
       const filed = hf.filing_date ? hf.filing_date.slice(5) : '—'; // MM-DD
       const fstat = hf.filing_status === 'reported' ? '✓' : (hf.filing_status || '');
       return `<tr class="${isCur?'dp-hist-cur':''}">
