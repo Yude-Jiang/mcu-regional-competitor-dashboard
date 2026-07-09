@@ -440,6 +440,21 @@ body.panel-open .table-wrap { padding-right:50vw; }
 }
 .chart-ctrl-row-main { justify-content:space-between; }
 .chart-ctrl-search { flex:1; min-width:200px; max-width:360px; }
+.table-toolbar {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:6px 16px; flex-wrap:wrap; min-height:36px;
+  background:var(--bg-2); border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.chart-filter {
+  display:flex; align-items:center; gap:10px; padding:6px 16px;
+  flex-wrap:wrap; min-height:36px;
+  background:var(--bg-2); border-top:2px solid var(--border);
+  border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.chart-filter-lbl {
+  font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
+  text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
+}
 .pipe-year-sel {
   padding:2px 6px; border:1px solid var(--border-b); border-radius:3px;
   background:var(--bg-1); color:var(--navy-1); font:700 var(--fz-xs)/1 var(--font);
@@ -589,7 +604,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .chart-quad-cell .cs-hdr { padding:8px 16px 0; }
 .chart-quad-body {
   flex:1; padding:10px 16px 8px;
-  height:220px; min-height:220px; max-height:220px;
+  height:300px; min-height:300px; max-height:300px;
   position:relative;
 }
 .chart-quad-cell .rev-summary { border-bottom:0; flex-shrink:0; }
@@ -702,49 +717,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <div id="pipe-cards" style="display:contents"></div>
 </div>
 
-<!-- ── Chart filter / sort bar ── -->
-<div class="chart-ctrl" id="chart-ctrl-bar">
-  <div class="chart-ctrl-row chart-ctrl-row-main">
-    <div class="chart-ctrl-grp chart-ctrl-search">
-      <span class="chart-ctrl-lbl" data-i18n="lbl_search">搜索</span>
-      <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
-    </div>
-    <div class="chart-ctrl-grp">
-      <span class="chart-ctrl-lbl" data-i18n="lbl_currency">货币</span>
-      <div class="cur-toggle">
-        <button class="cur-btn active" id="cur-btn-usd" onclick="setCur('usd')">USD</button>
-        <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
-      </div>
-    </div>
-  </div>
-  <div class="chart-ctrl-row">
-    <div class="chart-ctrl-grp">
-      <div class="yr-toggles" id="yr-toggles"></div>
-      <button class="yr-all-btn" id="yr-all-btn" data-i18n="btn_all">全部</button>
-    </div>
-    <div class="chart-ctrl-sep"></div>
-    <div class="chart-ctrl-grp">
-      <span class="chart-ctrl-lbl" data-i18n="lbl_companies">公司</span>
-      <div class="co-toggles" id="co-toggles"></div>
-      <button class="yr-all-btn" id="co-all-btn" data-i18n="btn_all">全部</button>
-    </div>
-    <div class="chart-ctrl-grp feature-hidden" id="chart-sort-grp">
-      <span class="chart-ctrl-lbl" data-i18n="lbl_sort">排序</span>
-      <select class="ctrl-sel" id="chart-sort-field">
-        <option value="mcu" selected data-i18n="sort_mcu_rev">MCU 营收</option>
-        <option value="rev" data-i18n="sort_total_rev">总营收</option>
-        <option value="name" data-i18n="sort_name">公司名</option>
-      </select>
-      <select class="ctrl-sel" id="chart-sort-year"></select>
-      <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向" data-i18n="sort_desc">↓ 降序</button>
-    </div>
-    <div class="chart-ctrl-sep feature-hidden" id="csv-export-sep"></div>
-    <div class="chart-ctrl-grp feature-hidden" id="csv-export-grp">
-      <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── Table section header + legend ── -->
 <div class="tbl-section-hdr">
   <span class="cs-tag" style="background:var(--navy-1)" data-i18n="tag_tbl">数据表</span>
@@ -763,6 +735,20 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <span class="tbl-legend-item"><span class="neg">-X%</span>&nbsp;<span data-i18n="legend_decline">下滑</span></span>
   <span class="tbl-legend-sep"></span>
   <span style="color:var(--text-faint)" data-i18n="legend_gm_note">毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）</span>
+</div>
+<!-- ── Table toolbar (search + currency) ── -->
+<div class="table-toolbar">
+  <div class="chart-ctrl-grp chart-ctrl-search">
+    <span class="chart-ctrl-lbl" data-i18n="lbl_search">搜索</span>
+    <input class="ctrl-inp" id="search" type="search" placeholder="公司名 / 代码 / 代工厂…" data-i18n-ph="ph_search">
+  </div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl" data-i18n="lbl_currency">货币</span>
+    <div class="cur-toggle">
+      <button class="cur-btn active" id="cur-btn-usd" onclick="setCur('usd')">USD</button>
+      <button class="cur-btn" id="cur-btn-cny" onclick="setCur('cny')">CNY</button>
+    </div>
+  </div>
 </div>
 <!-- ── Table ── -->
 <div class="table-wrap">
@@ -797,6 +783,36 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </td></tr>
 </tbody>
 </table>
+</div>
+
+<!-- ── Chart filter (years + companies) ── -->
+<div class="chart-filter" id="chart-filter-bar">
+  <span class="chart-filter-lbl" data-i18n="lbl_chart_filter">图表筛选</span>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <div class="yr-toggles" id="yr-toggles"></div>
+    <button class="yr-all-btn" id="yr-all-btn" data-i18n="btn_all">全部</button>
+  </div>
+  <div class="chart-ctrl-sep"></div>
+  <div class="chart-ctrl-grp">
+    <span class="chart-ctrl-lbl" data-i18n="lbl_companies">公司</span>
+    <div class="co-toggles" id="co-toggles"></div>
+    <button class="yr-all-btn" id="co-all-btn" data-i18n="btn_all">全部</button>
+  </div>
+  <div class="chart-ctrl-grp feature-hidden" id="chart-sort-grp">
+    <span class="chart-ctrl-lbl" data-i18n="lbl_sort">排序</span>
+    <select class="ctrl-sel" id="chart-sort-field">
+      <option value="mcu" selected data-i18n="sort_mcu_rev">MCU 营收</option>
+      <option value="rev" data-i18n="sort_total_rev">总营收</option>
+      <option value="name" data-i18n="sort_name">公司名</option>
+    </select>
+    <select class="ctrl-sel" id="chart-sort-year"></select>
+    <button class="sort-dir-btn" id="chart-sort-dir" title="切换排序方向" data-i18n="sort_desc">↓ 降序</button>
+  </div>
+  <div class="chart-ctrl-sep feature-hidden" id="csv-export-sep"></div>
+  <div class="chart-ctrl-grp feature-hidden" id="csv-export-grp">
+    <button class="csv-btn" id="csv-export-btn" onclick="exportCSV()">⬇ CSV</button>
+  </div>
 </div>
 
 <!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
@@ -947,6 +963,7 @@ const I18N = {
     subtitle:'中国大陆 MCU 上市公司 · 年报与推算',
     admin:'⚙ 管理',
     lbl_year:'年份', lbl_search:'搜索', ph_search:'公司名 / 代码 / 代工厂…',
+    lbl_chart_filter:'图表筛选',
     btn_all:'全部', lbl_sort:'排序',
     sort_mcu_rev:'MCU 营收', sort_total_rev:'总营收', sort_name:'公司名',
     sort_desc:'↓ 降序', sort_asc:'↑ 升序',
@@ -1011,6 +1028,7 @@ const I18N = {
     subtitle:'China A-Share MCU Companies · Annual Reports & Estimates',
     admin:'⚙ Admin',
     lbl_year:'Year', lbl_search:'Search', ph_search:'Company / Code / Foundry…',
+    lbl_chart_filter:'Chart Filters',
     btn_all:'All', lbl_sort:'Sort',
     sort_mcu_rev:'MCU Rev', sort_total_rev:'Total Rev', sort_name:'Name',
     sort_desc:'↓ Desc', sort_asc:'↑ Asc',
