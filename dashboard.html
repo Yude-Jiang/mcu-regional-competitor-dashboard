@@ -170,7 +170,7 @@ html,body {
 canvas { display:block; width:100% !important; }
 
 /* ── Table ── */
-.table-wrap { overflow:auto; background:var(--bg-1); flex:1; }
+.table-wrap { overflow:auto; background:var(--bg-1); flex:1; min-height:280px; }
 table { width:100%; border-collapse:collapse; white-space:nowrap; }
 thead th {
   background:var(--navy-1); color:#fff; padding:6px 8px;
@@ -728,64 +728,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
 </div>
 
-<!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
-<div class="chart-quad">
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
-      <span class="cs-title" id="mcu-chart-title">按公司 · MCU 营收 (推算)</span>
-      <div class="chart-view-toggle" id="mcu-view-toggle">
-        <button type="button" class="view-toggle-btn active" id="mcu-view-company" data-i18n="mcu_view_company">按公司</button>
-        <button type="button" class="view-toggle-btn" id="mcu-view-stacked" data-i18n="mcu_view_stacked">堆叠</button>
-      </div>
-      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
-    </div>
-    <div class="cs-desc" id="mcu-chart-desc">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
-    <div class="chart-quad-body chart-swap-body">
-      <canvas id="c-mcu-grp"></canvas>
-      <canvas id="c-stacked" class="chart-swap-hidden"></canvas>
-    </div>
-    <div class="rev-summary" id="mcu-summary"></div>
-  </div>
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
-      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
-      <span class="cs-unit" id="cs-unit-rev">M USD</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
-    <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
-    <div class="rev-summary" id="rev-summary"></div>
-  </div>
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">毛利率</span>
-      <span class="cs-title" data-i18n="chart_gm_title">按公司 · 毛利率 %</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_gm">优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。</div>
-    <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
-  </div>
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
-      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
-    <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
-  </div>
-</div>
-
-<!-- ── YoY% 热力图 ── -->
-<div class="yoy-heatmap" id="yoy-heatmap">
-  <div class="yoy-heatmap-hdr">
-    <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_heatmap">热力图</span>
-    <span class="cs-title" data-i18n="chart_heatmap_title">YoY% 营收热力图</span>
-    <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="heatmap_sub">上：总营收YoY &nbsp;下：MCU YoY</span>
-  </div>
-  <div class="cs-desc" data-i18n="desc_heatmap">绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。</div>
-  <div class="yoy-heatmap-grid" id="yoy-heatmap-grid"></div>
-</div>
-
 <!-- ── Table section header + legend ── -->
 <div class="tbl-section-hdr">
   <span class="cs-tag" style="background:var(--navy-1)" data-i18n="tag_tbl">数据表</span>
@@ -833,6 +775,64 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </td></tr>
 </tbody>
 </table>
+</div>
+
+<!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
+<div class="chart-quad">
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
+      <span class="cs-title" id="mcu-chart-title">按公司 · MCU 营收 (推算)</span>
+      <div class="chart-view-toggle" id="mcu-view-toggle">
+        <button type="button" class="view-toggle-btn active" id="mcu-view-company" data-i18n="mcu_view_company">按公司</button>
+        <button type="button" class="view-toggle-btn" id="mcu-view-stacked" data-i18n="mcu_view_stacked">堆叠</button>
+      </div>
+      <span class="cs-unit" id="cs-unit-mcu">M USD · 2018—2025</span>
+    </div>
+    <div class="cs-desc" id="mcu-chart-desc">2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。</div>
+    <div class="chart-quad-body chart-swap-body">
+      <canvas id="c-mcu-grp"></canvas>
+      <canvas id="c-stacked" class="chart-swap-hidden"></canvas>
+    </div>
+    <div class="rev-summary" id="mcu-summary"></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
+      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
+      <span class="cs-unit" id="cs-unit-rev">M USD</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
+    <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
+    <div class="rev-summary" id="rev-summary"></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">毛利率</span>
+      <span class="cs-title" data-i18n="chart_gm_title">按公司 · 毛利率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_gm">优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。</div>
+    <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
+      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
+    <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
+  </div>
+</div>
+
+<!-- YoY heatmap hidden (data available in table) -->
+<div class="yoy-heatmap feature-hidden" id="yoy-heatmap" aria-hidden="true">
+  <div class="yoy-heatmap-hdr">
+    <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_heatmap">热力图</span>
+    <span class="cs-title" data-i18n="chart_heatmap_title">YoY% 营收热力图</span>
+    <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="heatmap_sub">上：总营收YoY &nbsp;下：MCU YoY</span>
+  </div>
+  <div class="cs-desc" data-i18n="desc_heatmap">绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。</div>
+  <div class="yoy-heatmap-grid" id="yoy-heatmap-grid"></div>
 </div>
 
 <!-- ── Footer ── -->
@@ -1216,7 +1216,6 @@ function rerenderCharts() {
   _updateMcuSummary(cfYears(), cfSyms());
   renderStacked();
   setMcuView(MCU_VIEW, true);
-  renderYoYHeatmap();
 }
 
 let MCU_VIEW = 'company';
