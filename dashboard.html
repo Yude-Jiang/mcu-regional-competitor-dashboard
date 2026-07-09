@@ -209,11 +209,26 @@ tbody tr:hover td.sticky { background:var(--bg-2); }
 .co-tag { font:var(--fz-xs)/1 monospace; color:var(--text-faint); margin-top:2px; }
 .mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
 
-/* ── Footer ── */
-footer {
-  display:flex; align-items:center; justify-content:center; padding:8px 20px;
-  font:var(--fz-xs)/1 var(--font); color:var(--text-faint);
-  border-top:1px solid var(--border); flex-shrink:0;
+/* ── Footer (meta + FX + disclaimer) ── */
+.site-footer {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:10px 20px 8px; flex-shrink:0;
+  font:var(--fz-xs)/1.5 var(--font); color:var(--text-faint);
+  background:var(--bg-1); border-top:1px solid var(--border);
+  text-align:center;
+}
+.footer-meta {
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+  gap:4px 8px; line-height:1.6;
+}
+.footer-fx {
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+  gap:6px 14px; font-size:var(--fz-2xs); line-height:1.5;
+}
+.footer-disclaimer {
+  width:100%; margin-top:2px; padding-top:8px;
+  border-top:1px solid var(--border);
+  font-size:var(--fz-2xs); line-height:1.5; color:var(--text-faint); opacity:.9;
 }
 
 /* ── AI Q&A panel ── */
@@ -473,13 +488,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .cur-btn.active { background:var(--navy-1); color:#fff; }
 .cur-btn:not(.active):hover { background:var(--border-b); }
 
-/* FX rates bar */
-.fx-bar {
-  padding:4px 16px; font-size:var(--fz-2xs); color:var(--text-faint);
-  background:var(--bg-1); border-bottom:1px solid var(--border);
-  display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;
-}
-
 /* ── Chart section (cs) ── */
 .cs-wrap {
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
@@ -719,10 +727,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
     </div>
   </div>
 </div>
-<!-- FX rates bar -->
-<div class="fx-bar" id="fx-bar">
-  <span id="fx-generated-at" style="display:none;color:var(--text-dim);font-weight:600"></span>
-</div>
 
 <!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
 <div class="chart-quad">
@@ -832,11 +836,18 @@ body.panel-open .table-wrap { padding-right:50vw; }
 </div>
 
 <!-- ── Footer ── -->
-<footer>
-  MCU Regional Competitor Analysis &nbsp;|&nbsp;
-  <span data-i18n="footer_src">数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书</span> &nbsp;|&nbsp;
-  <span data-i18n="footer_creator">创建: yude.jiang@st.com</span> &nbsp;|&nbsp;
-  <span id="footer-date"></span>
+<footer class="site-footer">
+  <div class="footer-meta">
+    <span>MCU Regional Competitor Analysis</span>
+    <span>|</span>
+    <span data-i18n="footer_src">数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书</span>
+    <span>|</span>
+    <span data-i18n="footer_creator">创建: yude.jiang@st.com</span>
+    <span>|</span>
+    <span id="footer-date"></span>
+  </div>
+  <div class="footer-fx" id="fx-bar"></div>
+  <div class="footer-disclaimer" data-i18n="footer_ai_disclaimer">本工具依托AI大模型提供服务，相关生成信息请酌情参考。</div>
 </footer>
 <script>
   (function(){
@@ -949,6 +960,7 @@ const I18N = {
     data_updated:'数据更新: ', data_date_pfx:'数据日期 ', err_no_data:'请运行 fetch_mcu_data.py',
     footer_src:'数据来源: AKShare · 东方财富 · 公司年报 · IPO招股书',
     footer_creator:'创建: yude.jiang@st.com',
+    footer_ai_disclaimer:'本工具依托AI大模型提供服务，相关生成信息请酌情参考。',
     dp_mcu_strategy:'MCU 口径策略', dp_chart_ttl_pfx:'8年 总营收 vs MCU 营收',
     dp_key_metrics:'关键指标', dp_profile:'公司画像', dp_hist_title:'年报历史 · MCU',
     dp_close:'关闭', dp_arch:'核心架构', dp_foundry:'代工厂', dp_market:'市场',
@@ -1010,6 +1022,7 @@ const I18N = {
     data_updated:'Updated: ', data_date_pfx:'Data date ', err_no_data:'Run fetch_mcu_data.py',
     footer_src:'Source: AKShare · EastMoney · Annual Reports · IPO Prospectus',
     footer_creator:'Created by: yude.jiang@st.com',
+    footer_ai_disclaimer:'This tool is powered by AI large language models; please use generated information with discretion.',
     dp_mcu_strategy:'MCU Strategy', dp_chart_ttl_pfx:'8-Year Total Rev vs MCU Rev',
     dp_key_metrics:'Key Metrics', dp_profile:'Company Profile', dp_hist_title:'Annual History · MCU',
     dp_close:'Close', dp_arch:'Core Arch.', dp_foundry:'Foundry', dp_market:'Market',
@@ -2224,21 +2237,12 @@ function renderFxBar() {
   const bar = $('fx-bar');
   if (!bar) return;
   const years = Object.keys(FX).map(Number).sort();
-  if (!years.length) { bar.style.display = 'none'; return; }
+  if (!years.length) { bar.innerHTML = ''; bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML =
     `<span style="color:var(--text-dim);font-weight:600">${T('fx_label')}</span>` +
     years.map(y => `<span>${y}: <b>${Number(FX[y]).toFixed(4)}</b></span>`).join('') +
     `<span style="color:var(--text-faint);margin-left:4px">${T('fx_source')}</span>`;
-  // Data timestamp
-  if (G && G.generated_at) {
-    const ts = String(G.generated_at).slice(0, 10); // YYYY-MM-DD
-    const el = $('fx-generated-at');
-    if (el) {
-      el.textContent = `${T('data_updated')}${ts}`;
-      el.style.display = 'inline';
-    }
-  }
 }
 
 function setCur(cur) {
