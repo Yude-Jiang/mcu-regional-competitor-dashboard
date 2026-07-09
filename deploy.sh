@@ -9,6 +9,13 @@ IMAGE="asia-east1-docker.pkg.dev/${PROJECT}/mcu/${SERVICE}"
 
 gcloud config set project "${PROJECT}"
 
+COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+BRANCH="$(git branch --show-current 2>/dev/null || echo unknown)"
+echo "==> Deploying from branch: ${BRANCH} @ ${COMMIT}"
+if [[ "${BRANCH}" != "main" ]]; then
+  echo "WARNING: not on main — run: git checkout main && git pull"
+fi
+
 echo "==> [1/2] Building image and pushing to Artifact Registry..."
 gcloud builds submit --project "${PROJECT}"
 
