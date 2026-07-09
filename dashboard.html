@@ -773,14 +773,14 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th class="g-etc sortable" data-col="emp" rowspan="2" data-i18n="th_emp">员工<span class="si"></span></th>
   </tr>
   <tr>
-    <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
-    <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
-    <th class="g-rev sortable" data-col="cagr">CAGR 18-25<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="mcu">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev_yoy" data-i18n="th_yoy">YoY%<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="cagr" data-i18n="th_cagr">CAGR 18-25<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="mcu" id="th-mcu-hdr">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="mcu_yoy" data-i18n="th_mcu_yoy">YoY%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="wt" data-i18n="th_mcu_pct">占比%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="gm" data-i18n="th_gm">毛利率<span class="si"></span></th>
-    <th class="g-rd sortable" data-col="rd">研发 <span id="tbl-unit-rd">M$</span><span class="si"></span></th>
+    <th class="g-rd sortable" data-col="rd" id="th-rd-hdr">研发 <span id="tbl-unit-rd">M$</span><span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd_pct" data-i18n="th_rd_pct">研发%<span class="si"></span></th>
   </tr>
 </thead>
@@ -999,6 +999,7 @@ const I18N = {
     grp_total_rev:'总营收', grp_mcu_rev:'MCU 营收', grp_rd:'研发',
     th_mcu_pct:'占比%',
     th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_rd:'研发', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8年', th_mcu_yoy:'YoY%', th_mcu_pct:'占比%',
     th_gm:'毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
     loading:'加载中… 如数据为空请先运行 ',
@@ -1068,6 +1069,7 @@ const I18N = {
     grp_total_rev:'Total Revenue', grp_mcu_rev:'MCU Revenue', grp_rd:'R&D',
     th_mcu_pct:'Weight%',
     th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_rd:'R&D', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8yr', th_mcu_yoy:'YoY%', th_mcu_pct:'MCU Mix%',
     th_gm:'Gross Mgn', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
     loading:'Loading… If empty, run ',
@@ -1121,8 +1123,33 @@ function confLbl(conf) {
   return T({ high:'conf_high', medium:'conf_medium', low:'conf_low', na:'conf_na' }[conf] || 'conf_na');
 }
 
+function applyTableHeadI18n() {
+  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || 2024);
+  const u = CUR === 'usd' ? 'M$' : '亿';
+  const revHdr = $('th-rev-hdr');
+  if (revHdr) {
+    revHdr.innerHTML = `${T('th_total_rev')}<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">${year}</span>&nbsp;<span id="tbl-unit-rev">${u}</span><span class="si"></span>`;
+  }
+  const mcuHdr = $('th-mcu-hdr');
+  if (mcuHdr) {
+    mcuHdr.innerHTML = `${T('th_mcu_hdr')} <span id="tbl-unit-mcu">${u}</span><span class="si"></span>`;
+  }
+  const rdHdr = $('th-rd-hdr');
+  if (rdHdr) {
+    rdHdr.innerHTML = `${T('th_rd')} <span id="tbl-unit-rd">${u}</span><span class="si"></span>`;
+  }
+  document.querySelectorAll('#tbl thead th[data-i18n]').forEach(th => {
+    if (th.id === 'th-rev-hdr' || th.id === 'th-mcu-hdr' || th.id === 'th-rd-hdr') return;
+    const si = th.querySelector('.si');
+    const lbl = T(th.dataset.i18n);
+    if (si) th.innerHTML = lbl + si.outerHTML;
+    else th.textContent = lbl;
+  });
+}
+
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (el.closest('#tbl thead')) return;
     const v = T(el.dataset.i18n);
     if (el.innerHTML !== v) el.textContent = v;
   });
@@ -1135,6 +1162,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     el.title = T(el.dataset.i18nTitle);
   });
+  applyTableHeadI18n();
   // Update lang button
   const lb = document.getElementById('lang-btn');
   if (lb) { lb.textContent = LANG === 'zh' ? 'EN' : '中'; lb.classList.toggle('active', LANG === 'en'); }
@@ -2337,8 +2365,7 @@ function setCur(cur) {
   $('cur-btn-usd').classList.toggle('active', cur === 'usd');
   $('cur-btn-cny').classList.toggle('active', cur === 'cny');
   // Update header unit labels
-  const u = cur === 'usd' ? 'M$' : '亿元';
-  ['tbl-unit-rev','tbl-unit-mcu','tbl-unit-rd'].forEach(id => { const el = $(id); if (el) el.textContent = u; });
+  applyTableHeadI18n();
   const uu = cur === 'usd' ? 'M USD' : '亿元';
   const revEl = $('cs-unit-rev'); if (revEl) revEl.textContent = uu;
   const mcuEl = $('cs-unit-mcu'); if (mcuEl) mcuEl.textContent = uu + ' · 2018—2025';
