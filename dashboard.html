@@ -211,6 +211,8 @@ td {
   border-right:1px solid var(--bg-3);
   vertical-align:middle; text-align:right; color:var(--text); font-size:var(--fz-sm);
 }
+#tbl td { text-align:center; }
+#tbl td.l { text-align:center; }
 td.l { text-align:left; } td.c { text-align:center; }
 td.sticky {
   position:sticky; left:0; z-index:2; background:var(--bg-1);
@@ -225,6 +227,8 @@ tbody tr:hover td.sticky { background:var(--bg-2); }
 .co-en  { font:var(--fz-xs)/1 var(--font); color:var(--text-faint); margin-top:1px; }
 .co-tag { font:var(--fz-xs)/1.4 var(--font); color:var(--text-faint); margin-top:2px; letter-spacing:.02em; }
 .mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
+#tbl .mcu-cell { justify-content:center; }
+#tbl td svg { margin:0 auto; }
 
 /* ── Footer (meta + FX + disclaimer) ── */
 .site-footer {
@@ -562,12 +566,13 @@ body.panel-open .table-wrap { padding-right:50vw; }
   border-bottom:1px solid var(--border); border-top:2px solid var(--navy-1);
 }
 .tbl-legend {
-  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;
   padding:5px 16px; background:var(--bg-0);
   border-bottom:1px solid var(--border);
   font:var(--fz-xs)/1 var(--font); color:var(--text-faint);
+  text-align:center;
 }
-.tbl-legend-item { display:flex; align-items:center; gap:4px; }
+.tbl-legend-item { display:flex; align-items:center; justify-content:center; gap:4px; }
 .tbl-legend-sep { width:1px; height:12px; background:var(--border-b); }
 .tbl-legend .pos { font-weight:700; }
 .tbl-legend .neg { font-weight:700; }
@@ -1531,13 +1536,13 @@ function renderTable(year, query) {
     const fmtMcu = curFmt(f[curF('mcu_revenue')]);
     const fmtRd  = curFmt(f[curF('rd_expense')]);
     return `<tr style="cursor:pointer" onclick="openDetail('${sym}')">
-      <td class="sticky l">
+      <td class="sticky">
         <div class="co-cn">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</div>
         <div class="co-en">${(LANG==='en' ? m.name_cn : m.name_en) || ''}</div>
         <div class="co-tag">${sym}&nbsp;·&nbsp;${m.market || ''}</div>
       </td>
       <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
-      <td class="l" style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
+      <td style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
       <td class="g-rev">${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="g-rev c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="g-rev c">${cagr}</td>
@@ -1546,7 +1551,7 @@ function renderTable(year, query) {
       <td class="g-mcu c">${mcuY(f.mcu_yoy_pct, dt)}</td>
       <td class="g-mcu c">${mcuW(f.mcu_weight_pct, dt)}</td>
       <td class="g-mcu c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
-      <td class="l" style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
+      <td style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
       <td class="g-rd">${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="g-rd c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
