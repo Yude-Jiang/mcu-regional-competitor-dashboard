@@ -107,7 +107,7 @@ html,body {
   cursor:pointer; transition:background .1s;
 }
 .fp-card:hover { background:var(--bg-2); }
-.fp-sym  { font:600 var(--fz-xs)/1 monospace; color:var(--text-dim); }
+.fp-sym  { font:600 var(--fz-xs)/1 var(--font); color:var(--text-dim); letter-spacing:.03em; }
 .fp-name { font:600 var(--fz-sm)/1.2 var(--font); color:var(--text); white-space:nowrap; }
 .fp-badge {
   font:500 var(--fz-2xs)/1 monospace; letter-spacing:.05em; text-transform:uppercase;
@@ -206,7 +206,7 @@ tbody tr:hover td.sticky { background:var(--bg-2); }
 .neg  { color:var(--neg); }
 .co-cn  { font:700 var(--fz-base)/1.3 var(--font); }
 .co-en  { font:var(--fz-xs)/1 var(--font); color:var(--text-faint); margin-top:1px; }
-.co-tag { font:var(--fz-xs)/1 monospace; color:var(--text-faint); margin-top:2px; }
+.co-tag { font:var(--fz-xs)/1.4 var(--font); color:var(--text-faint); margin-top:2px; letter-spacing:.02em; }
 .mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
 
 /* ── Footer (meta + FX + disclaimer) ── */
@@ -321,7 +321,7 @@ tbody tr:hover td.sticky { background:var(--bg-2); }
 }
 .dp-co-name { font:700 18px/1.3 var(--font); color:#fff; }
 .dp-co-en   { font:var(--fz-base)/1.4 var(--font); color:var(--cyan-2); margin-top:4px; }
-.dp-co-tag  { font:var(--fz-sm)/1 monospace; color:var(--navy-3); margin-top:6px; }
+.dp-co-tag  { font:var(--fz-sm)/1.4 var(--font); color:var(--navy-3); margin-top:6px; letter-spacing:.02em; }
 .dp-close {
   background:transparent; border:none; color:var(--navy-3);
   font:18px/1 var(--font); cursor:pointer; padding:2px 5px; flex-shrink:0;
