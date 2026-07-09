@@ -17,7 +17,7 @@ import logging
 import os
 import re
 import secrets
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote, unquote
 
@@ -95,6 +95,27 @@ def _safe_next_url(raw: str | None) -> str:
     return "/"
 
 
+def _client_ip() -> str:
+    """Client IP (first hop in X-Forwarded-For on Cloud Run / load balancers)."""
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _log_auth_event(event: str, email: str | None = None) -> None:
+    """Structured auth audit line — visible in Cloud Run / gunicorn logs."""
+    record = {
+        "event": event,
+        "email": email,
+        "ip": _client_ip(),
+        "time": datetime.now(timezone.utc).isoformat(),
+        "path": request.path,
+        "user_agent": (request.headers.get("User-Agent") or "")[:200],
+    }
+    app.logger.info("auth_audit %s", json.dumps(record, ensure_ascii=False))
+
+
 @app.before_request
 def require_auth():
     if not _auth_enabled() or request.path in _AUTH_EXEMPT:
@@ -128,13 +149,16 @@ def api_auth_login():
     next_url = _safe_next_url(body.get("next") or request.form.get("next") or request.args.get("next"))
 
     if not _valid_access_token(token):
+        _log_auth_event("login_failed")
         if request.is_json or request.content_type == "application/json":
             return jsonify({"error": "invalid_token", "message": f"Use a valid {_auth_domain()} email"}), 401
         return redirect(f"/login?error=1&next={quote(next_url)}")
 
+    email = token.lower()
     session.permanent = True
     session["authenticated"] = True
-    session["email"] = token.lower()
+    session["email"] = email
+    _log_auth_event("login_success", email=email)
 
     if request.is_json or request.content_type == "application/json":
         return jsonify({"ok": True, "redirect": next_url})
@@ -143,6 +167,8 @@ def api_auth_login():
 
 @app.route("/api/auth/logout", methods=["POST", "GET"])
 def api_auth_logout():
+    if session.get("authenticated"):
+        _log_auth_event("logout", email=session.get("email"))
     session.clear()
     if request.method == "GET":
         return redirect("/login")
@@ -498,4 +524,8 @@ def api_refresh():
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
     app.run(host="0.0.0.0", port=8080, debug=False)

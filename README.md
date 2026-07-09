@@ -34,7 +34,7 @@ python app.py                  # production-like (requires @st.com email on /log
 ./deploy.sh   # 已配置 AUTH_EMAIL_DOMAIN 与 FLASK_SECRET_KEY
 ```
 
-**说明**：这是域名门禁，不验证邮箱真实性；仅防止公开 URL 被随意访问。
+**说明**：这是域名门禁，不验证邮箱真实性；仅防止公开 URL 被随意访问。登录成功/失败会写入 Cloud Run 日志（`auth_audit` JSON：邮箱、IP、UTC 时间）。
 
 ### 数据更新（每季报季）
 
