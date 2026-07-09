@@ -569,21 +569,21 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .sect-desc strong { color:var(--text-dim); font-weight:600; }
 .sect-desc em { color:var(--cyan-1); font-style:normal; }
 .tbl-section-hdr {
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:12px;
   padding:8px 16px; background:var(--bg-2);
   border-bottom:1px solid var(--border); border-top:2px solid var(--navy-1);
+  flex-wrap:nowrap; overflow-x:auto;
+  white-space:nowrap;
 }
-.tbl-legend {
-  display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;
-  padding:5px 16px; background:var(--bg-0);
-  border-bottom:1px solid var(--border);
+.tbl-section-hdr .cs-title { flex-shrink:0; }
+.tbl-legend-inline {
+  display:flex; align-items:center; gap:12px; flex-shrink:0;
   font:var(--fz-xs)/1 var(--font); color:var(--text-faint);
-  text-align:center;
 }
-.tbl-legend-item { display:flex; align-items:center; justify-content:center; gap:4px; }
-.tbl-legend-sep { width:1px; height:12px; background:var(--border-b); }
-.tbl-legend .pos { font-weight:700; }
-.tbl-legend .neg { font-weight:700; }
+.tbl-legend-item { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.tbl-legend-sep { width:1px; height:12px; background:var(--border-b); flex-shrink:0; }
+.tbl-legend-inline .pos { font-weight:700; }
+.tbl-legend-inline .neg { font-weight:700; }
 /* Revenue summary bar below chart */
 .rev-summary {
   padding:5px 20px 6px; font-size:var(--fz-xs); color:var(--text-faint);
@@ -730,21 +730,18 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <div id="pipe-cards" style="display:contents"></div>
 </div>
 
-<!-- ── Table section header + legend ── -->
+<!-- ── Table section header + legend (single row) ── -->
 <div class="tbl-section-hdr">
   <span class="cs-tag" style="background:var(--navy-1)" data-i18n="tag_tbl">数据表</span>
   <span class="cs-title" data-i18n="tbl_title">公司详情 · 点击任意行查看完整画像与历史数据</span>
+  <div class="tbl-legend-inline">
+    <span style="font-weight:600;color:var(--text-dim)" data-i18n="legend_conf_ttl">MCU数据置信度：</span>
+    <span class="tbl-legend-item"><span class="dot dc">●</span><span data-i18n="legend_reported">年报直接披露</span></span>
+    <span class="tbl-legend-item"><span class="dot dd">●</span><span data-i18n="legend_derived">推算（高置信）</span></span>
+    <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
+    <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
+  </div>
   <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="tbl_src">数据来源：年报 / AKShare / 招股书</span>
-</div>
-<div class="tbl-legend">
-  <span style="font-weight:600;color:var(--text-dim);margin-right:4px" data-i18n="legend_conf_ttl">MCU数据置信度：</span>
-  <span class="tbl-legend-item"><span class="dot dc">●</span><span data-i18n="legend_reported">年报直接披露</span></span>
-  <span class="tbl-legend-item"><span class="dot dd">●</span><span data-i18n="legend_derived">推算（高置信）</span></span>
-  <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
-  <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
-  <span class="tbl-legend-sep"></span>
-  <span class="tbl-legend-item"><span class="pos">+X%</span></span>
-  <span class="tbl-legend-item"><span class="neg">-X%</span></span>
 </div>
 <!-- ── Table toolbar (search + currency) ── -->
 <div class="table-toolbar">
