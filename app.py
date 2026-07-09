@@ -43,6 +43,30 @@ log = logging.getLogger(__name__)
 app = Flask(__name__)
 HERE = Path(__file__).parent
 
+
+def _setup_logging() -> None:
+    """Route app logs to gunicorn stderr so Cloud Run captures auth_audit lines."""
+    level = logging.INFO
+    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+    gunicorn_logger = logging.getLogger("gunicorn.error")
+    targets = (app.logger, log)
+    if gunicorn_logger.handlers:
+        for logger in targets:
+            logger.handlers = gunicorn_logger.handlers
+            logger.setLevel(gunicorn_logger.level or level)
+            logger.propagate = False
+    else:
+        handler = logging.StreamHandler()
+        handler.setLevel(level)
+        handler.setFormatter(fmt)
+        for logger in targets:
+            logger.handlers = [handler]
+            logger.setLevel(level)
+            logger.propagate = False
+
+
+_setup_logging()
+
 # ── Session / access gate ─────────────────────────────────────────────────────
 
 def _secret_key() -> str:
@@ -148,7 +172,7 @@ def api_auth_login():
     if not _valid_access_token(token):
         _log_auth_event("login_failed")
         if request.is_json or request.content_type == "application/json":
-            return jsonify({"error": "invalid_token", "message": f"Use a valid {_auth_domain()} email"}), 401
+            return jsonify({"error": "invalid_token", "message": "Invalid access token"}), 401
         return redirect(f"/login?error=1&next={quote(next_url)}")
 
     email = token.lower()
