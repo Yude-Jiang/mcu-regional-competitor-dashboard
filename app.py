@@ -136,10 +136,7 @@ def login_page():
 
 @app.route("/api/auth/config")
 def api_auth_config():
-    return jsonify({
-        "enabled": _auth_enabled(),
-        "email_domain": _auth_domain(),
-    })
+    return jsonify({"enabled": _auth_enabled()})
 
 
 @app.route("/api/auth/login", methods=["POST"])
