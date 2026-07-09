@@ -19,14 +19,19 @@ fi
 echo "==> [1/2] Building image and pushing to Artifact Registry..."
 gcloud builds submit --project "${PROJECT}"
 
+if ! gcloud secrets describe FLASK_SECRET_KEY --project="${PROJECT}" &>/dev/null; then
+  echo "==> Creating FLASK_SECRET_KEY secret (one-time)..."
+  openssl rand -hex 32 | gcloud secrets create FLASK_SECRET_KEY --data-file=- --project="${PROJECT}"
+fi
+
 echo "==> [2/2] Deploying to Cloud Run..."
 gcloud run deploy "${SERVICE}" \
   --image "${IMAGE}" \
   --region "${REGION}" \
   --platform managed \
   --allow-unauthenticated \
-  --set-env-vars "GCP_PROJECT=${PROJECT},BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports" \
-  --set-secrets "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest" \
+  --set-env-vars "GCP_PROJECT=${PROJECT},BQ_DATASET=mcu,GCS_BUCKET=st-finance-reports,AUTH_EMAIL_DOMAIN=@st.com" \
+  --set-secrets "VITE_DEEPSEEK_API_KEY=VITE_DEEPSEEK_API_KEY:latest,FLASK_SECRET_KEY=FLASK_SECRET_KEY:latest" \
   --project "${PROJECT}"
 
 echo ""
@@ -35,3 +40,7 @@ gcloud run services describe "${SERVICE}" \
   --region "${REGION}" \
   --project "${PROJECT}" \
   --format='value(status.url)'
+echo ""
+echo "NOTE: Access gate enabled — users must enter an @st.com email on /login."
+echo "      Create FLASK_SECRET_KEY secret if missing:"
+echo "        openssl rand -hex 32 | gcloud secrets create FLASK_SECRET_KEY --data-file=- --project=${PROJECT}"

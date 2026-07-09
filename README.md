@@ -16,8 +16,25 @@ cd mcu-regional-competitor-dashboard
 git checkout claude/code-review-hlYFP
 
 pip install -r requirements_cloudrun.txt
-python app.py          # → http://localhost:8080
+AUTH_DISABLED=1 python app.py   # local dev — skip login gate
+python app.py                  # production-like (requires @st.com email on /login)
 ```
+
+### 访问门禁（Access Token）
+
+部署后所有页面需先登录。用户在 `/login` 输入 **ST 邮箱** 作为 Access Token；只要地址以 `@st.com` 结尾即可进入（可用环境变量 `AUTH_EMAIL_DOMAIN` 修改）。
+
+| 变量 | 说明 |
+|------|------|
+| `AUTH_EMAIL_DOMAIN` | 允许的后缀，默认 `@st.com` |
+| `FLASK_SECRET_KEY` | Session 签名密钥（Secret Manager，deploy.sh 自动创建） |
+| `AUTH_DISABLED=1` | 本地开发关闭门禁 |
+
+```bash
+./deploy.sh   # 已配置 AUTH_EMAIL_DOMAIN 与 FLASK_SECRET_KEY
+```
+
+**说明**：这是域名门禁，不验证邮箱真实性；仅防止公开 URL 被随意访问。
 
 ### 数据更新（每季报季）
 

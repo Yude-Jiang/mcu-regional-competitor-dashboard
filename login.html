@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCU Dashboard — Access</title>
+<style>
+:root {
+  --navy-1:#03234b; --navy-2:#425a78; --navy-3:#8191a5;
+  --cyan-1:#3cb4e6; --cyan-2:#6dc7ec;
+  --bg-0:#f4f6f9; --bg-1:#ffffff;
+  --border:#dbe2eb; --text:var(--navy-1); --text-dim:var(--navy-2); --text-faint:var(--navy-3);
+  --neg:#e6007e;
+  --font: Arial, "Helvetica Neue", "Microsoft YaHei", sans-serif;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body {
+  min-height:100vh; font:14px/1.5 var(--font);
+  background:var(--bg-0); color:var(--text);
+  display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.card {
+  width:100%; max-width:400px; background:var(--bg-1);
+  border:1px solid var(--border); border-radius:6px;
+  box-shadow:0 8px 32px rgba(3,35,75,.08);
+  overflow:hidden;
+}
+.card-hdr {
+  background:var(--navy-1); color:#fff; padding:20px 24px;
+  border-bottom:3px solid var(--cyan-1);
+}
+.card-hdr h1 { font:700 16px/1.3 var(--font); letter-spacing:.08em; }
+.card-hdr p { margin-top:6px; font-size:12px; color:var(--cyan-2); opacity:.9; }
+.card-body { padding:24px; }
+label { display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px; }
+input[type=email], input[type=text] {
+  width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:4px;
+  font:14px/1 var(--font); outline:none;
+}
+input:focus { border-color:var(--cyan-1); box-shadow:0 0 0 2px rgba(60,180,230,.2); }
+.hint { margin-top:8px; font-size:11px; color:var(--text-faint); line-height:1.5; }
+.err {
+  margin-bottom:14px; padding:10px 12px; border-radius:4px; font-size:12px;
+  background:#fce8f1; color:var(--neg); border:1px solid rgba(230,0,126,.2);
+}
+button {
+  width:100%; margin-top:18px; padding:11px; border:none; border-radius:4px;
+  background:var(--navy-1); color:#fff; font:600 14px/1 var(--font); cursor:pointer;
+}
+button:hover { background:#0a3a6e; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-hdr">
+    <h1>MCU Regional Competitor Dashboard</h1>
+    <p>Internal access — ST employees only</p>
+  </div>
+  <div class="card-body">
+    <div class="err" id="err" hidden>Access denied. Use your <b>@st.com</b> email address.</div>
+    <form method="post" action="/api/auth/login" id="login-form">
+      <input type="hidden" name="next" id="next" value="/">
+      <label for="token">Access token (ST email)</label>
+      <input type="email" id="token" name="token" placeholder="name@st.com" autocomplete="email" required autofocus>
+      <p class="hint">Enter your STMicroelectronics email. Any address containing <b>@st.com</b> is accepted.</p>
+      <button type="submit">Continue</button>
+    </form>
+  </div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get('error')) document.getElementById('err').hidden = false;
+  const n = p.get('next');
+  if (n && n.startsWith('/') && !n.startsWith('//')) document.getElementById('next').value = n;
+</script>
+</body>
+</html>

@@ -16,9 +16,12 @@ import json
 import logging
 import os
 import re
+import secrets
+from datetime import timedelta
 from pathlib import Path
+from urllib.parse import quote, unquote
 
-from flask import Flask, Response, jsonify, request, send_file, send_from_directory
+from flask import Flask, Response, jsonify, redirect, request, send_file, send_from_directory, session
 
 import bq_writer
 
@@ -39,6 +42,111 @@ def _get_api_key(env_var: str, secret_id: str) -> str | None:
 log = logging.getLogger(__name__)
 app = Flask(__name__)
 HERE = Path(__file__).parent
+
+# ── Session / access gate ─────────────────────────────────────────────────────
+
+def _secret_key() -> str:
+    key = os.environ.get("FLASK_SECRET_KEY") or os.environ.get("AUTH_SECRET_KEY")
+    if key:
+        return key
+    if os.environ.get("K_SERVICE"):  # Cloud Run
+        log.error("FLASK_SECRET_KEY not set — sessions will not persist across instances")
+    return secrets.token_hex(32)
+
+
+app.secret_key = _secret_key()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=bool(os.environ.get("K_SERVICE")),
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),
+)
+
+_AUTH_EXEMPT = {"/login", "/api/auth/login", "/api/auth/config", "/favicon.ico"}
+
+
+def _auth_enabled() -> bool:
+    return os.environ.get("AUTH_DISABLED", "").lower() not in ("1", "true", "yes")
+
+
+def _auth_domain() -> str:
+    domain = os.environ.get("AUTH_EMAIL_DOMAIN", "@st.com").strip().lower()
+    return domain if domain.startswith("@") else f"@{domain}"
+
+
+def _valid_access_token(token: str) -> bool:
+    """Accept tokens that are @st.com emails (domain suffix at end of string)."""
+    token = (token or "").strip().lower()
+    if not token or len(token) > 254:
+        return False
+    domain = _auth_domain()
+    if not token.endswith(domain):
+        return False
+    local, sep, _host = token.rpartition("@")
+    return bool(sep) and bool(local) and "@" not in local and "." in _host
+
+
+def _safe_next_url(raw: str | None) -> str:
+    if not raw:
+        return "/"
+    path = unquote(raw)
+    if path.startswith("/") and not path.startswith("//"):
+        return path
+    return "/"
+
+
+@app.before_request
+def require_auth():
+    if not _auth_enabled() or request.path in _AUTH_EXEMPT:
+        return None
+    if session.get("authenticated"):
+        return None
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "unauthorized", "message": "Login required"}), 401
+    return redirect(f"/login?next={quote(request.full_path)}")
+
+
+@app.route("/login")
+def login_page():
+    if session.get("authenticated"):
+        return redirect(_safe_next_url(request.args.get("next")))
+    return send_file(HERE / "login.html")
+
+
+@app.route("/api/auth/config")
+def api_auth_config():
+    return jsonify({
+        "enabled": _auth_enabled(),
+        "email_domain": _auth_domain(),
+    })
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def api_auth_login():
+    body = request.get_json(silent=True) or {}
+    token = (body.get("token") or request.form.get("token") or "").strip()
+    next_url = _safe_next_url(body.get("next") or request.form.get("next") or request.args.get("next"))
+
+    if not _valid_access_token(token):
+        if request.is_json or request.content_type == "application/json":
+            return jsonify({"error": "invalid_token", "message": f"Use a valid {_auth_domain()} email"}), 401
+        return redirect(f"/login?error=1&next={quote(next_url)}")
+
+    session.permanent = True
+    session["authenticated"] = True
+    session["email"] = token.lower()
+
+    if request.is_json or request.content_type == "application/json":
+        return jsonify({"ok": True, "redirect": next_url})
+    return redirect(next_url)
+
+
+@app.route("/api/auth/logout", methods=["POST", "GET"])
+def api_auth_logout():
+    session.clear()
+    if request.method == "GET":
+        return redirect("/login")
+    return jsonify({"ok": True})
 
 
 def _admin_enabled() -> bool:
