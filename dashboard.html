@@ -211,8 +211,19 @@ td {
   border-right:1px solid var(--bg-3);
   vertical-align:middle; text-align:right; color:var(--text); font-size:var(--fz-sm);
 }
-#tbl td { text-align:center; }
-#tbl td.l { text-align:center; }
+#tbl th,
+#tbl td {
+  text-align: center !important;
+  vertical-align: middle;
+}
+#tbl td.sticky .co-cn,
+#tbl td.sticky .co-en,
+#tbl td.sticky .co-tag {
+  text-align: center;
+}
+.mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
+#tbl .mcu-cell { justify-content:center; width:100%; }
+#tbl td svg { display:block; margin:0 auto; }
 td.l { text-align:left; } td.c { text-align:center; }
 td.sticky {
   position:sticky; left:0; z-index:2; background:var(--bg-1);
@@ -226,9 +237,6 @@ tbody tr:hover td.sticky { background:var(--bg-2); }
 .co-cn  { font:700 var(--fz-base)/1.3 var(--font); }
 .co-en  { font:var(--fz-xs)/1 var(--font); color:var(--text-faint); margin-top:1px; }
 .co-tag { font:var(--fz-xs)/1.4 var(--font); color:var(--text-faint); margin-top:2px; letter-spacing:.02em; }
-.mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
-#tbl .mcu-cell { justify-content:center; }
-#tbl td svg { margin:0 auto; }
 
 /* ── Footer (meta + FX + disclaimer) ── */
 .site-footer {
@@ -734,9 +742,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
   <span class="tbl-legend-item"><span class="dot dd">●</span><span data-i18n="legend_derived">推算（高置信）</span></span>
   <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
   <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
-  <span class="tbl-legend-sep"></span>
-  <span class="tbl-legend-item"><span class="pos">+X%</span>&nbsp;<span data-i18n="legend_growth">增长</span></span>
-  <span class="tbl-legend-item"><span class="neg">-X%</span>&nbsp;<span data-i18n="legend_decline">下滑</span></span>
 </div>
 <!-- ── Table toolbar (search + currency) ── -->
 <div class="table-toolbar">
@@ -761,7 +766,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th rowspan="2" data-i18n-html="th_founded">成立<br>上市</th>
     <th rowspan="2" data-i18n="th_arch">核心架构</th>
     <th class="g-rev grp-hdr" colspan="3" data-i18n="grp_total_rev">总营收</th>
-    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
+    <th class="g-mcu" rowspan="2" style="min-width:72px;text-align:center" data-i18n-html="th_mcu_8yr">MCU<br>8年</th>
     <th class="g-mcu grp-hdr" colspan="4" data-i18n="grp_mcu_rev">MCU 营收</th>
     <th class="g-etc" rowspan="2" data-i18n="th_foundry">代工厂</th>
     <th class="g-rd grp-hdr" colspan="2" data-i18n="grp_rd">研发</th>
@@ -817,8 +822,18 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
 </div>
 
-<!-- ── 四宫格：MCU / 总营收 / 毛利率 / 净利率 ── -->
+<!-- ── 四宫格：总营收 / MCU / 毛利率 / 净利率 ── -->
 <div class="chart-quad">
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
+      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
+      <span class="cs-unit" id="cs-unit-rev">M USD</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
+    <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
+    <div class="rev-summary" id="rev-summary"></div>
+  </div>
   <div class="chart-quad-cell">
     <div class="cs-hdr">
       <span class="cs-tag" style="background:#03234b" data-i18n="tag_mcu">MCU</span>
@@ -834,16 +849,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <canvas id="c-stacked" class="chart-swap-hidden"></canvas>
     </div>
     <div class="rev-summary" id="mcu-summary"></div>
-  </div>
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
-      <span class="cs-tag" style="background:#1a8a4e" data-i18n="tag_rev">总营收</span>
-      <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
-      <span class="cs-unit" id="cs-unit-rev">M USD</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
-    <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
-    <div class="rev-summary" id="rev-summary"></div>
   </div>
   <div class="chart-quad-cell">
     <div class="cs-hdr">
@@ -1455,7 +1460,7 @@ function sparkline(values, w=76, h=22) {
   const lx = (last.i / n * w).toFixed(1);
   const ly = ((1 - (last.v - lo) / span) * (h - 5) + 2.5).toFixed(1);
   const col = last.v >= pts[0].v ? 'var(--pos)' : 'var(--neg)';
-  return `<svg width="${w}" height="${h}" style="display:block;overflow:visible">
+  return `<svg width="${w}" height="${h}" style="display:block;margin:0 auto;overflow:visible">
     <polyline fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" points="${coords}"/>
     <circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/>
   </svg>`;
