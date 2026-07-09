@@ -185,10 +185,27 @@ thead th.sort-asc  .si::after { content:"▲"; opacity:1; }
 thead th.sort-desc .si::after { content:"▼"; opacity:1; }
 thead th:not(.sort-asc):not(.sort-desc) .si::after { content:"⇅"; }
 th.sticky { position:sticky; left:0; z-index:3; background:var(--navy-1); }
-th.g-rev  { background:#0b2d5e !important; }
-th.g-mcu  { background:#09354f !important; border-top:2px solid var(--cyan-1) !important; }
+th.g-rev  { background:#157a44 !important; }
+th.g-mcu  { background:#0a2847 !important; }
 th.g-rd   { background:#0a3a2a !important; }
 th.g-etc  { background:#1c2a38 !important; }
+.grp-hdr {
+  text-align:center !important; font-size:var(--fz-2xs); font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; padding:5px 8px 4px; color:#fff;
+  border-bottom:none !important;
+}
+th.g-rev.grp-hdr  { background:#1a8a4e !important; }
+th.g-mcu.grp-hdr  { background:#03234b !important; border-top:none !important; }
+th.g-rd.grp-hdr   { background:#0a3a2a !important; }
+td.g-rev { background:rgba(26,138,78,.07); }
+td.g-mcu { background:rgba(3,35,75,.05); }
+td.g-rd  { background:rgba(10,58,42,.06); }
+[data-theme=dark] td.g-rev { background:rgba(26,138,78,.14); }
+[data-theme=dark] td.g-mcu { background:rgba(60,180,230,.07); }
+[data-theme=dark] td.g-rd  { background:rgba(10,58,42,.18); }
+tbody tr:hover td.g-rev,
+tbody tr:hover td.g-mcu,
+tbody tr:hover td.g-rd { background:var(--bg-2); }
 td {
   padding:5px 7px; border-bottom:1px solid var(--border);
   border-right:1px solid var(--bg-3);
@@ -752,21 +769,26 @@ body.panel-open .table-wrap { padding-right:50vw; }
 <table id="tbl">
 <thead>
   <tr>
-    <th class="sticky" rowspan="2">公司</th>
-    <th rowspan="2">成立<br>上市</th>
-    <th rowspan="2">核心架构</th>
+    <th class="sticky" rowspan="2" data-i18n="th_company">公司</th>
+    <th rowspan="2" data-i18n-html="th_founded">成立<br>上市</th>
+    <th rowspan="2" data-i18n="th_arch">核心架构</th>
+    <th class="g-rev grp-hdr" colspan="3" data-i18n="grp_total_rev">总营收</th>
+    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
+    <th class="g-mcu grp-hdr" colspan="4" data-i18n="grp_mcu_rev">MCU 营收</th>
+    <th class="g-etc" rowspan="2" data-i18n="th_foundry">代工厂</th>
+    <th class="g-rd grp-hdr" colspan="2" data-i18n="grp_rd">研发</th>
+    <th class="g-etc sortable" data-col="emp" rowspan="2" data-i18n="th_emp">员工<span class="si"></span></th>
+  </tr>
+  <tr>
     <th class="g-rev sortable" data-col="rev">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy">YoY%<span class="si"></span></th>
-    <th class="g-rev sortable" data-col="cagr">CAGR<span class="si"></span></th>
-    <th class="g-mcu" rowspan="2" style="min-width:72px">MCU<br>8年</th>
+    <th class="g-rev sortable" data-col="cagr">CAGR 18-25<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy">YoY%<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="wt">占比%<span class="si"></span></th>
-    <th class="g-mcu sortable" data-col="gm">毛利率<span class="si"></span></th>
-    <th class="g-etc" rowspan="2">代工厂</th>
+    <th class="g-mcu sortable" data-col="wt" data-i18n="th_mcu_pct">占比%<span class="si"></span></th>
+    <th class="g-mcu sortable" data-col="gm" data-i18n="th_gm">毛利率<span class="si"></span></th>
     <th class="g-rd sortable" data-col="rd">研发 <span id="tbl-unit-rd">M$</span><span class="si"></span></th>
-    <th class="g-rd sortable" data-col="rd_pct">研发%<span class="si"></span></th>
-    <th class="g-etc sortable" data-col="emp">员工<span class="si"></span></th>
+    <th class="g-rd sortable" data-col="rd_pct" data-i18n="th_rd_pct">研发%<span class="si"></span></th>
   </tr>
 </thead>
 <tbody id="tbody">
@@ -951,6 +973,8 @@ const I18N = {
     legend_yoy_ttl:'YoY同比：', legend_growth:'增长', legend_decline:'下滑',
     legend_gm_note:'毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）',
     th_company:'公司', th_founded:'成立<br>上市', th_arch:'核心架构',
+    grp_total_rev:'总营收', grp_mcu_rev:'MCU 营收', grp_rd:'研发',
+    th_mcu_pct:'占比%',
     th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR',
     th_mcu_8yr:'MCU<br>8年', th_mcu_yoy:'YoY%', th_mcu_pct:'占比%',
     th_gm:'毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
@@ -1013,6 +1037,8 @@ const I18N = {
     legend_yoy_ttl:'YoY:', legend_growth:'Growth', legend_decline:'Decline',
     legend_gm_note:'Gross Margin: product-level where available; historical PDF extraction pending (shown as —)',
     th_company:'Company', th_founded:'Founded<br>Listed', th_arch:'Core Arch.',
+    grp_total_rev:'Total Revenue', grp_mcu_rev:'MCU Revenue', grp_rd:'R&D',
+    th_mcu_pct:'Weight%',
     th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR',
     th_mcu_8yr:'MCU<br>8yr', th_mcu_yoy:'YoY%', th_mcu_pct:'MCU Mix%',
     th_gm:'Gross Mgn', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
@@ -1498,17 +1524,17 @@ function renderTable(year, query) {
       </td>
       <td class="c" style="font-size:var(--fz-xs)">${m.founded_year || '—'}<br><span class="na">${m.listed_year || '—'}</span></td>
       <td class="l" style="max-width:110px;white-space:normal;font-size:var(--fz-xs);color:var(--text-dim)">${m.core_license || '—'}</td>
-      <td>${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
-      <td class="c">${fYoY(f.revenue_yoy_pct)}</td>
-      <td class="c">${cagr}</td>
-      <td class="c" style="padding:4px 8px">${sparkline(spkVals)}</td>
-      <td>${mcuN2(f[curF('mcu_revenue')], dt)}</td>
-      <td class="c">${mcuY(f.mcu_yoy_pct, dt)}</td>
-      <td class="c">${mcuW(f.mcu_weight_pct, dt)}</td>
-      <td class="c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
+      <td class="g-rev">${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
+      <td class="g-rev c">${fYoY(f.revenue_yoy_pct)}</td>
+      <td class="g-rev c">${cagr}</td>
+      <td class="g-mcu c" style="padding:4px 8px">${sparkline(spkVals)}</td>
+      <td class="g-mcu">${mcuN2(f[curF('mcu_revenue')], dt)}</td>
+      <td class="g-mcu c">${mcuY(f.mcu_yoy_pct, dt)}</td>
+      <td class="g-mcu c">${mcuW(f.mcu_weight_pct, dt)}</td>
+      <td class="g-mcu c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="l" style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
-      <td>${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
-      <td class="c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
+      <td class="g-rd">${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
+      <td class="g-rd c">${f.rd_pct != null ? f.rd_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td class="c">${fEmp(f.employee_count)}</td>
     </tr>`;
   });
