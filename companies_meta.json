@@ -56,7 +56,13 @@
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
     "mcu_note": "口径：2026年港股招股书「芯片产品」审计数据；含通用MCU+安全MCU/USBKey+BMS芯片+RF芯片（纯通用MCU约占90%，来源：灼识咨询）；2022–2025有数据，2018–2021暂无",
-    "business_lines": ["通用MCU", "专业市场芯片（安全MCU/USBKey）", "BMS芯片", "RF芯片", "锂电池负极材料"],
+    "business_lines": [
+      "通用MCU",
+      "专业市场芯片（安全MCU/USBKey）",
+      "BMS芯片",
+      "RF芯片",
+      "锂电池负极材料"
+    ],
     "chip_revenue_pct_2024": 0.476,
     "prospectus_url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0313/2026031300050_c.pdf"
   },
@@ -72,7 +78,7 @@
     "mcu_strategy": "total_proxy",
     "mcu_multiplier": 0.67,
     "mcu_confidence": "medium",
-    "mcu_note": "年报无产品线收入拆分；MCU/ASIC合计按总收入×0.67估算；不含HVIC驱动芯片、MOSFET功率器件、IPM（约占30–35%）；2018–2025数据完整"
+    "mcu_note": "2025年起：年报「主营业务分产品情况」表「电机主控芯片MCU」行直接披露，不含ASIC（1.33亿/60.17%）、HVIC、IPM、MOSFET；2024年及以前：年报无单独MCU行，按总收入×0.67估算（含ASIC系数，置信度medium）"
   },
   "002180": {
     "name_cn": "纳思达",

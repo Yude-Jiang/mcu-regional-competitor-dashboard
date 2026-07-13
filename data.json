@@ -1045,10 +1045,10 @@
           "total_revenue_yuan": 773904376.96,
           "net_income_yuan": 218935518.04,
           "rd_expense_yuan": 169145554.13,
-          "mcu_revenue_yuan": 518515932.56320006,
-          "mcu_data_type": "derived",
-          "mcu_confidence": "medium",
-          "mcu_source": "总营收×0.67",
+          "mcu_revenue_yuan": 482336903.89,
+          "mcu_data_type": "reported",
+          "mcu_confidence": "high",
+          "mcu_source": "峰岹科技2025年报第29页 主营业务分产品情况表「电机主控芯片MCU」行 营业收入482,336,903.89元 毛利率54.44%（不含ASIC）",
           "rd_pct": 21.9,
           "mcu_weight_pct": 67.0,
           "revenue_yoy_pct": 28.9,
@@ -1057,13 +1057,14 @@
           "total_revenue_musd": 107.19,
           "net_income_musd": 30.32,
           "rd_expense_musd": 23.43,
-          "mcu_revenue_musd": 71.82,
+          "mcu_revenue_musd": 66.81,
           "filing_status": "derived",
           "filing_date": "2025-04-30",
           "data_coverage": 1.0,
           "cagr_pct": 35.7,
           "cagr_label": "CAGR 2018–2025",
-          "employee_count": 315
+          "employee_count": 315,
+          "gross_margin_pct": 54.44
         }
       }
     },
@@ -1904,7 +1905,8 @@
           "data_coverage": 1.0,
           "cagr_pct": 21.3,
           "cagr_label": "CAGR 2018–2025",
-          "employee_count": 546
+          "employee_count": 546,
+          "gross_margin_pct": 22.82
         }
       }
     },
