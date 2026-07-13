@@ -73,11 +73,11 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M3 (motor ctrl)",
     "foundry_fab": "TSMC",
-    "mcu_strategy": "total_proxy",
-    "mcu_multiplier": 0.67,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报无产品线收入拆分；MCU/ASIC合计按总收入×0.67估算；不含HVIC驱动芯片、MOSFET功率器件、IPM（约占30–35%）；2018–2025数据完整",
-    "mcu_note_en": "No product-line revenue breakdown in annual report; MCU/ASIC estimated as total revenue × 0.67; excludes HVIC drivers, MOSFETs, IPM (~30–35%); 2018–2025 complete"
+    "mcu_strategy": "segment_reported",
+    "mcu_multiplier": null,
+    "mcu_confidence": "high",
+    "mcu_note": "年报/招股书「主营业务分产品情况」表「电机主控芯片MCU」行直接披露（2018–2025）；不含HVIC/ASIC/IPM/MOSFET",
+    "mcu_note_en": "Motor main control MCU line from annual report / prospectus product table (2018–2025); excludes HVIC/ASIC/IPM/MOSFET"
   },
   "002180": {
     "name_cn": "纳思达",
@@ -133,11 +133,11 @@
     "listed_year": 2020,
     "core_license": "ARM Cortex-M0",
     "foundry_fab": "TSMC / SMIC",
-    "mcu_strategy": "estimated",
-    "mcu_multiplier": 0.45,
-    "mcu_confidence": "low",
-    "mcu_note": "年报无产品线收入拆分表；MCU口径按总收入×0.45估算（来源：IR活动记录）；置信度低；2020–2025有估算数据",
-    "mcu_note_en": "No product-line table in annual report; MCU estimated as total revenue × 0.45 (IR activity records); low confidence; 2020–2025 estimates"
+    "mcu_strategy": "segment_reported",
+    "mcu_multiplier": null,
+    "mcu_confidence": "high",
+    "mcu_note": "年报「主营业务分产品情况」表「MCU芯片」行直接披露（不含AIoT芯片、模拟信号链芯片）；2020–2025数据完整",
+    "mcu_note_en": "MCU chip line directly disclosed in annual report product table (excl. AIoT and analog signal chain); 2020–2025 complete"
   },
   "688391": {
     "name_cn": "钜泉科技",
