@@ -76,8 +76,8 @@
     "mcu_strategy": "total_proxy",
     "mcu_multiplier": 0.67,
     "mcu_confidence": "medium",
-    "mcu_note": "年报无产品线收入拆分；MCU/ASIC合计按总收入×0.67估算；不含HVIC驱动芯片、MOSFET功率器件、IPM（约占30–35%）；2018–2025数据完整",
-    "mcu_note_en": "No product-line revenue breakdown in annual report; MCU/ASIC estimated as total revenue × 0.67; excludes HVIC drivers, MOSFETs, IPM (~30–35%); 2018–2025 complete"
+    "mcu_note": "年报「主营业务分产品情况」表「电机主控芯片MCU」行直接披露（2025年起）；历史年份仍用总营收×0.67推算；不含HVIC/ASIC/IPM/MOSFET",
+    "mcu_note_en": "Motor main control MCU line disclosed in annual report product table (from 2025); earlier years use total revenue × 0.67; excludes HVIC/ASIC/IPM/MOSFET"
   },
   "002180": {
     "name_cn": "纳思达",

@@ -433,7 +433,11 @@
       "mcu_gross_margin": 0.5324
     },
     "2025": {
-      "mcu_gross_margin": 0.5257
+      "mcu_revenue_yuan": 482336903.89,
+      "mcu_gross_margin": 0.5444,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2025年报第29页 主营业务分产品表「电机主控芯片MCU」行：营收482,336,903.89元、营业成本219,747,031.71元、毛利率54.44%"
     }
   },
   "688391": {
