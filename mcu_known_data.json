@@ -412,25 +412,53 @@
   },
   "688279": {
     "2018": {
-      "mcu_gross_margin": 0.4466
+      "mcu_revenue_yuan": 39248947.34,
+      "mcu_gross_margin": 0.5084,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务收入分产品表「电机主控芯片MCU」行：营收39,248,947.34元、营业成本19,294,875.64元、毛利率50.84%"
     },
     "2019": {
-      "mcu_gross_margin": 0.4761
+      "mcu_revenue_yuan": 82683597.76,
+      "mcu_gross_margin": 0.5215,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务收入分产品表「电机主控芯片MCU」行：营收82,683,597.76元、营业成本39,566,974.18元、毛利率52.15%"
     },
     "2020": {
-      "mcu_gross_margin": 0.5027
+      "mcu_revenue_yuan": 156080057.02,
+      "mcu_gross_margin": 0.5384,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务收入分产品表「电机主控芯片MCU」行：营收156,080,057.02元、营业成本72,046,077.90元、毛利率53.84%"
     },
     "2021": {
-      "mcu_gross_margin": 0.5744
+      "mcu_revenue_yuan": 214737256.41,
+      "mcu_gross_margin": 0.6116,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2021年报 主营业务分产品表「电机主控芯片MCU」行：营收214,737,256.41元、营业成本83,396,437.88元、毛利率61.16%"
     },
     "2022": {
-      "mcu_gross_margin": 0.5742
+      "mcu_revenue_yuan": 232343097.58,
+      "mcu_gross_margin": 0.6112,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2022年报 主营业务分产品表「电机主控芯片MCU」行：营收232,343,097.58元、营业成本90,340,628.86元、毛利率61.12%"
     },
     "2023": {
-      "mcu_gross_margin": 0.5347
+      "mcu_revenue_yuan": 274748146.16,
+      "mcu_gross_margin": 0.5667,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2023年报 主营业务分产品表「电机主控芯片MCU」行：营收274,748,146.16元、营业成本119,045,232.69元、毛利率56.67%"
     },
     "2024": {
-      "mcu_gross_margin": 0.5324
+      "mcu_revenue_yuan": 384574457.54,
+      "mcu_gross_margin": 0.5571,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2024年报 主营业务分产品表「电机主控芯片MCU」行：营收384,574,457.54元、营业成本170,329,379.32元、毛利率55.71%"
     },
     "2025": {
       "mcu_revenue_yuan": 482336903.89,
