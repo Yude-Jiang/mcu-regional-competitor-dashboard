@@ -7,6 +7,18 @@ REGION="asia-east1"
 SERVICE="mcu-regional-competitor-dashboard"
 IMAGE="asia-east1-docker.pkg.dev/${PROJECT}/mcu/${SERVICE}"
 
+# Ensure gcloud is on PATH (Cloud Shell / local SDK installs)
+if ! command -v gcloud &>/dev/null; then
+  for d in "$HOME/google-cloud-sdk/bin" "$HOME/google-cloud-sdk/google-cloud-sdk/bin" \
+           "/usr/lib/google-cloud-sdk/bin"; do
+    if [[ -x "${d}/gcloud" ]]; then
+      export PATH="${d}:${PATH}"
+      break
+    fi
+  done
+fi
+command -v gcloud &>/dev/null || { echo "gcloud not found — install Google Cloud SDK"; exit 1; }
+
 gcloud config set project "${PROJECT}"
 
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
