@@ -25,8 +25,8 @@
     "foundry_fab": "TSMC",
     "mcu_strategy": "segment_industrial",
     "mcu_multiplier": null,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报「工业控制芯片」分产品表直接披露；含工规MCU+BMIC电池管理芯片，不含AMOLED显示驱动；2019–2025有数据（2018年无披露）",
+    "mcu_confidence": "high",
+    "mcu_note": "年报「工业控制」分产品表直接披露；含工规MCU+BMIC电池管理芯片，不含AMOLED显示驱动；2019–2025有数据（2018年无披露）",
     "mcu_note_en": "Industrial control chips segment from annual report product table; includes industrial MCU + BMIC battery management chips, excludes AMOLED display drivers; 2019–2025 data (no 2018 disclosure)"
   },
   "688380": {
@@ -58,8 +58,8 @@
     "mcu_strategy": "estimated",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "口径：2026年港股招股书「芯片产品」审计数据；含通用MCU+安全MCU/USBKey+BMS芯片+RF芯片（纯通用MCU约占90%，来源：灼识咨询）；2022–2025有数据，2018–2021暂无",
-    "mcu_note_en": "Scope: 2026 HK prospectus audited Chip Products revenue; includes general MCU + secure MCU/USB Key + BMS + RF chips (general MCU ~90% per CIC); 2022–2025 data, 2018–2021 N/A",
+    "mcu_note": "口径：年报「芯片类产品」行（含通用MCU+安全MCU/USBKey+BMS+RF，非纯MCU；灼识咨询估算纯通用MCU约占90%）；2022–2025有数据，2018–2021暂无",
+    "mcu_note_en": "Scope: annual report Chip Products line (incl. general MCU + secure MCU/USB Key + BMS + RF, not pure MCU; CIC estimates general MCU ~90%); 2022–2025 data, 2018–2021 N/A",
     "business_lines": ["通用MCU", "专业市场芯片（安全MCU/USBKey）", "BMS芯片", "RF芯片", "锂电池负极材料"],
     "chip_revenue_pct_2024": 0.476,
     "prospectus_url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0313/2026031300050_c.pdf"
@@ -73,11 +73,11 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M3 (motor ctrl)",
     "foundry_fab": "TSMC",
-    "mcu_strategy": "total_proxy",
-    "mcu_multiplier": 0.67,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报无产品线收入拆分；MCU/ASIC合计按总收入×0.67估算；不含HVIC驱动芯片、MOSFET功率器件、IPM（约占30–35%）；2018–2025数据完整",
-    "mcu_note_en": "No product-line revenue breakdown in annual report; MCU/ASIC estimated as total revenue × 0.67; excludes HVIC drivers, MOSFETs, IPM (~30–35%); 2018–2025 complete"
+    "mcu_strategy": "segment_reported",
+    "mcu_multiplier": null,
+    "mcu_confidence": "high",
+    "mcu_note": "年报/招股书「主营业务分产品情况」表「电机主控芯片MCU」行直接披露（2018–2025）；不含HVIC/ASIC/IPM/MOSFET",
+    "mcu_note_en": "Motor main control MCU line from annual report / prospectus product table (2018–2025); excludes HVIC/ASIC/IPM/MOSFET"
   },
   "002180": {
     "name_cn": "纳思达",
@@ -103,10 +103,10 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M (smart meter)",
     "foundry_fab": "SMIC / TSMC",
-    "mcu_strategy": "segment_estimated",
+    "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报「智能电表芯片产品线」直接披露，含电表MCU/通用MCU/车规MCU及相关模组；与FPGA和安全芯片独立列示；2021–2025有数据，2018–2020暂缺",
+    "mcu_confidence": "high",
+    "mcu_note": "年报「智能电表芯片」产品线直接披露，含电表MCU/通用MCU/车规MCU及相关模组；与FPGA和安全芯片独立列示；2021–2025有数据，2018–2020暂缺",
     "mcu_note_en": "Smart meter IC product line directly disclosed; includes meter MCU, general MCU, automotive MCU and modules; separate from FPGA and security chips; 2021–2025 data, 2018–2020 N/A"
   },
   "688766": {
@@ -120,9 +120,9 @@
     "foundry_fab": "Huahong / SMIC",
     "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
-    "mcu_confidence": "high",
-    "mcu_note": "年报「MCU产品线」与NOR Flash独立拆分并含独立毛利率披露；2022年上市，上市前数据不追溯；2022–2025数据完整",
-    "mcu_note_en": "MCU product line split from NOR Flash with separate gross margin in annual report; listed 2022, pre-listing data not restated; 2022–2025 complete"
+    "mcu_confidence": "medium",
+    "mcu_note": "年报「微控制器及其他」/「存储+」系列行披露（2022–2025）；2023年MCU与VCM Driver合并无法拆分；口径含MCU+部分模拟产品，非纯MCU",
+    "mcu_note_en": "MCU from annual report MCU/controller line (2022–2025); 2023 MCU+VCM merged; includes MCU + some analog products, not pure MCU"
   },
   "688595": {
     "name_cn": "芯海科技",
@@ -133,11 +133,11 @@
     "listed_year": 2020,
     "core_license": "ARM Cortex-M0",
     "foundry_fab": "TSMC / SMIC",
-    "mcu_strategy": "estimated",
-    "mcu_multiplier": 0.45,
-    "mcu_confidence": "low",
-    "mcu_note": "年报无产品线收入拆分表；MCU口径按总收入×0.45估算（来源：IR活动记录）；置信度低；2020–2025有估算数据",
-    "mcu_note_en": "No product-line table in annual report; MCU estimated as total revenue × 0.45 (IR activity records); low confidence; 2020–2025 estimates"
+    "mcu_strategy": "segment_reported",
+    "mcu_multiplier": null,
+    "mcu_confidence": "high",
+    "mcu_note": "年报「主营业务分产品情况」表MCU产品线直接披露（2018–2019为「通用微控制器芯片」，2020起为「MCU芯片」；不含AIoT芯片、模拟信号链芯片）；2018–2025数据完整",
+    "mcu_note_en": "MCU product line from annual report (2018–19: general MCU controller chip; 2020+: MCU chip line; excl. AIoT and analog signal chain); 2018–2025 complete"
   },
   "688391": {
     "name_cn": "钜泉科技",
@@ -148,11 +148,11 @@
     "listed_year": 2021,
     "core_license": "ARM Cortex-M (meter MCU)",
     "foundry_fab": "SMIC",
-    "mcu_strategy": "total_proxy",
-    "mcu_multiplier": 0.34,
-    "mcu_confidence": "medium",
-    "mcu_note": "计量MCU/SoC按总收入×0.34估算；不含计量模块和系统解决方案；应用场景单一（电力计量）；2018–2025数据完整",
-    "mcu_note_en": "Metering MCU/SoC estimated as total revenue × 0.34; excludes metering modules and system solutions; single application (power metering); 2018–2025 complete"
+    "mcu_strategy": "segment_reported",
+    "mcu_multiplier": null,
+    "mcu_confidence": "high",
+    "mcu_note": "年报分产品表「智能电表MCU芯片」/「MCU芯片」/「智能电表芯片」行直接披露（2018–2025）；不含计量模块和系统解决方案",
+    "mcu_note_en": "Meter MCU/smart meter IC line from annual report product table (2018–2025); excludes metering modules and system solutions"
   },
   "688018": {
     "name_cn": "乐鑫科技",
@@ -163,10 +163,10 @@
     "listed_year": 2019,
     "core_license": "RISC-V / Xtensa LX7",
     "foundry_fab": "TSMC",
-    "mcu_strategy": "segment_estimated",
+    "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
-    "mcu_confidence": "medium",
-    "mcu_note": "年报「芯片收入」直接披露（年报芯片/模组二段拆分），不含模组收入；产品兼MCU+WiFi SoC属性（部分分析师归类为SoC）；2019–2025有数据，2018暂缺",
-    "mcu_note_en": "Chip revenue directly disclosed (chip/module two-segment split), excludes module revenue; products are MCU + WiFi SoC (some analysts classify as SoC); 2019–2025 data, 2018 N/A"
+    "mcu_confidence": "high",
+    "mcu_note": "年报「芯片」收入行直接披露（芯片/模组二段拆分，不含模组）；产品兼MCU+WiFi SoC属性；2018–2025有数据",
+    "mcu_note_en": "Chip revenue line from annual report (chip/module split, excludes modules); MCU + WiFi SoC products; 2018–2025 data"
   }
 }
