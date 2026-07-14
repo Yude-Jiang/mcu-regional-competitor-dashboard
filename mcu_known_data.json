@@ -60,120 +60,127 @@
   },
   "688766": {
     "2022": {
-      "mcu_revenue_yuan": 52990000,
+      "mcu_revenue_yuan": 52990020.5,
       "data_type": "reported",
       "confidence": "high",
-      "source": "普冉股份2022年报 MCU产品线 — LLM提取自PDF，¥5299万"
+      "source": "普冉股份2022年报 主营业务分产品表「微控制器及其他」行",
+      "mcu_gross_margin": 0.3319
     },
     "2023": {
-      "mcu_revenue_yuan": 115356800,
+      "mcu_revenue_yuan": 115356776.93,
       "data_type": "estimated",
       "confidence": "low",
-      "source": "普冉股份2023年报「存储+」系列合计（含MCU+VCM Driver模拟芯片合并披露，无法拆分纯MCU口径，11535.68万元，毛利率26.88%）"
+      "source": "普冉股份2023年报「存储+」系列（MCU与VCM Driver合并披露，无法拆分纯MCU）",
+      "mcu_gross_margin": 0.2688
     },
     "2024": {
-      "mcu_revenue_yuan": 524000000,
-      "mcu_gross_margin": 0.287,
+      "mcu_revenue_yuan": 385962303.33,
+      "mcu_gross_margin": 0.2963,
       "data_type": "reported",
-      "confidence": "high",
-      "source": "普冉股份2024年报 MCU产品线"
+      "confidence": "medium",
+      "source": "普冉股份2024年报「存储+」/「微控制器及其他」行：营收3.86亿元、毛利率29.63%（含MCU+模拟产品）"
     },
     "2025": {
-      "mcu_revenue_yuan": 532000000,
+      "mcu_revenue_yuan": 532270497.12,
       "data_type": "reported",
-      "confidence": "high",
-      "source": "普冉股份2025年报 MCU产品线 — LLM提取自PDF，¥53200万"
+      "confidence": "medium",
+      "source": "普冉股份2025年报「微控制器及其他」行：营收5.32亿元、毛利率24.42%（含MCU+模拟产品）",
+      "mcu_gross_margin": 0.2442
     }
   },
   "688385": {
     "2021": {
       "mcu_revenue_yuan": 295785000.0,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.566,
       "data_type": "reported",
       "confidence": "high",
-      "source": "复旦微电子2021年报第33页 主营业务分产品情况表「智能电表芯片」行（含智能电表MCU、通用低功耗MCU等）— Gemini-3.5-flash提取"
+      "source": "复旦微电子2021年报 主营业务分产品表「智能电表芯片」行"
     },
     "2022": {
       "mcu_revenue_yuan": 594579681.69,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.6431,
       "data_type": "reported",
       "confidence": "high",
-      "source": "复旦微电子2022年报第162页 合同产生的收入情况表「智能电表芯片」行（含智能电表MCU、通用低功耗MCU等）— Gemini-3.5-flash提取"
+      "source": "复旦微电子2022年报 主营业务分产品表「智能电表芯片」行"
     },
     "2023": {
       "mcu_revenue_yuan": 273770800.0,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.394,
       "data_type": "reported",
       "confidence": "high",
-      "source": "复旦微电子2023年报第29页 主营业务分产品情况表「智能电表芯片」行（含智能电表MCU、通用低功耗MCU等）— Gemini-3.5-flash提取"
+      "source": "复旦微电子2023年报 主营业务分产品表「智能电表芯片」行"
     },
     "2024": {
       "mcu_revenue_yuan": 396694720.15,
       "mcu_gross_margin": 0.3607,
       "data_type": "reported",
       "confidence": "high",
-      "source": "复旦微电子2024年报第186页 营业收入、营业成本分解信息表「智能电表芯片」行（涵盖智能电表MCU、通用MCU及车规MCU）¥39,669.47万 — Gemini-3.5-flash提取"
+      "source": "复旦微电子2024年报 主营业务分产品表「智能电表芯片」行"
     },
     "2025": {
       "mcu_revenue_yuan": 518448862.94,
-      "mcu_gross_margin": null,
+      "mcu_gross_margin": 0.3957,
       "data_type": "reported",
       "confidence": "high",
-      "source": "复旦微电子2025年报第36页/第183页 主营业务分产品情况表及营业收入分解「智能电表芯片」行 — Gemini-3.5-flash提取"
+      "source": "复旦微电子2025年报 主营业务分产品表「智能电表芯片」行"
     }
   },
   "688018": {
     "2019": {
       "mcu_revenue_yuan": 520672245.57,
-      "mcu_gross_margin": 0.4703,
+      "mcu_gross_margin": 0.5033,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2019年报第28页 主营业务分产品情况表「芯片」行（区别于模组收入）— Gemini-3.5-flash提取"
+      "source": "乐鑫科技2019年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2020": {
       "mcu_revenue_yuan": 441378003.21,
       "mcu_gross_margin": 0.4129,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2020年报第29页 分产品营业收入表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2020年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2021": {
       "mcu_revenue_yuan": 552713033.07,
-      "mcu_gross_margin": 0.396,
+      "mcu_gross_margin": 0.4894,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2021年报第35页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2021年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2022": {
       "mcu_revenue_yuan": 405986184.48,
-      "mcu_gross_margin": 0.3998,
+      "mcu_gross_margin": 0.4728,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2022年报 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2022年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2023": {
       "mcu_revenue_yuan": 547438532.96,
-      "mcu_gross_margin": 0.4056,
+      "mcu_gross_margin": 0.4685,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2023年报第39页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2023年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2024": {
       "mcu_revenue_yuan": 783046926.91,
-      "mcu_gross_margin": 0.4391,
+      "mcu_gross_margin": 0.5149,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2024年报第40页 主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2024年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2025": {
       "mcu_revenue_yuan": 980061726.23,
-      "mcu_gross_margin": 0.4663,
+      "mcu_gross_margin": 0.4847,
       "data_type": "reported",
       "confidence": "high",
-      "source": "乐鑫科技2025年报第44页 管理层讨论与分析主营业务分产品情况表「芯片」行 — Gemini-3.5-flash提取"
+      "source": "乐鑫科技2025年报 主营业务分产品表「芯片」行（不含模组）"
     },
     "2018": {
-      "mcu_gross_margin": 0.5066
+      "mcu_gross_margin": 0.5561,
+      "mcu_revenue_yuan": 318792800,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "乐鑫科技2018年报 主营业务分产品表「芯片」行（不含模组）"
     }
   },
   "002180": {
@@ -289,93 +296,98 @@
   },
   "300327": {
     "2019": {
-      "mcu_revenue_yuan": 779104990.85,
+      "mcu_revenue_yuan": 780636940.65,
       "data_type": "reported",
       "confidence": "high",
-      "source": "中颖电子2019年报第20页「占公司营业收入或营业利润10%以上的行业、产品或地区情况」表中「工业控制」产品 — Gemini提取"
+      "source": "中颖电子2019年报 主营业务分产品表「工业控制」行",
+      "mcu_gross_margin": 0.4285
     },
     "2020": {
       "mcu_revenue_yuan": 949708325.64,
       "data_type": "reported",
       "confidence": "high",
-      "source": "中颖电子2020年报第20页营业收入构成表中「工业控制」产品 — Gemini提取"
+      "source": "中颖电子2020年报 主营业务分产品表「工业控制」行",
+      "mcu_gross_margin": 0.4162
     },
     "2021": {
       "mcu_revenue_yuan": 1167245829.41,
       "data_type": "reported",
       "confidence": "high",
-      "source": "中颖电子2021年报第17页营业收入构成表及占公司营业收入或营业利润10%以上的产品情况表中「工业控制」产品线 — Gemini提取"
+      "source": "中颖电子2021年报 主营业务分产品表「工业控制」行",
+      "mcu_gross_margin": 0.499
     },
     "2022": {
-      "mcu_revenue_yuan": 1177213651.14,
+      "mcu_revenue_yuan": 1177627780.69,
       "data_type": "reported",
       "confidence": "high",
-      "source": "中颖电子2022年报第16页主营业务分产品情况表中「工业控制」产品营业收入 — Gemini提取"
+      "source": "中颖电子2022年报 主营业务分产品表「工业控制」行",
+      "mcu_gross_margin": 0.5087
     },
     "2023": {
-      "mcu_revenue_yuan": 1013682135,
-      "mcu_gross_margin": null,
+      "mcu_revenue_yuan": 1013682135.85,
+      "mcu_gross_margin": 0.4215,
       "data_type": "reported",
-      "confidence": "medium",
-      "source": "中颖电子2023年报 工业控制芯片分产品表"
+      "confidence": "high",
+      "source": "中颖电子2023年报 主营业务分产品表「工业控制」行"
     },
     "2024": {
-      "mcu_revenue_yuan": 1093424644,
+      "mcu_revenue_yuan": 1093424644.07,
       "mcu_gross_margin": 0.3684,
       "data_type": "reported",
-      "confidence": "medium",
-      "source": "中颖电子2024年报 工业控制芯片分产品表"
+      "confidence": "high",
+      "source": "中颖电子2024年报 主营业务分产品表「工业控制」行"
     },
     "2025": {
       "mcu_revenue_yuan": 1032988745.38,
       "data_type": "reported",
       "confidence": "high",
-      "source": "中颖电子2025年报第16页「营业收入构成」及「占公司营业收入或营业利润10%以上的行业、产品、地区、销售模式的情况」中「工业控制」产品 — Gemini提取"
+      "source": "中颖电子2025年报 主营业务分产品表「工业控制」行",
+      "mcu_gross_margin": 0.3376
     }
   },
   "688595": {
-    "_note": "口径=「MCU和AIoT芯片」产品线（年报管理层讨论章节披露；含MCU+AIoT，非纯MCU）；2020-2023年数据Gemini提取，怀疑提取了错误产品行，待重新核验",
+    "_note": "口径=年报「主营业务分产品情况」表「MCU芯片」行（不含AIoT芯片、模拟信号链芯片）",
     "2020": {
-      "mcu_revenue_yuan": 103761750,
+      "mcu_revenue_yuan": 103761749.81,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2021年报 MCU芯片29,515.85万YoY+184.46%反推2020年值≈10,376万（Gemini提取103,761,750，差值<250元）",
-      "mcu_gross_margin": 0.4834
+      "source": "芯海科技2020年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.2903
     },
     "2021": {
-      "mcu_revenue_yuan": 295158500,
+      "mcu_revenue_yuan": 295158518.28,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2021年报 管理层讨论「MCU芯片2021年实现销售29,515.85万元，较上年同期增长184.46%」",
-      "mcu_gross_margin": 0.5218
+      "source": "芯海科技2021年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.5069
     },
     "2022": {
-      "mcu_revenue_yuan": 288995900,
+      "mcu_revenue_yuan": 288995945.79,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2022年报 管理层讨论「MCU芯片2022年实现销售28,899.59万元，较上年同期下降2.09%」",
-      "mcu_gross_margin": 0.3919
+      "source": "芯海科技2022年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.309
     },
     "2023": {
-      "mcu_revenue_yuan": 194614600,
+      "mcu_revenue_yuan": 194614592.54,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2023年报 管理层讨论「MCU芯片2023年实现销售19,461.46万元」",
-      "mcu_gross_margin": 0.2826
+      "source": "芯海科技2023年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.1773
     },
     "2024": {
-      "mcu_revenue_yuan": 326228400,
+      "mcu_revenue_yuan": 326228371.65,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2024年报 管理层讨论「MCU芯片2024年度实现销售32,622.84万元，较上年增长67.63%」",
-      "mcu_gross_margin": 0.3416
+      "source": "芯海科技2024年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.2346
     },
     "2025": {
-      "mcu_revenue_yuan": 339862396,
+      "mcu_revenue_yuan": 339862395.82,
       "data_type": "reported",
       "confidence": "high",
-      "source": "芯海科技2025年报审计意见附注「MCU芯片业务营收339,862,395.82元，占营业收入40.05%」",
-      "mcu_gross_margin": 0.352
+      "source": "芯海科技2025年报 主营业务分产品表「MCU芯片」行",
+      "mcu_gross_margin": 0.2282
     },
     "2018": {
       "mcu_gross_margin": 0.4504
@@ -412,54 +424,118 @@
   },
   "688279": {
     "2018": {
-      "mcu_gross_margin": 0.4466
+      "mcu_gross_margin": 0.5084,
+      "mcu_revenue_yuan": 39248947.34,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2019": {
-      "mcu_gross_margin": 0.4761
+      "mcu_gross_margin": 0.5215,
+      "mcu_revenue_yuan": 82683597.76,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2020": {
-      "mcu_gross_margin": 0.5027
+      "mcu_gross_margin": 0.5384,
+      "mcu_revenue_yuan": 156080057.02,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "招股说明书 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2021": {
-      "mcu_gross_margin": 0.5744
+      "mcu_gross_margin": 0.6116,
+      "mcu_revenue_yuan": 214737256.41,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2021年报 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2022": {
-      "mcu_gross_margin": 0.5742
+      "mcu_gross_margin": 0.6112,
+      "mcu_revenue_yuan": 232343097.58,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2022年报 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2023": {
-      "mcu_gross_margin": 0.5347
+      "mcu_gross_margin": 0.5667,
+      "mcu_revenue_yuan": 274748146.16,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2023年报 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2024": {
-      "mcu_gross_margin": 0.5324
+      "mcu_gross_margin": 0.5571,
+      "mcu_revenue_yuan": 384574457.54,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2024年报 主营业务分产品表「电机主控芯片MCU」行"
     },
     "2025": {
-      "mcu_gross_margin": 0.5257
+      "mcu_gross_margin": 0.5444,
+      "mcu_revenue_yuan": 482336903.89,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "峰岹科技2025年报 主营业务分产品表「电机主控芯片MCU」行"
     }
   },
   "688391": {
     "2018": {
-      "mcu_gross_margin": 0.3822
+      "mcu_gross_margin": 0.2411,
+      "mcu_revenue_yuan": 41990022.4,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2018年报 主营业务分产品表「智能电表MCU芯片」行"
     },
     "2019": {
-      "mcu_gross_margin": 0.364
+      "mcu_gross_margin": 0.2054,
+      "mcu_revenue_yuan": 95430996.22,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2019年报 主营业务分产品表「智能电表MCU芯片」行"
     },
     "2020": {
-      "mcu_gross_margin": 0.3824
+      "mcu_gross_margin": 0.2305,
+      "mcu_revenue_yuan": 130839223.22,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2020年报 主营业务分产品表「智能电表MCU芯片」行"
     },
     "2021": {
-      "mcu_gross_margin": 0.4545
+      "mcu_gross_margin": 0.295,
+      "mcu_revenue_yuan": 139823592.48,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2021年报 主营业务分产品表「智能电表MCU芯片」行"
     },
     "2022": {
-      "mcu_gross_margin": 0.5133
+      "mcu_gross_margin": 0.4426,
+      "mcu_revenue_yuan": 270613967.41,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2022年报 主营业务分产品表「MCU芯片」行"
     },
     "2023": {
-      "mcu_gross_margin": 0.4965
+      "mcu_gross_margin": 0.416,
+      "mcu_revenue_yuan": 211125150.65,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2023年报 主营业务分产品表「MCU芯片」行"
     },
     "2024": {
-      "mcu_gross_margin": 0.441
+      "mcu_gross_margin": 0.4006,
+      "mcu_revenue_yuan": 518653840.55,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2024年报 主营业务分产品表「智能电表芯片」行"
     },
     "2025": {
-      "mcu_gross_margin": 0.3923
+      "mcu_gross_margin": 0.3733,
+      "mcu_revenue_yuan": 432883105.35,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "钜泉科技2025年报 主营业务分产品表「智能电表芯片」行"
     }
   }
 }
