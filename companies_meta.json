@@ -58,8 +58,8 @@
     "mcu_strategy": "estimated",
     "mcu_multiplier": null,
     "mcu_confidence": "medium",
-    "mcu_note": "口径：2026年港股招股书「芯片产品」审计数据；含通用MCU+安全MCU/USBKey+BMS芯片+RF芯片（纯通用MCU约占90%，来源：灼识咨询）；2022–2025有数据，2018–2021暂无",
-    "mcu_note_en": "Scope: 2026 HK prospectus audited Chip Products revenue; includes general MCU + secure MCU/USB Key + BMS + RF chips (general MCU ~90% per CIC); 2022–2025 data, 2018–2021 N/A",
+    "mcu_note": "口径：年报「芯片类产品」行（含通用MCU+安全MCU/USBKey+BMS+RF，非纯MCU；灼识咨询估算纯通用MCU约占90%）；2022–2025有数据，2018–2021暂无",
+    "mcu_note_en": "Scope: annual report Chip Products line (incl. general MCU + secure MCU/USB Key + BMS + RF, not pure MCU; CIC estimates general MCU ~90%); 2022–2025 data, 2018–2021 N/A",
     "business_lines": ["通用MCU", "专业市场芯片（安全MCU/USBKey）", "BMS芯片", "RF芯片", "锂电池负极材料"],
     "chip_revenue_pct_2024": 0.476,
     "prospectus_url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0313/2026031300050_c.pdf"
