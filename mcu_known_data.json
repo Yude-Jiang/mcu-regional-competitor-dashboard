@@ -390,10 +390,18 @@
       "mcu_gross_margin": 0.2282
     },
     "2018": {
-      "mcu_gross_margin": 0.4504
+      "mcu_revenue_yuan": 55976571.89,
+      "mcu_gross_margin": 0.3221,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "芯海科技2018年报 主营业务分产品表「通用微控制器芯片」行"
     },
     "2019": {
-      "mcu_gross_margin": 0.448
+      "mcu_revenue_yuan": 78930766.07,
+      "mcu_gross_margin": 0.3382,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "芯海科技2019年报 主营业务分产品表「通用微控制器芯片」行"
     }
   },
   "688380": {

@@ -136,8 +136,8 @@
     "mcu_strategy": "segment_reported",
     "mcu_multiplier": null,
     "mcu_confidence": "high",
-    "mcu_note": "年报「主营业务分产品情况」表「MCU芯片」行直接披露（不含AIoT芯片、模拟信号链芯片）；2020–2025数据完整",
-    "mcu_note_en": "MCU chip line directly disclosed in annual report product table (excl. AIoT and analog signal chain); 2020–2025 complete"
+    "mcu_note": "年报「主营业务分产品情况」表MCU产品线直接披露（2018–2019为「通用微控制器芯片」，2020起为「MCU芯片」；不含AIoT芯片、模拟信号链芯片）；2018–2025数据完整",
+    "mcu_note_en": "MCU product line from annual report (2018–19: general MCU controller chip; 2020+: MCU chip line; excl. AIoT and analog signal chain); 2018–2025 complete"
   },
   "688391": {
     "name_cn": "钜泉科技",

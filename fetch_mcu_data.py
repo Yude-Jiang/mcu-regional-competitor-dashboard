@@ -213,6 +213,9 @@ def apply_mcu_strategy(
                 row["mcu_source"] = k.get("source", "Manual entry")
                 if k.get("mcu_gross_margin") is not None:
                     row["gross_margin_pct"] = round(k["mcu_gross_margin"] * 100, 2)
+                else:
+                    # Segment revenue without segment GM — do not keep company-level margin
+                    row["gross_margin_pct"] = None
                 continue
             elif musd is not None:
                 row["mcu_revenue_yuan"] = musd * FX.get(year, 7.2) * 1_000_000
