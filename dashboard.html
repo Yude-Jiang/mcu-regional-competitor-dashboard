@@ -774,7 +774,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th class="g-etc sortable" data-col="emp" rowspan="2" data-i18n="th_emp">员工<span class="si"></span></th>
   </tr>
   <tr>
-    <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2025</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy" data-i18n="th_yoy">YoY%<span class="si"></span></th>
     <th class="g-rev sortable" data-col="cagr" data-i18n="th_cagr">CAGR 18-25<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu" id="th-mcu-hdr">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
@@ -941,7 +941,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     </div>
 
     <div>
-      <div class="dp-section-ttl"><span data-i18n="dp_key_metrics">关键指标</span> · <span id="dp-metric-year">2024</span></div>
+      <div class="dp-section-ttl"><span data-i18n="dp_key_metrics">关键指标</span> · <span id="dp-metric-year">2025</span></div>
       <div class="dp-metrics" id="dp-metrics"></div>
     </div>
 
@@ -1127,7 +1127,7 @@ function confLbl(conf) {
 }
 
 function applyTableHeadI18n() {
-  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || 2024);
+  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || DEFAULT_FY);
   const u = CUR === 'usd' ? 'M$' : '亿';
   const revHdr = $('th-rev-hdr');
   if (revHdr) {
@@ -1179,7 +1179,7 @@ function setLang(lang) {
   renderFxBar();
   if (typeof rerenderCharts === 'function') rerenderCharts();
   const sel = document.getElementById('year-sel');
-  const year = sel ? +sel.value : 2024;
+  const year = sel ? +sel.value : DEFAULT_FY;
   const srch = document.getElementById('search');
   if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
   // Re-render pipeline strip (uses company names)
@@ -1211,6 +1211,7 @@ const ORDER = [
   '603986','300327','688380','300077','688279',
   '002180','688385','688766','688595','688391','688018',
 ];
+const DEFAULT_FY = 2025;
 const STRAT_LBL = {
   segment_reported:'SEG·RPT', total_proxy:'TOTAL×k',
   total_revenue:'TOTAL=MCU', subsidiary_geehy:'SUBSID.',
@@ -1303,7 +1304,7 @@ const CF = {
   years:     new Set([2018,2019,2020,2021,2022,2023,2024,2025]),
   companies: new Set(ORDER),
   sortField: 'mcu',   // 'mcu' | 'rev' | 'name'
-  sortYear:  2024,
+  sortYear:  DEFAULT_FY,
   sortDir:   'desc',
 };
 
@@ -1424,7 +1425,7 @@ function initChartCtrl() {
   [...years].reverse().forEach(y => {
     const o = document.createElement('option');
     o.value = y; o.textContent = y;
-    if (y === 2024) o.selected = true;
+    if (y === DEFAULT_FY) o.selected = true;
     sortYrSel.appendChild(o);
   });
 
@@ -1858,8 +1859,8 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {
     label: String(y),
     data:  ss.map(s => { const v = (G.companies[s].financials[y]||{})[field]; return v != null ? v * scale : null; }),
     backgroundColor: YEAR_PAL[y],
-    borderWidth: y === 2024 ? 2 : 0,
-    borderColor: y === 2024 ? '#fff' : undefined,
+    borderWidth: y === DEFAULT_FY ? 2 : 0,
+    borderColor: y === DEFAULT_FY ? '#fff' : undefined,
     spanGaps: false,
   }));
 
@@ -2202,7 +2203,7 @@ function openDetail(sym) {
   });
 
   // Metrics — use the currently selected year
-  const selYear = +$('year-sel').value || 2024;
+  const selYear = +$('year-sel').value || DEFAULT_FY;
   _updateDetailMetrics(sym, selYear);
 
   // 公司画像 table
@@ -2372,7 +2373,7 @@ function setCur(cur) {
   const mcuEl = $('cs-unit-mcu'); if (mcuEl) mcuEl.textContent = uu + ' · 2018—2025';
   // Re-render everything
   const sel = $('year-sel');
-  const year = sel ? +sel.value : 2024;
+  const year = sel ? +sel.value : DEFAULT_FY;
   rerenderCharts();
   renderTable(year, $('search')?.value || '');
   if (_currentDetailSym && $('detail-panel')?.classList.contains('open'))
@@ -2424,10 +2425,10 @@ async function loadData() {
     years.forEach(y => {
       const o = document.createElement('option');
       o.value = y; o.textContent = y;
-      if (y === 2024) o.selected = true;
+      if (y === DEFAULT_FY) o.selected = true;
       sel.appendChild(o);
     });
-    const defYear = years.includes(2024) ? 2024 : years[0];
+    const defYear = years.includes(DEFAULT_FY) ? DEFAULT_FY : years[0];
 
     // Sort header clicks
     document.querySelectorAll('thead th.sortable').forEach(th =>
