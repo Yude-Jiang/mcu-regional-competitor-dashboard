@@ -255,6 +255,16 @@ def apply_mcu_strategy(
             row["mcu_confidence"] = "na" if strategy == "na" else base_conf
             row["mcu_source"] = None
 
+        # gross_margin_pct is MCU / segment gross margin only (never company-level when MCU rev exists)
+        k_entry = known_mcu.get(key) if isinstance(known_mcu.get(key), dict) else None
+        if row.get("mcu_revenue_yuan") is not None:
+            if k_entry and k_entry.get("mcu_gross_margin") is not None:
+                row["gross_margin_pct"] = round(k_entry["mcu_gross_margin"] * 100, 2)
+            elif k_entry and k_entry.get("mcu_revenue_yuan") is not None and k_entry.get("mcu_gross_margin") is None:
+                row["gross_margin_pct"] = None
+            elif strategy not in ("total_proxy", "total_revenue"):
+                row["gross_margin_pct"] = None
+
     return financials
 
 

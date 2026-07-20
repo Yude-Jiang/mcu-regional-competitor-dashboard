@@ -110,6 +110,7 @@ html,body {
 .fp-sym  { font:600 var(--fz-xs)/1 var(--font); color:var(--text-dim); letter-spacing:.03em; }
 .fp-name { font:600 var(--fz-sm)/1.2 var(--font); color:var(--text); white-space:nowrap; }
 .fp-badge {
+  display: none;
   font:500 var(--fz-2xs)/1 monospace; letter-spacing:.05em; text-transform:uppercase;
   padding:1px 4px; border-radius:2px; background:var(--bg-3);
   color:var(--text-dim); width:fit-content;
@@ -773,7 +774,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th class="g-etc sortable" data-col="emp" rowspan="2" data-i18n="th_emp">员工<span class="si"></span></th>
   </tr>
   <tr>
-    <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2024</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
+    <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2025</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy" data-i18n="th_yoy">YoY%<span class="si"></span></th>
     <th class="g-rev sortable" data-col="cagr" data-i18n="th_cagr">CAGR 18-25<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu" id="th-mcu-hdr">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
@@ -852,18 +853,18 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
   <div class="chart-quad-cell">
     <div class="cs-hdr">
-      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">毛利率</span>
-      <span class="cs-title" data-i18n="chart_gm_title">按公司 · 毛利率 %</span>
+      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">MCU毛利率</span>
+      <span class="cs-title" data-i18n="chart_gm_title">按公司 · MCU 毛利率 %</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_gm">优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。</div>
+    <div class="cs-desc" data-i18n="desc_gm">MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。</div>
     <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
   </div>
   <div class="chart-quad-cell">
     <div class="cs-hdr">
-      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">净利率</span>
-      <span class="cs-title" data-i18n="chart_net_title">按公司 · 净利润率 %</span>
+      <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">总营收净利率</span>
+      <span class="cs-title" data-i18n="chart_net_title">按公司 · 总营收净利润率 %</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_net">净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。</div>
+    <div class="cs-desc" data-i18n="desc_net">净利润率 = 归母净利润 ÷ 公司总营收 × 100%（含非 MCU 业务，如负极材料、打印耗材等）。非 MCU 分产品净利率。</div>
     <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
   </div>
 </div>
@@ -940,7 +941,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     </div>
 
     <div>
-      <div class="dp-section-ttl"><span data-i18n="dp_key_metrics">关键指标</span> · <span id="dp-metric-year">2024</span></div>
+      <div class="dp-section-ttl"><span data-i18n="dp_key_metrics">关键指标</span> · <span id="dp-metric-year">2025</span></div>
       <div class="dp-metrics" id="dp-metrics"></div>
     </div>
 
@@ -975,16 +976,16 @@ const I18N = {
     sort_desc:'↓ 降序', sort_asc:'↑ 升序',
     lbl_companies:'公司', lbl_currency:'货币',
     tag_rev:'总营收', chart_rev_title:'按公司 · 总营收 (来自年报)',
-    tag_net_margin:'净利率', chart_net_title:'按公司 · 净利润率 %', net_margin_yaxis:'净利润率',
-    tag_gross_margin:'毛利率', chart_gm_title:'按公司 · 毛利率 %', gross_margin_yaxis:'毛利率',
-    desc_gm:'优先取年报分产品口径；部分公司历史数据待 PDF 提取（显示 —）。芯片厂商正常区间约 30–60%。',
+    tag_net_margin:'总营收净利率', chart_net_title:'按公司 · 总营收净利润率 %', net_margin_yaxis:'总营收净利率 %',
+    tag_gross_margin:'MCU毛利率', chart_gm_title:'按公司 · MCU 毛利率 %', gross_margin_yaxis:'MCU 毛利率 %',
+    desc_gm:'MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。',
     tag_mcu:'MCU', chart_mcu_title:'按公司 · MCU 营收 (推算)',
     chart_stacked_title:'按年度 · 公司堆叠',
     mcu_view_company:'按公司', mcu_view_stacked:'堆叠',
     tag_heatmap:'热力图', chart_heatmap_title:'YoY% 营收热力图',
     heatmap_sub:'上：总营收YoY  下：MCU YoY',
     desc_rev:'2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。',
-    desc_net:'净利润率 = 净利润 ÷ 营收 × 100%。随营收周期同步波动；2023 年多家公司跌至低点，2024 年逐步回升。注：国民技术（300077）2018 年净利润率约 −268%，系当年董事长失联引发重大资产减值（净亏损约 16 亿元，远超当年营收 6 亿元）。',
+    desc_net:'净利润率 = 归母净利润 ÷ 公司总营收 × 100%（含非 MCU 业务，如负极材料、打印耗材等）。非 MCU 分产品净利率。',
     desc_mcu:'2018→2025 CAGR 约 20%+；兆易创新持续占据最大份额；乐鑫凭借 AIoT 生态增速领先。',
     desc_stacked:'11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。',
     desc_heatmap:'绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。',
@@ -994,14 +995,14 @@ const I18N = {
     legend_reported:'年报直接披露', legend_derived:'推算（高置信）',
     legend_estimated:'估算（低置信）', legend_unavail:'数据缺失',
     legend_yoy_ttl:'YoY同比：', legend_growth:'增长', legend_decline:'下滑',
-    legend_gm_note:'毛利率：优先取年报分产品口径，部分公司历史数据待 PDF 提取（显示 —）',
+    legend_gm_note:'MCU 毛利率：年报分产品 / MCU 产品线口径；缺失年份显示 —',
     th_company:'公司', th_founded:'成立<br>上市', th_arch:'核心架构',
     grp_total_rev:'总营收', grp_mcu_rev:'MCU 营收', grp_rd:'研发',
     th_mcu_pct:'占比%',
     th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR',
     th_rd:'研发', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8年', th_mcu_yoy:'YoY%', th_mcu_pct:'占比%',
-    th_gm:'毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
+    th_gm:'MCU毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
     loading:'加载中… 如数据为空请先运行 ',
     err_load:'数据加载失败：', err_run:'请先运行 ', no_results:'无匹配结果',
     fx_label:'汇率参考 CNY/USD：', fx_source:'（来源：中国人民银行年度均值）',
@@ -1031,7 +1032,8 @@ const I18N = {
     qa_ph:'问任何关于11家MCU公司的问题…', qa_send:'发送',
     qa_suggested_ttl:'建议问题', qa_err_pfx:'错误：', qa_net_err_pfx:'网络错误：',
     m_total_rev:'总营收', m_mcu_rev:'MCU 营收', m_mcu_pct:'MCU 占比',
-    m_gross_mgn:'毛利率', m_rd_exp:'研发费用', m_net_inc:'净利润', m_emp:'员工人数',
+    m_gross_mgn:'MCU毛利率', m_rd_exp:'研发费用', m_net_inc:'净利润', m_emp:'员工人数',
+    m_mcu_gm_basis:'MCU/分产品口径', m_net_total_basis:'公司总营收口径',
     m_mcu_basis:'MCU口径', m_co_basis:'综合口径', m_pct_of_rev:'% of Rev',
     founded:'成立', listed:'上市',
   },
@@ -1045,16 +1047,16 @@ const I18N = {
     sort_desc:'↓ Desc', sort_asc:'↑ Asc',
     lbl_companies:'Companies', lbl_currency:'Currency',
     tag_rev:'Total Rev', chart_rev_title:'By Company · Total Revenue (Annual Reports)',
-    tag_net_margin:'Net Margin', chart_net_title:'By Company · Net Profit Margin %', net_margin_yaxis:'Net Margin %',
-    tag_gross_margin:'Gross Margin', chart_gm_title:'By Company · Gross Margin %', gross_margin_yaxis:'Gross Margin %',
-    desc_gm:'Product-segment gross margin from annual reports (preferred); some historical years pending PDF extraction (shown as —). Normal range for chip companies: ~30–60%.',
+    tag_net_margin:'Net Margin (Total Rev.)', chart_net_title:'By Company · Net Margin on Total Revenue %', net_margin_yaxis:'Net Margin % (Total Rev.)',
+    tag_gross_margin:'MCU Gross Margin', chart_gm_title:'By Company · MCU Gross Margin %', gross_margin_yaxis:'MCU Gross Margin %',
+    desc_gm:'MCU / product-segment gross margin from annual report product tables (scope varies by company). Shown as — when not disclosed; Cmsemicon uses consolidated gross margin (pure-play MCU proxy).',
     tag_mcu:'MCU', chart_mcu_title:'By Company · MCU Revenue (Estimates)',
     chart_stacked_title:'By Year · Company Stack',
     mcu_view_company:'By Co.', mcu_view_stacked:'Stacked',
     tag_heatmap:'Heatmap', chart_heatmap_title:'YoY% Revenue Heatmap',
     heatmap_sub:'Top: Total Rev YoY  Bottom: MCU YoY',
     desc_rev:'2021–22 chip shortage drove revenue surge; 2023 inventory digestion caused broad declines; 2024 recovery diverged — GigaDevice & Espressif showed the strongest rebound.',
-    desc_net:'Net Margin = Net Income ÷ Revenue × 100%. Moves in tandem with revenue cycles; 2023 saw several companies turn unprofitable; gradual recovery in 2024. Note: NationZ (300077) net margin was ~−268% in 2018 due to a governance crisis (CEO disappeared), triggering massive asset impairments — net loss ~¥1.6B vs. revenue of only ¥0.6B.',
+    desc_net:'Net Margin = Net Income Attributable to Parent ÷ Total Company Revenue × 100% (includes non-MCU businesses such as anode materials or printer supplies). Not MCU-segment net margin.',
     desc_mcu:'Industry MCU CAGR 2018→2025 ~20%+; GigaDevice holds the largest share; Espressif leads growth via its AIoT ecosystem.',
     desc_stacked:'Annual evolution of 11-company MCU aggregate; Nasda/Geehy targets industrial & automotive with higher ASP.',
     desc_heatmap:'Green = growth, red = decline. 2023 saw broad synchronized correction across all 11 companies; 2024–25 recovery pace varies by company.',
@@ -1064,14 +1066,14 @@ const I18N = {
     legend_reported:'Annual Report (Direct)', legend_derived:'Derived (High Conf.)',
     legend_estimated:'Estimated (Low Conf.)', legend_unavail:'Unavailable',
     legend_yoy_ttl:'YoY:', legend_growth:'Growth', legend_decline:'Decline',
-    legend_gm_note:'Gross Margin: product-level where available; historical PDF extraction pending (shown as —)',
+    legend_gm_note:'MCU gross margin: annual report product / MCU line; missing years shown as —',
     th_company:'Company', th_founded:'Founded<br>Listed', th_arch:'Core Arch.',
     grp_total_rev:'Total Revenue', grp_mcu_rev:'MCU Revenue', grp_rd:'R&D',
     th_mcu_pct:'Weight%',
     th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR',
     th_rd:'R&D', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8yr', th_mcu_yoy:'YoY%', th_mcu_pct:'MCU Mix%',
-    th_gm:'Gross Mgn', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
+    th_gm:'MCU GM', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
     loading:'Loading… If empty, run ',
     err_load:'Failed to load data: ', err_run:'Please run ', no_results:'No results',
     fx_label:'FX Reference CNY/USD:', fx_source:'(Source: PBOC Annual Average)',
@@ -1101,7 +1103,8 @@ const I18N = {
     qa_ph:'Ask anything about the 11 MCU companies…', qa_send:'Send',
     qa_suggested_ttl:'Suggested Questions', qa_err_pfx:'Error: ', qa_net_err_pfx:'Network error: ',
     m_total_rev:'Total Revenue', m_mcu_rev:'MCU Revenue', m_mcu_pct:'MCU Mix%',
-    m_gross_mgn:'Gross Margin', m_rd_exp:'R&D Expense', m_net_inc:'Net Income', m_emp:'Headcount',
+    m_gross_mgn:'MCU Gross Margin', m_rd_exp:'R&D Expense', m_net_inc:'Net Income', m_emp:'Headcount',
+    m_mcu_gm_basis:'MCU / segment scope', m_net_total_basis:'Total company revenue',
     m_mcu_basis:'MCU-level', m_co_basis:'Company-level', m_pct_of_rev:'% of Rev',
     founded:'f.', listed:'l.',
   },
@@ -1124,7 +1127,7 @@ function confLbl(conf) {
 }
 
 function applyTableHeadI18n() {
-  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || 2024);
+  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || DEFAULT_FY);
   const u = CUR === 'usd' ? 'M$' : '亿';
   const revHdr = $('th-rev-hdr');
   if (revHdr) {
@@ -1176,7 +1179,7 @@ function setLang(lang) {
   renderFxBar();
   if (typeof rerenderCharts === 'function') rerenderCharts();
   const sel = document.getElementById('year-sel');
-  const year = sel ? +sel.value : 2024;
+  const year = sel ? +sel.value : DEFAULT_FY;
   const srch = document.getElementById('search');
   if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
   // Re-render pipeline strip (uses company names)
@@ -1208,6 +1211,7 @@ const ORDER = [
   '603986','300327','688380','300077','688279',
   '002180','688385','688766','688595','688391','688018',
 ];
+const DEFAULT_FY = 2025;
 const STRAT_LBL = {
   segment_reported:'SEG·RPT', total_proxy:'TOTAL×k',
   total_revenue:'TOTAL=MCU', subsidiary_geehy:'SUBSID.',
@@ -1300,7 +1304,7 @@ const CF = {
   years:     new Set([2018,2019,2020,2021,2022,2023,2024,2025]),
   companies: new Set(ORDER),
   sortField: 'mcu',   // 'mcu' | 'rev' | 'name'
-  sortYear:  2024,
+  sortYear:  DEFAULT_FY,
   sortDir:   'desc',
 };
 
@@ -1421,7 +1425,7 @@ function initChartCtrl() {
   [...years].reverse().forEach(y => {
     const o = document.createElement('option');
     o.value = y; o.textContent = y;
-    if (y === 2024) o.selected = true;
+    if (y === DEFAULT_FY) o.selected = true;
     sortYrSel.appendChild(o);
   });
 
@@ -1540,13 +1544,11 @@ function renderPipeline(data, year) {
     const m  = co.meta || {};
     const f  = (co.financials || {})[String(year)] || {};
     const conf = m.mcu_confidence || 'na';
-    const strat = STRAT_LBL[m.mcu_strategy] || '?';
     const border = CONF_BORDER[conf] || CONF_BORDER.na;
     const note = metaNote(m).replace(/"/g, '&quot;');
     return `<div class="fp-card" style="border-left-color:${border}" title="${note}" onclick="openDetail('${sym}')">
       <span class="fp-sym">${sym}</span>
       <span class="fp-name">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</span>
-      <span class="fp-badge">${strat}</span>
     </div>`;
   }).join('');
 }
@@ -1857,8 +1859,8 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {
     label: String(y),
     data:  ss.map(s => { const v = (G.companies[s].financials[y]||{})[field]; return v != null ? v * scale : null; }),
     backgroundColor: YEAR_PAL[y],
-    borderWidth: y === 2024 ? 2 : 0,
-    borderColor: y === 2024 ? '#fff' : undefined,
+    borderWidth: y === DEFAULT_FY ? 2 : 0,
+    borderColor: y === DEFAULT_FY ? '#fff' : undefined,
     spanGaps: false,
   }));
 
@@ -2071,11 +2073,11 @@ function _updateDetailMetrics(sym, year) {
     { key:'mcu_pct',   lbl:T('m_mcu_pct'),    val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
       sub: stratLbl(m.mcu_strategy, true) },
     { key:'gross_mgn', lbl:T('m_gross_mgn'),  val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
-      sub: f.mcu_confidence === 'high' ? T('m_mcu_basis') : (f.gross_margin_pct != null ? T('m_co_basis') : '') },
+      sub: f.gross_margin_pct != null ? T('m_mcu_gm_basis') : '' },
     { key:'rd_exp',    lbl:T('m_rd_exp'),     val: curFmt(f[curF('rd_expense')]),
       sub: f.rd_pct != null ? f.rd_pct.toFixed(1)+T('m_pct_of_rev') : '' },
     { key:'net_inc',   lbl:T('m_net_inc'),    val: curFmt(f[curF('net_income')]),
-      sub: f.net_income_yoy_pct != null ? (f.net_income_yoy_pct>=0?'+':'')+f.net_income_yoy_pct.toFixed(1)+'% YoY' : '',
+      sub: T('m_net_total_basis'),
       cls: f.net_income_yoy_pct!=null ? (f.net_income_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
     { key:'emp_count', lbl:T('m_emp'),        val: f.employee_count != null ? localeNum(f.employee_count) : '—',
       sub: '' },
@@ -2201,7 +2203,7 @@ function openDetail(sym) {
   });
 
   // Metrics — use the currently selected year
-  const selYear = +$('year-sel').value || 2024;
+  const selYear = +$('year-sel').value || DEFAULT_FY;
   _updateDetailMetrics(sym, selYear);
 
   // 公司画像 table
@@ -2290,16 +2292,16 @@ const METRIC_INFO = {
     en:{ title:'MCU Mix%', formula:'MCU Revenue ÷ Total Revenue × 100%', note:'Reflects MCU business concentration. >80% = pure-play MCU; <30% = diversified.' },
   },
   gross_mgn: {
-    zh:{ title:'毛利率', formula:'(营收 − 营业成本) ÷ 营收 × 100%', note:'MCU口径：年报分产品毛利率（优先）<br>综合口径：公司整体毛利率（含非MCU）<br>芯片厂商正常区间 30–60%。<br><br>⚠ 中微半导、峰岹、芯海、钜泉、乐鑫历史毛利率 API 未覆盖，待年报 PDF 提取。' },
-    en:{ title:'Gross Margin', formula:'(Revenue − COGS) ÷ Revenue × 100%', note:'MCU-level: product segment gross margin (preferred)<br>Company-level: overall gross margin (includes non-MCU)<br>Normal range for chip companies: 30–60%.<br><br>⚠ Cmsemicon, Fortior, Chipsea, Hi-Trend, Espressif historical GM not covered by API; pending PDF extraction.' },
+    zh:{ title:'MCU 毛利率', formula:'(MCU产品线营收 − 对应营业成本) ÷ MCU产品线营收 × 100%', note:'来自年报「主营业务分产品」表中 MCU / 约定产品线行。<br>国民技术为「芯片类产品」；中微半导无单独 MCU 行时用公司综合毛利率（纯 MCU 公司近似）。<br>无分产品毛利率时显示 —。' },
+    en:{ title:'MCU Gross Margin', formula:'(MCU product revenue − segment COGS) ÷ MCU product revenue × 100%', note:'From annual report product-segment table (MCU or agreed product line).<br>NationZ uses Chip Products line; Cmsemicon uses consolidated margin when no MCU line (pure-play proxy).<br>Shown as — when segment GM is not disclosed.' },
   },
   rd_exp: {
-    zh:{ title:'研发费用', formula:'研发费用率 = 研发费用 ÷ 营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。A股芯片公司普遍 10–20%。' },
-    en:{ title:'R&D Expense', formula:'R&D Intensity = R&D Expense ÷ Revenue × 100%', note:'From income statement "R&D Expenses". China A-share chip companies typically 10–20%.' },
+    zh:{ title:'研发费用', formula:'研发费用率 = 研发费用 ÷ 公司总营收 × 100%', note:'来自利润表「研发费用」行，反映技术投入强度。' },
+    en:{ title:'R&D Expense', formula:'R&D Intensity = R&D Expense ÷ Total Revenue × 100%', note:'From income statement R&D line (company consolidated).' },
   },
   net_inc: {
-    zh:{ title:'净利润', formula:'净利润率 = 净利润 ÷ 营收 × 100%', note:'归属于母公司股东的净利润，已扣除所有成本、税费及少数股东损益。' },
-    en:{ title:'Net Income', formula:'Net Margin = Net Income ÷ Revenue × 100%', note:'Net income attributable to parent shareholders, after all costs, taxes, and minority interests.' },
+    zh:{ title:'净利润（公司总营收）', formula:'净利润率 = 归母净利润 ÷ 公司总营收 × 100%', note:'公司合并利润表口径，含负极材料、打印耗材等非 MCU 业务。' },
+    en:{ title:'Net Income (Total Revenue)', formula:'Net Margin = Net Income Attributable to Parent ÷ Total Company Revenue × 100%', note:'Consolidated income statement; includes non-MCU businesses.' },
   },
   emp_count: {
     zh:{ title:'员工人数', formula:'人效（万元/人）= 总营收 ÷ 员工人数', note:'报告期末在职员工总数，来自年报「员工情况」章节。' },
@@ -2371,7 +2373,7 @@ function setCur(cur) {
   const mcuEl = $('cs-unit-mcu'); if (mcuEl) mcuEl.textContent = uu + ' · 2018—2025';
   // Re-render everything
   const sel = $('year-sel');
-  const year = sel ? +sel.value : 2024;
+  const year = sel ? +sel.value : DEFAULT_FY;
   rerenderCharts();
   renderTable(year, $('search')?.value || '');
   if (_currentDetailSym && $('detail-panel')?.classList.contains('open'))
@@ -2423,10 +2425,10 @@ async function loadData() {
     years.forEach(y => {
       const o = document.createElement('option');
       o.value = y; o.textContent = y;
-      if (y === 2024) o.selected = true;
+      if (y === DEFAULT_FY) o.selected = true;
       sel.appendChild(o);
     });
-    const defYear = years.includes(2024) ? 2024 : years[0];
+    const defYear = years.includes(DEFAULT_FY) ? DEFAULT_FY : years[0];
 
     // Sort header clicks
     document.querySelectorAll('thead th.sortable').forEach(th =>
