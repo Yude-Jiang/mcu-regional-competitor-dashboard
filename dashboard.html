@@ -480,16 +480,44 @@ body.panel-open .table-wrap { padding-right:50vw; }
 }
 .pipe-year-sel:focus { border-color:var(--cyan-1); }
 .period-tabs {
-  display:flex; gap:4px; align-items:center; flex-shrink:0;
-  padding:2px; border-radius:6px; background:var(--bg-3); border:1px solid var(--border-b);
+  display:flex; gap:6px; align-items:center; flex-shrink:0;
+  padding:3px; border-radius:8px; background:var(--bg-3); border:1px solid var(--border-b);
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
 .period-tab {
-  padding:4px 10px; border:none; border-radius:4px; cursor:pointer;
-  font:700 var(--fz-xs)/1 var(--font); color:var(--text-dim); background:transparent;
-  transition:background .12s, color .12s;
+  padding:5px 12px; border:none; border-radius:6px; cursor:pointer;
+  font:700 var(--fz-xs)/1 var(--font); color:var(--text-dim); background:var(--bg-1);
+  transition:background .12s, color .12s, box-shadow .12s, transform .08s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.04);
 }
-.period-tab:hover { color:var(--navy-1); }
-.period-tab.active { background:var(--navy-1); color:#fff; }
+.period-tab:hover {
+  color:var(--navy-1);
+  box-shadow: 0 2px 6px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06);
+}
+.period-tab.active {
+  background:var(--navy-1); color:#fff;
+  box-shadow: 0 3px 10px rgba(3,35,75,.35), 0 1px 2px rgba(0,0,0,.2);
+}
+.hdr .period-tabs {
+  margin-left:10px;
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.22);
+  box-shadow: 0 2px 10px rgba(0,0,0,.28);
+}
+.hdr .period-tab {
+  color:rgba(255,255,255,.92);
+  background:rgba(0,0,0,.18);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+.hdr .period-tab:hover {
+  color:#fff;
+  background:rgba(255,255,255,.12);
+}
+.hdr .period-tab.active {
+  background:#fff;
+  color:var(--navy-1);
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+}
 .chart-ctrl-lbl {
   font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
   text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
@@ -701,6 +729,8 @@ body.panel-open .table-wrap { padding-right:50vw; }
   }
   .chart-box:last-child { border-bottom: 0; }
   .brand .sub { display: none; }
+  .hdr .period-tabs { margin-left: 4px; }
+  .hdr .period-tab { padding: 4px 10px; }
   .chart-quad { grid-template-columns:1fr; }
   .chart-quad-cell { border-right:0; }
   .chart-quad-cell:not(:last-child) { border-bottom:1px solid var(--border); }
@@ -732,6 +762,10 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <span class="ttl">MCU.CN</span>
     <span class="sep">/</span>
     <span class="sub" data-i18n="subtitle">中国大陆 MCU 上市公司 · 年报与推算</span>
+    <div class="period-tabs" id="period-tabs" role="tablist" aria-label="数据周期">
+      <button type="button" class="period-tab active" data-period="annual" data-i18n="tab_annual" role="tab">2018-2025</button>
+      <button type="button" class="period-tab" data-period="2026Q1" data-i18n="tab_2026" role="tab">2026</button>
+    </div>
   </div>
   <div class="hdr-r">
     <span class="hdr-meta" id="hdr-meta"></span>
@@ -743,10 +777,6 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 <!-- ── Pipeline strip ── -->
 <div class="pipeline">
-  <div class="period-tabs" id="period-tabs">
-    <button type="button" class="period-tab active" data-period="annual" data-i18n="tab_annual">年报</button>
-    <button type="button" class="period-tab" data-period="2026Q1" data-i18n="tab_2026q1">2026一季报</button>
-  </div>
   <div class="pipe-lbl" id="pipe-fy-wrap">FY&nbsp;<select class="pipe-year-sel" id="year-sel" title="表格年份"></select></div>
   <div id="pipe-cards" style="display:contents"></div>
 </div>
@@ -1013,8 +1043,8 @@ const I18N = {
     desc_heatmap:'绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。',
     tag_tbl:'数据表', tbl_title:'公司详情 · 点击任意行查看完整画像与历史数据',
     tbl_src:'数据来源：年报 / 一季报 / AKShare / 招股书',
-    tab_annual:'年报',
-    tab_2026q1:'2026一季报',
+    tab_annual:'2018-2025',
+    tab_2026:'2026',
     period_q1_note:'一季报单季合并口径（1–3月）；YoY 对比上年同期。MCU 列均为估算（一季报通常无年报级分产品表），悬停单元格或打开详情可查看来源说明。',
     mcu_est_badge:'估',
     mcu_est_note:'MCU为估算值',
@@ -1089,8 +1119,8 @@ const I18N = {
     desc_heatmap:'Green = growth, red = decline. 2023 saw broad synchronized correction across all 11 companies; 2024–25 recovery pace varies by company.',
     tag_tbl:'Table', tbl_title:'Company Detail · Click any row for full profile & history',
     tbl_src:'Source: Annual Reports / Q1 Reports / AKShare / Prospectus',
-    tab_annual:'Annual',
-    tab_2026q1:'2026 Q1',
+    tab_annual:'2018-2025',
+    tab_2026:'2026',
     period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. All MCU figures are estimates (Q1 reports rarely disclose full product breakdown). Hover table cells or open detail for source notes.',
     mcu_est_badge:'Est',
     mcu_est_note:'MCU revenue is estimated',
@@ -1474,7 +1504,7 @@ function updatePeriodUi() {
   if (mcuEl) {
     const uu = curUnit();
     mcuEl.textContent = q1
-      ? `${uu} · ${LANG === 'zh' ? '2026一季报' : '2026 Q1'}`
+      ? `${uu} · ${T('tab_2026')}`
       : `${uu} · 2018—2025`;
   }
 }
