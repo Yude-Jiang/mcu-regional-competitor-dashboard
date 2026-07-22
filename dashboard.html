@@ -474,6 +474,17 @@ body.panel-open .table-wrap { padding-right:50vw; }
   outline:none; cursor:pointer;
 }
 .pipe-year-sel:focus { border-color:var(--cyan-1); }
+.period-tabs {
+  display:flex; gap:4px; align-items:center; flex-shrink:0;
+  padding:2px; border-radius:6px; background:var(--bg-3); border:1px solid var(--border-b);
+}
+.period-tab {
+  padding:4px 10px; border:none; border-radius:4px; cursor:pointer;
+  font:700 var(--fz-xs)/1 var(--font); color:var(--text-dim); background:transparent;
+  transition:background .12s, color .12s;
+}
+.period-tab:hover { color:var(--navy-1); }
+.period-tab.active { background:var(--navy-1); color:#fff; }
 .chart-ctrl-lbl {
   font:700 var(--fz-2xs)/1 var(--font); color:var(--text-faint);
   text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;
@@ -727,7 +738,11 @@ body.panel-open .table-wrap { padding-right:50vw; }
 
 <!-- ── Pipeline strip ── -->
 <div class="pipeline">
-  <div class="pipe-lbl">FY&nbsp;<select class="pipe-year-sel" id="year-sel" title="表格年份"></select></div>
+  <div class="period-tabs" id="period-tabs">
+    <button type="button" class="period-tab active" data-period="annual" data-i18n="tab_annual">年报</button>
+    <button type="button" class="period-tab" data-period="2026Q1" data-i18n="tab_2026q1">2026一季报</button>
+  </div>
+  <div class="pipe-lbl" id="pipe-fy-wrap">FY&nbsp;<select class="pipe-year-sel" id="year-sel" title="表格年份"></select></div>
   <div id="pipe-cards" style="display:contents"></div>
 </div>
 
@@ -742,7 +757,8 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
     <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
   </div>
-  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" data-i18n="tbl_src">数据来源：年报 / AKShare / 招股书</span>
+  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" id="tbl-period-note" data-i18n="period_q1_note"></span>
+  <span class="cs-unit feature-hidden" style="font-size:var(--fz-xs);color:var(--text-faint)" id="tbl-src-lbl" data-i18n="tbl_src">数据来源：年报 / 一季报 / AKShare / 招股书</span>
 </div>
 <!-- ── Table toolbar (search + currency) ── -->
 <div class="table-toolbar">
@@ -990,7 +1006,10 @@ const I18N = {
     desc_stacked:'11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。',
     desc_heatmap:'绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。',
     tag_tbl:'数据表', tbl_title:'公司详情 · 点击任意行查看完整画像与历史数据',
-    tbl_src:'数据来源：年报 / AKShare / 招股书',
+    tbl_src:'数据来源：年报 / 一季报 / AKShare / 招股书',
+    tab_annual:'年报',
+    tab_2026q1:'2026一季报',
+    period_q1_note:'一季报为单季合并口径（1–3月）；YoY 对比上年同期。MCU 分产品收入多数未披露。',
     legend_conf_ttl:'MCU数据置信度：',
     legend_reported:'年报直接披露', legend_derived:'推算（高置信）',
     legend_estimated:'估算（低置信）', legend_unavail:'数据缺失',
@@ -1061,7 +1080,10 @@ const I18N = {
     desc_stacked:'Annual evolution of 11-company MCU aggregate; Nasda/Geehy targets industrial & automotive with higher ASP.',
     desc_heatmap:'Green = growth, red = decline. 2023 saw broad synchronized correction across all 11 companies; 2024–25 recovery pace varies by company.',
     tag_tbl:'Table', tbl_title:'Company Detail · Click any row for full profile & history',
-    tbl_src:'Source: Annual Reports / AKShare / Prospectus',
+    tbl_src:'Source: Annual Reports / Q1 Reports / AKShare / Prospectus',
+    tab_annual:'Annual',
+    tab_2026q1:'2026 Q1',
+    period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. MCU segment revenue usually not in Q1 filings.',
     legend_conf_ttl:'MCU Data Confidence:',
     legend_reported:'Annual Report (Direct)', legend_derived:'Derived (High Conf.)',
     legend_estimated:'Estimated (Low Conf.)', legend_unavail:'Unavailable',
@@ -1127,7 +1149,7 @@ function confLbl(conf) {
 }
 
 function applyTableHeadI18n() {
-  const year = $('year-sel') ? +$('year-sel').value : ($('tbl-year-lbl')?.textContent || DEFAULT_FY);
+  const year = activeTableYear();
   const u = CUR === 'usd' ? 'M$' : '亿';
   const revHdr = $('th-rev-hdr');
   if (revHdr) {
@@ -1179,11 +1201,12 @@ function setLang(lang) {
   renderFxBar();
   if (typeof rerenderCharts === 'function') rerenderCharts();
   const sel = document.getElementById('year-sel');
-  const year = sel ? +sel.value : DEFAULT_FY;
+  const year = activeTableYear();
   const srch = document.getElementById('search');
   if (typeof renderTable === 'function') renderTable(year, srch ? srch.value : '');
   // Re-render pipeline strip (uses company names)
   if (typeof G !== 'undefined' && G) renderPipeline(G, year);
+  updatePeriodUi();
   // Update company pill labels in-place (no event listener re-attach needed)
   if (typeof G !== 'undefined' && G) {
     document.querySelectorAll('.co-pill[data-sym]').forEach(pill => {
@@ -1212,6 +1235,46 @@ const ORDER = [
   '002180','688385','688766','688595','688391','688018',
 ];
 const DEFAULT_FY = 2025;
+const PERIOD_Q1_KEY = '2026Q1';
+let DATA_PERIOD = 'annual';
+
+function isAnnualYear(y) {
+  const s = String(y);
+  return /^\d{4}$/.test(s);
+}
+function yearInData(y) {
+  const ys = G?.years || [];
+  const s = String(y);
+  return ys.some(v => String(v) === s);
+}
+function yearColor(y) {
+  return YEAR_PAL[y] ?? YEAR_PAL[String(y)] ?? '#90a4ae';
+}
+function yearPillText(y) {
+  if (String(y) === PERIOD_Q1_KEY) return LANG === 'zh' ? '26Q1' : '26Q1';
+  return String(y);
+}
+function yearPillFg(y) {
+  const s = String(y);
+  if (s === PERIOD_Q1_KEY || s === '2020' || s === '2025') return '#03234b';
+  return '#fff';
+}
+function chartYearOptions() {
+  return Object.keys(YEAR_PAL).filter(yr => {
+    const key = yr === '2026Q1' ? PERIOD_Q1_KEY : Number(yr);
+    if (!yearInData(key)) return false;
+    if (DATA_PERIOD === 'annual' && key === PERIOD_Q1_KEY) return false;
+    return true;
+  }).map(yr => (yr === '2026Q1' ? PERIOD_Q1_KEY : Number(yr)));
+}
+function activeTableYear() {
+  if (DATA_PERIOD === '2026Q1') return PERIOD_Q1_KEY;
+  const sel = $('year-sel');
+  return sel ? +sel.value : DEFAULT_FY;
+}
+function finOf(co, y) {
+  return (co?.financials || {})[String(y)] || {};
+}
 const STRAT_LBL = {
   segment_reported:'SEG·RPT', total_proxy:'TOTAL×k',
   total_revenue:'TOTAL=MCU', subsidiary_geehy:'SUBSID.',
@@ -1250,6 +1313,7 @@ const YEAR_PAL = {
   2018:'#b0bec5', 2019:'#78909c', 2020:'#03234b',
   2021:'#81d4fa', 2022:'#3cb4e6',
   2023:'#f48fb1', 2024:'#e6007e', 2025:'#ffd200',
+  '2026Q1':'#26c6da',
 };
 // Company palette: maximise hue gap between adjacent companies in stack ORDER
 // ORDER: 603986→300327→688380→300077→688279→002180→688385→688766→688595→688391→688018
@@ -1308,7 +1372,9 @@ const CF = {
   sortDir:   'desc',
 };
 
-function cfYears()  { return Object.keys(YEAR_PAL).map(Number).filter(y => CF.years.has(y) && (G?.years||[]).includes(y)); }
+function cfYears() {
+  return chartYearOptions().filter(y => CF.years.has(y));
+}
 function cfSyms()   {
   let ss = ORDER.filter(s => G?.companies[s] && CF.companies.has(s));
   if (CF.sortField === 'name') {
@@ -1322,8 +1388,8 @@ function cfSyms()   {
   } else {
     const field = CF.sortField === 'mcu' ? curF('mcu_revenue') : curF('total_revenue');
     ss = ss.slice().sort((a,b) => {
-      const va = (G.companies[a].financials?.[CF.sortYear]||{})[field] ?? -1/0;
-      const vb = (G.companies[b].financials?.[CF.sortYear]||{})[field] ?? -1/0;
+      const va = finOf(G.companies[a], CF.sortYear)[field] ?? -1/0;
+      const vb = finOf(G.companies[b], CF.sortYear)[field] ?? -1/0;
       return CF.sortDir === 'asc' ? va - vb : vb - va;
     });
   }
@@ -1365,34 +1431,111 @@ function initMcuViewToggle() {
 }
 
 // ── Chart control bar init ────────────────────────────────────────────────
-function initChartCtrl() {
-  const years = Object.keys(YEAR_PAL).map(Number).filter(y => (G.years||[]).includes(y));
+let _yrAllBound = false;
 
-  // Year pills
+function rebuildYearPills() {
+  const years = chartYearOptions();
   const yrWrap = $('yr-toggles');
+  if (!yrWrap) return;
   yrWrap.innerHTML = '';
   years.forEach(y => {
-    const col = YEAR_PAL[y];
+    const col = yearColor(y);
     const pill = document.createElement('button');
     pill.className = 'yr-pill';
     pill.dataset.year = y;
-    pill.style.cssText = `background:${col};color:${y===2020||y===2025?'#03234b':'#fff'};border-color:${col}`;
-    pill.innerHTML = `<span class="yd" style="background:#fff;opacity:.7"></span>${y}`;
+    if (!CF.years.has(y)) pill.classList.add('off');
+    pill.style.cssText = `background:${col};color:${yearPillFg(y)};border-color:${col}`;
+    pill.innerHTML = `<span class="yd" style="background:#fff;opacity:.7"></span>${yearPillText(y)}`;
     pill.addEventListener('click', () => {
       if (CF.years.has(y)) { CF.years.delete(y); pill.classList.add('off'); }
-      else                  { CF.years.add(y);    pill.classList.remove('off'); }
+      else { CF.years.add(y); pill.classList.remove('off'); }
       rerenderCharts();
     });
     yrWrap.appendChild(pill);
   });
-  $('yr-all-btn').addEventListener('click', () => {
-    const allOn = CF.years.size === years.length;
-    if (allOn) { CF.years.clear(); document.querySelectorAll('.yr-pill').forEach(p => p.classList.add('off')); }
-    else { years.forEach(y => CF.years.add(y)); document.querySelectorAll('.yr-pill').forEach(p => p.classList.remove('off')); }
-    rerenderCharts();
-  });
+}
 
-  // Company pills
+function updatePeriodUi() {
+  const q1 = DATA_PERIOD === '2026Q1';
+  $('tbl-period-note')?.classList.toggle('feature-hidden', !q1);
+  $('tbl-src-lbl')?.classList.toggle('feature-hidden', q1);
+  const mcuEl = $('cs-unit-mcu');
+  if (mcuEl) {
+    const uu = curUnit();
+    mcuEl.textContent = q1
+      ? `${uu} · ${LANG === 'zh' ? '2026一季报' : '2026 Q1'}`
+      : `${uu} · 2018—2025`;
+  }
+}
+
+function rebuildSortYearSelect() {
+  const sortYrSel = $('chart-sort-year');
+  if (!sortYrSel) return;
+  const years = chartYearOptions();
+  sortYrSel.innerHTML = '';
+  [...years].reverse().forEach(y => {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = yearPillText(y);
+    if (y === CF.sortYear) o.selected = true;
+    sortYrSel.appendChild(o);
+  });
+}
+
+function setDataPeriod(period) {
+  DATA_PERIOD = period;
+  document.querySelectorAll('.period-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.period === period);
+  });
+  const fyWrap = $('pipe-fy-wrap');
+  if (fyWrap) fyWrap.style.display = period === 'annual' ? '' : 'none';
+
+  if (period === '2026Q1') {
+    CF.years = new Set([PERIOD_Q1_KEY]);
+    CF.sortYear = PERIOD_Q1_KEY;
+  } else {
+    CF.years = new Set((G?.years || []).filter(isAnnualYear).map(Number));
+    CF.sortYear = DEFAULT_FY;
+  }
+  rebuildYearPills();
+  rebuildSortYearSelect();
+  updatePeriodUi();
+  const ty = activeTableYear();
+  renderPipeline(G, ty);
+  renderTable(ty, $('search')?.value || '');
+  rerenderCharts();
+  if (_currentDetailSym && $('detail-panel')?.classList.contains('open'))
+    _updateDetailMetrics(_currentDetailSym, ty);
+}
+
+function initPeriodTabs() {
+  document.querySelectorAll('.period-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.period;
+      if (p && p !== DATA_PERIOD) setDataPeriod(p);
+    });
+  });
+}
+
+function initChartCtrl() {
+  rebuildYearPills();
+
+  if (!_yrAllBound) {
+    $('yr-all-btn').addEventListener('click', () => {
+      const years = chartYearOptions();
+      const allOn = years.length > 0 && years.every(y => CF.years.has(y));
+      if (allOn) {
+        CF.years.clear();
+        document.querySelectorAll('.yr-pill').forEach(p => p.classList.add('off'));
+      } else {
+        years.forEach(y => CF.years.add(y));
+        document.querySelectorAll('.yr-pill').forEach(p => p.classList.remove('off'));
+      }
+      rerenderCharts();
+    });
+    _yrAllBound = true;
+  }
+
+  const years = chartYearOptions();
   const coWrap = $('co-toggles');
   coWrap.innerHTML = '';
   ORDER.filter(s => G.companies[s]).forEach((s, i) => {
@@ -1420,14 +1563,7 @@ function initChartCtrl() {
   });
 
   // Sort year dropdown — populate with available years, descending
-  const sortYrSel = $('chart-sort-year');
-  sortYrSel.innerHTML = '';
-  [...years].reverse().forEach(y => {
-    const o = document.createElement('option');
-    o.value = y; o.textContent = y;
-    if (y === DEFAULT_FY) o.selected = true;
-    sortYrSel.appendChild(o);
-  });
+  rebuildSortYearSelect();
 
   // Sort field change
   $('chart-sort-field').addEventListener('change', e => {
@@ -1436,7 +1572,8 @@ function initChartCtrl() {
     rerenderCharts();
   });
   $('chart-sort-year').addEventListener('change', e => {
-    CF.sortYear = +e.target.value;
+    const v = e.target.value;
+    CF.sortYear = v === PERIOD_Q1_KEY ? PERIOD_Q1_KEY : +v;
     rerenderCharts();
   });
 
@@ -1542,7 +1679,7 @@ function renderPipeline(data, year) {
   $('pipe-cards').innerHTML = ORDER.filter(s => data.companies[s]).map(sym => {
     const co = data.companies[sym];
     const m  = co.meta || {};
-    const f  = (co.financials || {})[String(year)] || {};
+    const f  = finOf(co, year);
     const conf = m.mcu_confidence || 'na';
     const border = CONF_BORDER[conf] || CONF_BORDER.na;
     const note = metaNote(m).replace(/"/g, '&quot;');
@@ -1555,7 +1692,7 @@ function renderPipeline(data, year) {
 
 // ── Table sort helper ─────────────────────────────────────────────────────
 function sortVal(sym, year, col) {
-  const f = (G.companies[sym].financials || {})[String(year)] || {};
+  const f = finOf(G.companies[sym], year);
   switch (col) {
     case 'rev':     return f[curF('total_revenue')];
     case 'rev_yoy': return f.revenue_yoy_pct;
@@ -1573,7 +1710,12 @@ function sortVal(sym, year, col) {
 
 // ── Table render ──────────────────────────────────────────────────────────
 function renderTable(year, query) {
-  const yl = $('tbl-year-lbl'); if (yl) yl.textContent = year;
+  const yl = $('tbl-year-lbl');
+  if (yl) {
+    yl.textContent = String(year) === PERIOD_Q1_KEY
+      ? (LANG === 'zh' ? '2026 Q1' : '2026 Q1')
+      : year;
+  }
   const q = (query || '').toLowerCase();
 
   let syms = ORDER.filter(s => G.companies[s]).filter(s => {
@@ -1597,16 +1739,16 @@ function renderTable(year, query) {
     });
   }
 
-  const allYears = G.years || [];
+  const allYears = (G.years || []).filter(isAnnualYear);
   const rows = syms.map(sym => {
     const co = G.companies[sym];
     const m  = co.meta || {};
-    const f  = (co.financials || {})[String(year)] || {};
+    const f  = finOf(co, year);
     const dt = f.mcu_data_type || 'unavailable';
     const cagr = f.cagr_pct != null
       ? `<span title="${f.cagr_label || ''}">${f.cagr_pct.toFixed(1)}%</span>`
       : '<span class="na">—</span>';
-    const spkVals = allYears.map(y => { const v = (co.financials[y]||{})[curF('mcu_revenue')]; return v != null ? curV(v) : null; });
+    const spkVals = allYears.map(y => { const v = finOf(co, y)[curF('mcu_revenue')]; return v != null ? curV(v) : null; });
     const fmtRev = curFmt(f[curF('total_revenue')]);
     const fmtMcu = curFmt(f[curF('mcu_revenue')]);
     const fmtRd  = curFmt(f[curF('rd_expense')]);
@@ -1678,7 +1820,7 @@ function _updateMcuSummary(years, ss) {
   const unit  = curShort();
   const yrs   = years.slice().sort();
   const totals = yrs.map(y =>
-    ss.reduce((sum, s) => { const v=(G.companies[s].financials[y]||{})[field]; return sum+(v!=null?v*scale:0); }, 0)
+    ss.reduce((sum, s) => { const v=finOf(G.companies[s], y)[field]; return sum+(v!=null?v*scale:0); }, 0)
   );
   if (!totals.length) { el.innerHTML = ''; return; }
   const n    = totals.length - 1;
@@ -1701,7 +1843,7 @@ function _updateRevSummary(years, ss) {
   const unit  = curShort();
   const yrs   = years.slice().sort();
   const totals = yrs.map(y =>
-    ss.reduce((sum, s) => { const v=(G.companies[s].financials[y]||{})[field]; return sum+(v!=null?v*scale:0); }, 0)
+    ss.reduce((sum, s) => { const v=finOf(G.companies[s], y)[field]; return sum+(v!=null?v*scale:0); }, 0)
   );
   if (!totals.length) { el.innerHTML = ''; return; }
   const n    = totals.length - 1;
@@ -1729,8 +1871,8 @@ function renderTotalRevChart() {
 
   const datasets = years.map(y => ({
     label: String(y),
-    data: ss.map(s => { const v=(G.companies[s].financials[y]||{})[field]; return v!=null?v*scale:null; }),
-    backgroundColor: YEAR_PAL[y],
+    data: ss.map(s => { const v=finOf(G.companies[s], y)[field]; return v!=null?v*scale:null; }),
+    backgroundColor: yearColor(y),
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
     spanGaps: false,
   }));
@@ -1776,8 +1918,8 @@ function renderGrossMarginChart() {
 
   const datasets = years.map(y => ({
     label: String(y),
-    data: ss.map(s => (G.companies[s].financials[y]||{}).gross_margin_pct ?? null),
-    backgroundColor: YEAR_PAL[y],
+    data: ss.map(s => finOf(G.companies[s], y).gross_margin_pct ?? null),
+    backgroundColor: yearColor(y),
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
     spanGaps: false,
   }));
@@ -1816,8 +1958,8 @@ function renderNetMarginChart() {
 
   const datasets = years.map(y => ({
     label: String(y),
-    data: ss.map(s => netMarginPct(G.companies[s].financials[y]||{})),
-    backgroundColor: YEAR_PAL[y],
+    data: ss.map(s => netMarginPct(finOf(G.companies[s], y))),
+    backgroundColor: yearColor(y),
     borderWidth: y===CF.sortYear?2:0, borderColor: y===CF.sortYear?'#fff':undefined,
     spanGaps: false,
   }));
@@ -1857,8 +1999,8 @@ function renderGroupedByYear(canvasId, key, field, tooltipSuffix, extraYOpts = {
   const dec   = field.endsWith('_yuan') ? 2 : 1;
   const datasets = years.map(y => ({
     label: String(y),
-    data:  ss.map(s => { const v = (G.companies[s].financials[y]||{})[field]; return v != null ? v * scale : null; }),
-    backgroundColor: YEAR_PAL[y],
+    data:  ss.map(s => { const v = finOf(G.companies[s], y)[field]; return v != null ? v * scale : null; }),
+    backgroundColor: yearColor(y),
     borderWidth: y === DEFAULT_FY ? 2 : 0,
     borderColor: y === DEFAULT_FY ? '#fff' : undefined,
     spanGaps: false,
@@ -1906,13 +2048,13 @@ function renderStacked() {
   const stUnit   = curShort();
   const datasets = ss.map(s => ({
     label: (() => { const m=G.companies[s].meta||{}; return (LANG==='en'?m.name_en:m.name_cn)||s; })(),
-    data:  years.map(y => { const v = (G.companies[s].financials[y]||{})[mcuField]; return v != null ? v * stScale : null; }),
+    data:  years.map(y => { const v = finOf(G.companies[s], y)[mcuField]; return v != null ? v * stScale : null; }),
     backgroundColor: CO_COLORS[ORDER.indexOf(s) % CO_COLORS.length],
     stack: 'a', spanGaps: false,
   }));
 
   const yearTotals = years.map(y =>
-    ss.reduce((sum, s) => { const v = (G.companies[s].financials[y]||{})[mcuField]; return sum + (v != null ? v * stScale : 0); }, 0)
+    ss.reduce((sum, s) => { const v = finOf(G.companies[s], y)[mcuField]; return sum + (v != null ? v * stScale : 0); }, 0)
   );
 
   const ctx = $('c-stacked').getContext('2d');
@@ -1977,7 +2119,7 @@ function renderYoYHeatmap() {
     const name = (LANG==='en' ? meta.name_en : meta.name_cn) || s;
     html += `<div class="yoy-row-lbl">${name}</div>`;
     years.forEach(y => {
-      const f    = (G.companies[s].financials[y]||{});
+      const f    = finOf(G.companies[s], y);
       const rv   = f.revenue_yoy_pct;
       const mv   = f.mcu_yoy_pct;
       const rc   = yoyColor(rv);
@@ -2203,7 +2345,7 @@ function openDetail(sym) {
   });
 
   // Metrics — use the currently selected year
-  const selYear = +$('year-sel').value || DEFAULT_FY;
+  const selYear = activeTableYear();
   _updateDetailMetrics(sym, selYear);
 
   // 公司画像 table
@@ -2370,10 +2512,8 @@ function setCur(cur) {
   applyTableHeadI18n();
   const uu = cur === 'usd' ? 'M USD' : '亿元';
   const revEl = $('cs-unit-rev'); if (revEl) revEl.textContent = uu;
-  const mcuEl = $('cs-unit-mcu'); if (mcuEl) mcuEl.textContent = uu + ' · 2018—2025';
-  // Re-render everything
-  const sel = $('year-sel');
-  const year = sel ? +sel.value : DEFAULT_FY;
+  updatePeriodUi();
+  const year = activeTableYear();
   rerenderCharts();
   renderTable(year, $('search')?.value || '');
   if (_currentDetailSym && $('detail-panel')?.classList.contains('open'))
@@ -2419,16 +2559,16 @@ async function loadData() {
       ? `${T('data_date_pfx')}<b>${G.generated_at}</b>`
       : `<span style="color:var(--neg)">${T('err_no_data')}</span>`;
 
-    // Year selector
-    const years = (G.years || []).slice().reverse();
+    // Year selector (annual FY only)
+    const annualYrs = (G.years || []).filter(isAnnualYear).map(Number).sort((a, b) => b - a);
     const sel = $('year-sel');
-    years.forEach(y => {
+    annualYrs.forEach(y => {
       const o = document.createElement('option');
       o.value = y; o.textContent = y;
       if (y === DEFAULT_FY) o.selected = true;
       sel.appendChild(o);
     });
-    const defYear = years.includes(DEFAULT_FY) ? DEFAULT_FY : years[0];
+    const defYear = annualYrs.includes(DEFAULT_FY) ? DEFAULT_FY : annualYrs[0];
 
     // Sort header clicks
     document.querySelectorAll('thead th.sortable').forEach(th =>
@@ -2436,17 +2576,18 @@ async function loadData() {
         const col = th.dataset.col;
         sortState = (sortState.col === col && sortState.dir === 'desc')
           ? { col, dir:'asc' } : { col, dir:'desc' };
-        renderTable(+sel.value, $('search').value);
+        renderTable(activeTableYear(), $('search').value);
       })
     );
 
     // Search
     $('search').addEventListener('input', e =>
-      renderTable(+sel.value, e.target.value)
+      renderTable(activeTableYear(), e.target.value)
     );
 
     // Year change — charts are all-years so no re-render needed; only table + pipeline
     sel.addEventListener('change', () => {
+      if (DATA_PERIOD !== 'annual') return;
       const y = +sel.value;
       renderPipeline(G, y);
       renderTable(y, $('search').value);
@@ -2455,6 +2596,8 @@ async function loadData() {
     });
 
     // Initial render
+    initPeriodTabs();
+    updatePeriodUi();
     renderPipeline(G, defYear);
     renderTable(defYear, '');
     initChartCtrl();

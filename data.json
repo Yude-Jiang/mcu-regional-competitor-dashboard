@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20",
+  "generated_at": "2026-07-22",
   "years": [
     2018,
     2019,
@@ -8,7 +8,8 @@
     2022,
     2023,
     2024,
-    2025
+    2025,
+    "2026Q1"
   ],
   "companies": {
     "603986": {
@@ -235,6 +236,34 @@
           "cagr_pct": 22.3,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 2333
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 4188075574.04,
+          "net_income_yuan": 1461248353.08,
+          "rd_expense_yuan": 358360763.82,
+          "gross_margin_pct": 57.08,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 8.6,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 119.4,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 522.8,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 577.67,
+          "net_income_musd": 201.55,
+          "rd_expense_musd": 49.43,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -462,6 +491,34 @@
           "cagr_pct": 7.8,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 532
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 326699314.72,
+          "net_income_yuan": 20484926.12,
+          "rd_expense_yuan": 75032602.4,
+          "gross_margin_pct": 31.73,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 23.0,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 2.4,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 31.7,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 45.06,
+          "net_income_musd": 2.83,
+          "rd_expense_musd": 10.35,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -685,6 +742,34 @@
           "cagr_pct": 30.4,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 459
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 325179531.86,
+          "net_income_yuan": 51248390.83,
+          "rd_expense_yuan": 30813706.57,
+          "gross_margin_pct": 38.45,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 9.5,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 57.5,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 48.9,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 44.85,
+          "net_income_musd": 7.07,
+          "rd_expense_musd": 4.25,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -923,6 +1008,34 @@
           "cagr_pct": 12.3,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 1112
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 394821181.5,
+          "net_income_yuan": -15745001.71,
+          "rd_expense_yuan": 43644492.88,
+          "gross_margin_pct": 17.03,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "medium",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 11.1,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 29.9,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": -26.3,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 54.46,
+          "net_income_musd": -2.17,
+          "rd_expense_musd": 6.02,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -1146,6 +1259,34 @@
           "cagr_pct": 35.7,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 315
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 250291452.83,
+          "net_income_yuan": 88267191.13,
+          "rd_expense_yuan": 37262257.95,
+          "gross_margin_pct": 51.82,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 14.9,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 46.2,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 75.1,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 34.52,
+          "net_income_musd": 12.17,
+          "rd_expense_musd": 5.14,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -1372,6 +1513,34 @@
           "data_coverage": 0.67,
           "cagr_pct": -1.3,
           "cagr_label": "CAGR 2018–2025"
+        },
+        "2026Q1": {
+          "total_revenue_yuan": null,
+          "net_income_yuan": null,
+          "rd_expense_yuan": 153614188.28,
+          "gross_margin_pct": null,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "medium",
+          "mcu_source": "合并一季报为集团口径，极海 MCU 需子公司/人工数据",
+          "rd_pct": 6.7,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": null,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": null,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": null,
+          "net_income_musd": null,
+          "rd_expense_musd": 21.19,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -1596,6 +1765,34 @@
           "cagr_pct": 15.8,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 1958
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 1032049852.98,
+          "net_income_yuan": 148308606.45,
+          "rd_expense_yuan": 310953008.88,
+          "gross_margin_pct": 55.27,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 30.1,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 16.2,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 8.9,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 142.35,
+          "net_income_musd": 20.46,
+          "rd_expense_musd": 42.89,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -1820,6 +2017,34 @@
           "cagr_pct": 44.3,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 574
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 1446779783.07,
+          "net_income_yuan": 251112055.65,
+          "rd_expense_yuan": 94436352.48,
+          "gross_margin_pct": 44.68,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "medium",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 6.5,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 256.1,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 1259.9,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 199.56,
+          "net_income_musd": 34.64,
+          "rd_expense_musd": 13.03,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -2045,6 +2270,34 @@
           "cagr_pct": 21.3,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 546
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 177497857.54,
+          "net_income_yuan": -38986210.1,
+          "rd_expense_yuan": 61727785.55,
+          "gross_margin_pct": 29.59,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 34.8,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 12.1,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 62.2,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 24.48,
+          "net_income_musd": -5.38,
+          "rd_expense_musd": 8.51,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -2268,6 +2521,34 @@
           "cagr_pct": 17.8,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 289
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 114889741.35,
+          "net_income_yuan": 3900177.85,
+          "rd_expense_yuan": 43723699.8,
+          "gross_margin_pct": 38.9,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 38.1,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": -5.4,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": -56.4,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 15.85,
+          "net_income_musd": 0.54,
+          "rd_expense_musd": 6.03,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     },
@@ -2494,8 +2775,45 @@
           "cagr_pct": 27.2,
           "cagr_label": "CAGR 2018–2025",
           "employee_count": 915
+        },
+        "2026Q1": {
+          "total_revenue_yuan": 647971431.84,
+          "net_income_yuan": 135642156.35,
+          "rd_expense_yuan": 154485482.24,
+          "gross_margin_pct": 48.51,
+          "mcu_revenue_yuan": null,
+          "mcu_data_type": "unavailable",
+          "mcu_confidence": "high",
+          "mcu_source": "一季报未披露分产品 MCU 收入（仅合并利润表口径）",
+          "rd_pct": 23.8,
+          "mcu_weight_pct": null,
+          "revenue_yoy_pct": 16.2,
+          "mcu_yoy_pct": null,
+          "net_income_yoy_pct": 44.8,
+          "fx_rate_cny_usd": 7.25,
+          "total_revenue_musd": 89.38,
+          "net_income_musd": 18.71,
+          "rd_expense_musd": 21.31,
+          "mcu_revenue_musd": null,
+          "filing_status": "q1_reported",
+          "filing_date": "2026-04-30",
+          "period_end": "2026-03-31",
+          "period_label": "2026年一季度",
+          "data_coverage": 0.67,
+          "cagr_pct": null,
+          "cagr_label": "N/A (单季)",
+          "employee_count": null
         }
       }
     }
-  }
+  },
+  "periods": {
+    "2026Q1": {
+      "label_zh": "2026年一季报",
+      "label_en": "2026 Q1 Report",
+      "period_end": "2026-03-31",
+      "type": "quarter"
+    }
+  },
+  "q1_updated_at": "2026-07-22"
 }
