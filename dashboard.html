@@ -2662,7 +2662,7 @@ async function loadData() {
     applyI18n();
 
   } catch (err) {
-    $('tbody').innerHTML = `<tr><td colspan="15"
+    $('tbody').innerHTML = `<tr><td colspan="16"
       style="text-align:center;padding:48px;color:var(--neg)">
       ${T('err_load')}${err.message}<br><br>
       <small style="color:var(--text-faint)">${T('err_run')}<code>python fetch_mcu_data.py</code></small>
