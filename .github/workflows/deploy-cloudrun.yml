@@ -20,6 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Require GCP_SA_KEY secret
+        run: |
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "::error::Missing repository secret GCP_SA_KEY. Deploy from Cloud Shell instead: git checkout main && git pull && bash deploy.sh"
+            echo "See docs/DEPLOY_CLOUD_RUN.md"
+            exit 1
+          fi
+
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
