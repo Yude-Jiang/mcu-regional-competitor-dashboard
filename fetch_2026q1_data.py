@@ -150,6 +150,83 @@ def build_q1_row(cur: dict, prev: dict | None, meta: dict) -> dict:
     return row
 
 
+def _prior_q1_mcu_yuan(
+    symbol: str,
+    meta: dict,
+    known_mcu: dict,
+    q1_2025_total: float | None,
+    data: dict,
+) -> float | None:
+    """Estimate 2025Q1 MCU for YoY (same rules as 2026Q1 extraction)."""
+    k25 = known_mcu.get(symbol, {}).get("2025")
+    fin25 = (data.get("companies", {}).get(symbol, {}) or {}).get("financials", {}).get("2025", {})
+    rev25 = fin25.get("total_revenue_yuan")
+    mcu25 = fin25.get("mcu_revenue_yuan") or (k25 or {}).get("mcu_revenue_yuan")
+    ratio = (mcu25 / rev25) if (rev25 and mcu25) else None
+    strat = meta.get("mcu_strategy", "")
+    mult = float(meta.get("mcu_multiplier") or 1.0)
+    if strat == "total_proxy" and q1_2025_total:
+        return round(q1_2025_total * mult, 2)
+    if strat == "subsidiary_geehy":
+        return None  # needs PDF parse for 2025 Q1 if desired
+    if q1_2025_total and ratio:
+        return round(q1_2025_total * ratio, 2)
+    return None
+
+
+def apply_mcu_known_q1(
+    row: dict,
+    symbol: str,
+    meta: dict,
+    known_entry: dict | None,
+    known_mcu: dict,
+    data: dict,
+    q1_2025_total: float | None,
+) -> None:
+    if not known_entry:
+        return
+    mcu = known_entry.get("mcu_revenue_yuan")
+    if mcu is None:
+        return
+    row["mcu_revenue_yuan"] = mcu
+    row["mcu_revenue_musd"] = to_musd(mcu)
+    row["mcu_data_type"] = known_entry.get("data_type", "derived")
+    row["mcu_confidence"] = known_entry.get("confidence", meta.get("mcu_confidence", "medium"))
+    row["mcu_source"] = known_entry.get("source") or row.get("mcu_source")
+
+    rev = row.get("total_revenue_yuan")
+    if rev and mcu:
+        row["mcu_weight_pct"] = round(mcu / rev * 100, 1)
+
+    gm = known_entry.get("mcu_gross_margin")
+    if gm is not None:
+        row["gross_margin_pct"] = round(float(gm) * 100, 2)
+    elif meta.get("mcu_strategy") in ("total_proxy", "total_revenue"):
+        pass  # keep consolidated Q1 GM
+    else:
+        k25 = known_mcu.get(symbol, {}).get("2025")
+        if isinstance(k25, dict) and k25.get("mcu_gross_margin") is not None:
+            row["gross_margin_pct"] = round(k25["mcu_gross_margin"] * 100, 2)
+
+    prev_mcu = _prior_q1_mcu_yuan(symbol, meta, known_mcu, q1_2025_total, data)
+    if prev_mcu and prev_mcu != 0:
+        row["mcu_yoy_pct"] = round((mcu / prev_mcu - 1) * 100, 1)
+
+    row["data_coverage"] = round(
+        sum(
+            1
+            for k in ("total_revenue_yuan", "rd_expense_yuan", "mcu_revenue_yuan")
+            if row.get(k) is not None
+        )
+        / 3,
+        2,
+    )
+    if row["mcu_data_type"] == "reported":
+        row["filing_status"] = "q1_reported"
+    elif row["mcu_data_type"] == "derived":
+        row["filing_status"] = "derived"
+
+
 def fetch_symbol(symbol: str, meta: dict) -> dict | None:
     sym = em_symbol(symbol)
     try:
@@ -166,7 +243,9 @@ def fetch_symbol(symbol: str, meta: dict) -> dict | None:
 
     cur = parse_pl_row(r26)
     prev = parse_pl_row(r25) if r25 is not None else None
-    return build_q1_row(cur, prev, meta)
+    row = build_q1_row(cur, prev, meta)
+    row["_q1_2025_total"] = (prev or {}).get("total_revenue_yuan")
+    return row
 
 
 def main() -> int:
@@ -178,12 +257,17 @@ def main() -> int:
 
     data = json.loads(data_path.read_text())
     companies = data.setdefault("companies", {})
+    known_mcu = json.loads((HERE / "mcu_known_data.json").read_text())
     ok = 0
 
     for symbol, meta in meta_all.items():
         row = fetch_symbol(symbol, meta)
         if not row:
             continue
+        q1_2025_total = row.pop("_q1_2025_total", None)
+        known_entry = known_mcu.get(symbol, {}).get(PERIOD_KEY)
+        apply_mcu_known_q1(row, symbol, meta, known_entry, known_mcu, data, q1_2025_total)
+
         co = companies.setdefault(symbol, {"meta": meta, "financials": {}})
         if "meta" not in co or not co["meta"]:
             co["meta"] = meta
