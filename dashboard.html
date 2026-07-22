@@ -787,7 +787,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th class="sticky" rowspan="2" data-i18n="th_company">公司</th>
     <th rowspan="2" data-i18n-html="th_founded">成立<br>上市</th>
     <th rowspan="2" data-i18n="th_arch">核心架构</th>
-    <th class="g-rev grp-hdr" colspan="3" data-i18n="grp_total_rev">总营收</th>
+    <th class="g-rev grp-hdr" colspan="4" data-i18n="grp_total_rev">总营收</th>
     <th class="g-mcu" rowspan="2" style="min-width:72px;text-align:center" data-i18n-html="th_mcu_8yr">MCU<br>8年</th>
     <th class="g-mcu grp-hdr" colspan="4" data-i18n="grp_mcu_rev">MCU 营收</th>
     <th class="g-etc" rowspan="2" data-i18n="th_foundry">代工厂</th>
@@ -798,6 +798,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <th class="g-rev sortable" data-col="rev" id="th-rev-hdr">总营收<br><span id="tbl-year-lbl" style="font-weight:400;opacity:.7">2025</span>&nbsp;<span id="tbl-unit-rev">M$</span><span class="si"></span></th>
     <th class="g-rev sortable" data-col="rev_yoy" data-i18n="th_yoy">YoY%<span class="si"></span></th>
     <th class="g-rev sortable" data-col="cagr" data-i18n="th_cagr">CAGR 18-25<span class="si"></span></th>
+    <th class="g-rev sortable" data-col="net_margin" data-i18n="th_net_margin">总营收利润率<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu" id="th-mcu-hdr">MCU <span id="tbl-unit-mcu">M$</span><span class="si"></span></th>
     <th class="g-mcu sortable" data-col="mcu_yoy" data-i18n="th_mcu_yoy">YoY%<span class="si"></span></th>
     <th class="g-mcu sortable" data-col="wt" data-i18n="th_mcu_pct">占比%<span class="si"></span></th>
@@ -807,7 +808,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </tr>
 </thead>
 <tbody id="tbody">
-  <tr><td colspan="15" style="text-align:center;padding:48px;color:var(--text-faint)" id="tbody-loading">
+  <tr><td colspan="16" style="text-align:center;padding:48px;color:var(--text-faint)" id="tbody-loading">
     加载中…&ensp;如数据为空请先运行 <code>python fetch_mcu_data.py</code>
   </td></tr>
 </tbody>
@@ -1025,7 +1026,7 @@ const I18N = {
     th_company:'公司', th_founded:'成立<br>上市', th_arch:'核心架构',
     grp_total_rev:'总营收', grp_mcu_rev:'MCU 营收', grp_rd:'研发',
     th_mcu_pct:'占比%',
-    th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_total_rev:'总营收', th_yoy:'YoY%', th_cagr:'CAGR', th_net_margin:'总营收利润率',
     th_rd:'研发', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8年', th_mcu_yoy:'YoY%', th_mcu_pct:'占比%',
     th_gm:'MCU毛利率', th_foundry:'代工厂', th_rd_pct:'研发%', th_emp:'员工',
@@ -1101,7 +1102,7 @@ const I18N = {
     th_company:'Company', th_founded:'Founded<br>Listed', th_arch:'Core Arch.',
     grp_total_rev:'Total Revenue', grp_mcu_rev:'MCU Revenue', grp_rd:'R&D',
     th_mcu_pct:'Weight%',
-    th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR',
+    th_total_rev:'Total Rev', th_yoy:'YoY%', th_cagr:'CAGR', th_net_margin:'Net Margin %',
     th_rd:'R&D', th_mcu_hdr:'MCU',
     th_mcu_8yr:'MCU<br>8yr', th_mcu_yoy:'YoY%', th_mcu_pct:'MCU Mix%',
     th_gm:'MCU GM', th_foundry:'Foundry', th_rd_pct:'R&D%', th_emp:'Employees',
@@ -1178,6 +1179,7 @@ function applyTableHeadI18n() {
     const lbl = T(th.dataset.i18n);
     if (si) th.innerHTML = lbl + si.outerHTML;
     else th.textContent = lbl;
+    if (th.dataset.col === 'net_margin') th.title = T('desc_net');
   });
 }
 
@@ -1726,6 +1728,7 @@ function sortVal(sym, year, col) {
     case 'rev':     return f[curF('total_revenue')];
     case 'rev_yoy': return f.revenue_yoy_pct;
     case 'cagr':    return f.cagr_pct;
+    case 'net_margin': return netMarginPct(f);
     case 'mcu':     return f[curF('mcu_revenue')];
     case 'mcu_yoy': return f.mcu_yoy_pct;
     case 'wt':      return f.mcu_weight_pct;
@@ -1781,6 +1784,10 @@ function renderTable(year, query) {
     const fmtRev = curFmt(f[curF('total_revenue')]);
     const fmtMcu = curFmt(f[curF('mcu_revenue')]);
     const fmtRd  = curFmt(f[curF('rd_expense')]);
+    const nm = netMarginPct(f);
+    const nmCell = nm != null
+      ? `<span class="${nm >= 0 ? 'pos' : 'neg'}">${nm.toFixed(1)}%</span>`
+      : '<span class="na">—</span>';
     return `<tr style="cursor:pointer" onclick="openDetail('${sym}')">
       <td class="sticky">
         <div class="co-cn">${(LANG==='en' ? m.name_en : m.name_cn) || sym}</div>
@@ -1792,6 +1799,7 @@ function renderTable(year, query) {
       <td class="g-rev">${fmtRev !== '—' ? fmtRev.split(' ')[0] : '<span class="na">—</span>'}</td>
       <td class="g-rev c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="g-rev c">${cagr}</td>
+      <td class="g-rev c" title="${escAttr(T('desc_net'))}">${nmCell}</td>
       <td class="g-mcu c" style="padding:4px 8px">${sparkline(spkVals)}</td>
       <td class="g-mcu">${mcuN2(f[curF('mcu_revenue')], dt, f)}</td>
       <td class="g-mcu c">${mcuY(f.mcu_yoy_pct, dt, f)}</td>
@@ -1805,7 +1813,7 @@ function renderTable(year, query) {
   });
 
   $('tbody').innerHTML = rows.join('') ||
-    `<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text-faint)">${T('no_results')}</td></tr>`;
+    `<tr><td colspan="16" style="text-align:center;padding:32px;color:var(--text-faint)">${T('no_results')}</td></tr>`;
 
   document.querySelectorAll('thead th.sortable').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
@@ -1834,8 +1842,8 @@ function syms() { return ORDER.filter(s => G.companies[s]); }
 // ── Grouped chart helper: companies on X, one dataset per year ─────────────
 // ── Net margin helper ────────────────────────────────────────────────────
 function netMarginPct(f) {
-  const ni = f.net_income_musd ?? f.net_income_yuan;
-  const tr = f.total_revenue_musd ?? f.total_revenue_yuan;
+  const ni = f[curF('net_income')];
+  const tr = f[curF('total_revenue')];
   return (ni != null && tr != null && tr > 0) ? ni / tr * 100 : null;
 }
 
