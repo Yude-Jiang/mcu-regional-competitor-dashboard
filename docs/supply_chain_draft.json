@@ -1,0 +1,379 @@
+{
+  "schema_version": 1,
+  "status": "draft",
+  "purpose": "Back-end (OSAT) + wafer foundry + MCU-oriented process nodes from 2024/2025 full annual reports (CNINFO PDFs). Curated from PDF text; auto hints via extract_supply_chain_from_pdf.py.",
+  "extracted_at": "2026-07-22",
+  "field_notes": {
+    "foundry_fab": "Wafer fabrication partners explicitly named or clearly delegated (Fabless).",
+    "backend_fab": "Packaging / test (OSAT) partners named in operations or top-supplier narrative.",
+    "process_nodes_nm": "Nanometer nodes tied to MCU or company eFlash/BCD roadmap where stated; empty if AR only discusses Fabless generically.",
+    "process_nodes_scope": "mcu | eflash_platform | product_roadmap | none_disclosed"
+  },
+  "companies": {
+    "603986": {
+      "name_cn": "兆易创新",
+      "years": {
+        "2024": {
+          "pdf": "兆易创新2024年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": ["110", "55", "40", "22"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "在工艺制程上，目前公司MCU 产品覆盖110nm、55nm、40nm、22nm 工艺制程……",
+            "将晶圆制造、封装和测试等环节外包给专门的晶圆代工、封装及测试厂商。"
+          ],
+          "confidence": "high"
+        },
+        "2025": {
+          "pdf": "兆易创新2025年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": ["110", "55", "40", "22"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "工艺制程上，目前公司MCU产品覆盖110nm、55nm、40nm、22nm工艺制程，在行业处于领先……"
+          ],
+          "confidence": "high"
+        }
+      },
+      "yoy": {
+        "changed": false,
+        "summary_zh": "MCU 四档制程表述一致；年报仍未点名具体晶圆厂/封测厂（仅 Fabless 外包描述）。",
+        "fields_changed": []
+      }
+    },
+    "300327": {
+      "name_cn": "中颖电子",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": ["LXCC"],
+          "backend_fab": [],
+          "process_nodes_nm": ["110", "90", "55", "40"],
+          "process_nodes_scope": "product_roadmap",
+          "source_quotes_zh": [
+            "锂电池管理芯片制程由早期的0.25um/0.11um 工艺逐步向90nm/55nm 精进……",
+            "公司55nm 产品已经在客户端量产……投入向55nm/40nm，12 英寸制程的产品研发。",
+            "委托供应商联芯集成电路制造（厦门）有限公司……晶圆代工厂流片生产（担保披露）。"
+          ],
+          "confidence": "medium"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": ["HHGrace", "LXCC"],
+          "backend_fab": [],
+          "process_nodes_nm": ["55"],
+          "process_nodes_scope": "product_roadmap",
+          "source_quotes_zh": [
+            "2025 年开发了更多的55nm 制程MCU 产品，预计到2026 年会陆续上市……",
+            "芯片研发完成后，需要委托供应商华虹半导体（无锡）有限公司和联芯集成电路制造（厦门）有限公司……晶圆代工。"
+          ],
+          "confidence": "medium"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "2025 在担保/研发披露中明确并列华虹无锡与联芯代工；经营讨论强调 55nm MCU 在研。2024 工艺叙述更全（0.11μm→90/55/40nm 路线图），2025 摘录节点更少但代工主体披露更具体。",
+        "fields_changed": ["foundry_fab", "process_nodes_nm", "source_quotes_zh"]
+      }
+    },
+    "688380": {
+      "name_cn": "中微半导",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": ["HHGrace"],
+          "backend_fab": ["Huatian", "TFME"],
+          "process_nodes_nm": ["90", "55"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "2005 年与晶圆厂华虹宏力合作……2021 年在3 个工艺实现量产，是华虹12 寸厂90/55nm eFlash 工艺首发客户……",
+            "2001 年与封测厂天水华天合作……（行业段落亦提及华天科技、通富微电）。"
+          ],
+          "confidence": "high"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": ["HHGrace"],
+          "backend_fab": ["Huatian", "TFME"],
+          "process_nodes_nm": ["90", "55"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "晶圆厂华虹宏力合作……华虹12 寸厂90/55nm eFlash 工艺首发客户……",
+            "与封测厂天水华天合作……"
+          ],
+          "confidence": "high"
+        }
+      },
+      "yoy": {
+        "changed": false,
+        "summary_zh": "华虹 90/55nm eFlash + 华天/通富长期合作表述延续；无新增代工名单。",
+        "fields_changed": []
+      }
+    },
+    "300077": {
+      "name_cn": "国民技术",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": ["SMIC", "HHGrace"],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "释义/行业章节列示中芯、华虹等术语；MCU 章节为市场与产品路线，未披露具体纳米制程清单。"
+          ],
+          "confidence": "low"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": ["SMIC", "HHGrace"],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "与 2024 类似：Fabless + MCU 市场叙述，未给出 MCU 代工/制程表。"
+          ],
+          "confidence": "low"
+        }
+      },
+      "yoy": {
+        "changed": false,
+        "summary_zh": "两年均未在正文中给出可引用的 MCU 制程节点或封测厂名单（仅行业/释义层面出现晶圆厂名称）。",
+        "fields_changed": []
+      }
+    },
+    "688279": {
+      "name_cn": "峰岹科技",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": ["TSMC", "GF"],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "晶圆制造选择了格罗方德（GF）、台积电（TSMC）作为主要合作伙伴；封测与成熟封装厂长期合作（未逐一列名）。",
+            "第五名供应商合肥晶合集成电路股份有限公司为新进前五（采购额披露）。"
+          ],
+          "confidence": "medium"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": ["TSMC", "GF"],
+          "backend_fab": ["JCET"],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "GF、台积电（TSMC）为主要晶圆合作伙伴（表述与 2024 一致）。",
+            "第五名供应商江苏长电为 2025 年新进前五名供应商。"
+          ],
+          "confidence": "medium"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "晶圆伙伴仍为 GF+TSMC；前五名采购披露变化：2024 出现晶合，2025 新进长电（反映采购结构，不等同于独家封测）。",
+        "fields_changed": ["backend_fab", "source_quotes_zh"]
+      }
+    },
+    "002180": {
+      "name_cn": "纳思达（极海微 MCU 口径）",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "控股子公司极海微经营叙述（车规/工控 MCU 产品）未在合并报表正文中列示晶圆厂/封测厂清单；集团层担保披露涉及晶圆厂债务担保框架。"
+          ],
+          "confidence": "low"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "极海微章节延续产品与市场描述；未新增可引用的代工/制程表。需极海单体或招股书补充供应链。"
+          ],
+          "confidence": "low"
+        }
+      },
+      "yoy": {
+        "changed": false,
+        "summary_zh": "合并年报对极海微仍无结构化 backend/foundry 字段；不宜使用集团打印机供应链替代。",
+        "fields_changed": []
+      }
+    },
+    "688385": {
+      "name_cn": "复旦微电",
+      "years": {
+        "2024": {
+          "pdf": "2024年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": ["40", "55", "90"],
+          "process_nodes_scope": "eflash_platform",
+          "source_quotes_zh": [
+            "报告期内，公司MCU 产品完成了12 寸40nm、55nm 和90nm 嵌入式闪存工艺平台的开发与流片……"
+          ],
+          "confidence": "high"
+        },
+        "2025": {
+          "pdf": "2025年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "eflash_platform",
+          "source_quotes_zh": [
+            "完成了基于国产 eflash 工艺平台的多产品布局……（未再并列 40/55/90nm 数字清单）。",
+            "研发进展表提及嵌入式闪存工艺量产/样测（具体 nm 在表格行文中）。"
+          ],
+          "confidence": "medium"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "2024 明确 12 寸 40/55/90nm eFlash 平台；2025 改为「国产 eflash 工艺平台」表述，公开 nm 枚举减弱。",
+        "fields_changed": ["process_nodes_nm", "source_quotes_zh"]
+      }
+    },
+    "688766": {
+      "name_cn": "普冉股份",
+      "years": {
+        "2024": {
+          "pdf": "普冉半导体（上海）股份有限公司2024年年度报告.pdf",
+          "foundry_fab": ["HLMC", "SMIC"],
+          "backend_fab": ["Unimos", "WeTest", "SJSemi", "Huatian", "TFME"],
+          "process_nodes_nm": ["55"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "MCU 产品采用55nm 及以下嵌入式Flash 工艺技术……",
+            "晶圆代工主要委托华力和中芯国际……封装测试主要委托紫光宏茂、伟测科技和盛合晶微、华天科技、通富微电等。"
+          ],
+          "confidence": "high"
+        },
+        "2025": {
+          "pdf": "普冉半导体（上海）股份有限公司2025年年度报告.pdf",
+          "foundry_fab": ["HLMC", "SMIC"],
+          "backend_fab": ["WeTest", "SJSemi", "Huatian", "TFME"],
+          "process_nodes_nm": ["55"],
+          "process_nodes_scope": "mcu",
+          "source_quotes_zh": [
+            "MCU 产品采用55nm 及以下嵌入式Flash 工艺技术……",
+            "晶圆代工主要委托华力和中芯国际……封装测试主要委托伟测科技和盛合晶微、华天科技、通富微电等（未再列紫光宏茂）。"
+          ],
+          "confidence": "high"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "MCU ≤55nm eFlash 表述不变；封测委托名单中 2025 不再点名紫光宏茂，其余主体一致。",
+        "fields_changed": ["backend_fab", "source_quotes_zh"]
+      }
+    },
+    "688595": {
+      "name_cn": "芯海科技",
+      "years": {
+        "2024": {
+          "pdf": "芯海科技（深圳）股份有限公司2024年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "典型 Fabless：向晶圆厂、封测厂采购；强调与上游晶圆制造战略合作，未列具体厂商与 nm。"
+          ],
+          "confidence": "low"
+        },
+        "2025": {
+          "pdf": "芯海科技2025年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "新增：推动数字设计向更小线宽演进、模拟设计向 120V BCD 工艺演进；深化与头部晶圆厂、封测厂战略合作（仍无具名列表）。"
+          ],
+          "confidence": "low"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "仍无具名 foundry/OSAT；2025 工艺路线表述更具体（小线宽数字 + 120V BCD），属文字层面变化。",
+        "fields_changed": ["source_quotes_zh"]
+      }
+    },
+    "688391": {
+      "name_cn": "钜泉科技",
+      "years": {
+        "2024": {
+          "pdf": "钜泉光电科技（上海）股份有限公司2024年年度报告.pdf",
+          "foundry_fab": ["UMC"],
+          "backend_fab": ["JCET", "TFME", "Huatian"],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "晶圆制造主要委托和舰科技（联华电子）生产；向和舰科技采购额占年度采购总额 64.99%。",
+            "与华天科技、通富微电、长电科技等封测战略合作（行业/合作段落）。"
+          ],
+          "confidence": "high"
+        },
+        "2025": {
+          "pdf": "钜泉光电科技（上海）股份有限公司2025年年度报告.pdf",
+          "foundry_fab": ["UMC"],
+          "backend_fab": ["JCET", "TFME", "Huatian", "KYEC"],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "向和舰科技（联华电子）采购额占年度采购总额 68.55%。",
+            "晶圆制造商和舰科技、封装厂商华天科技、通富微电、长电科技以及测试服务商京隆科技……十年以上合作。"
+          ],
+          "confidence": "high"
+        }
+      },
+      "yoy": {
+        "changed": true,
+        "summary_zh": "代工主体仍为和舰/联电，采购占比 64.99%→68.55%；2025 正文点名京隆为测试服务商。未披露 MCU 专用 nm。",
+        "fields_changed": ["backend_fab", "source_quotes_zh"]
+      }
+    },
+    "688018": {
+      "name_cn": "乐鑫科技",
+      "years": {
+        "2024": {
+          "pdf": "乐鑫科技2024年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "Fabless 经营；前五名供应商披露（如立讯电子等）为物料/模组类，非晶圆代工名单。年报正文未给出 Wi-Fi/MCU 纳米制程表。"
+          ],
+          "confidence": "low"
+        },
+        "2025": {
+          "pdf": "乐鑫科技2025年年度报告.pdf",
+          "foundry_fab": [],
+          "backend_fab": [],
+          "process_nodes_nm": [],
+          "process_nodes_scope": "none_disclosed",
+          "source_quotes_zh": [
+            "与 2024 类似，无具名晶圆/封测伙伴或工艺节点（可参考 profiles_xq.foundry 历史字段，非本年 AR 原文）。"
+          ],
+          "confidence": "low"
+        }
+      },
+      "yoy": {
+        "changed": false,
+        "summary_zh": "两年 AR 均未提供可入库的 foundry/backend/process_nodes 明文。",
+        "fields_changed": []
+      }
+    }
+  }
+}
