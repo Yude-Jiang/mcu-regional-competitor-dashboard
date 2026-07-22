@@ -10,3 +10,7 @@ venv
 node_modules/
 package.json
 package-lock.json
+
+finance_reports/
+finance_reports_q1/
+finance_reports_q1_2025/

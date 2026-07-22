@@ -1,5 +1,5 @@
 {
-  "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。",
+  "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。支持季度键如 2026Q1（一季报）。",
   "603986": {
     "2018": {
       "mcu_revenue_yuan": 404498501.99,
@@ -56,6 +56,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "兆易创新年报 分产品营业收入表 MCU纯口径"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 869107284.01,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 438720858.09,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688766": {
@@ -86,6 +100,20 @@
       "confidence": "medium",
       "source": "普冉股份2025年报「微控制器及其他」行：营收5.32亿元、毛利率24.42%（含MCU+模拟产品）",
       "mcu_gross_margin": 0.2442
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 331965443.66,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 86949929.45,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688385": {
@@ -123,6 +151,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "复旦微电子2025年报 主营业务分产品表「智能电表芯片」行"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 123000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2026一季报经营讨论：智能电表芯片产品线收入（非完整分产品表）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 103000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2025一季报经营讨论：智能电表芯片产品线收入（非完整分产品表）【估算】"
     }
   },
   "688018": {
@@ -181,6 +223,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "乐鑫科技2018年报 主营业务分产品表「芯片」行（不含模组）"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 247557042.87,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 217658249.45,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "002180": {
@@ -255,6 +311,20 @@
       "total_revenue_yuan": 1092181364.86,
       "total_revenue_note": "第20页「2、收入与成本-(1)营业收入构成」中分行业「集成电路产业」行",
       "mcu_gross_margin": 0.327
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 319000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "medium",
+      "source": "2026一季报正文：极海微营业收入（子公司口径，非年报分产品表）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 254000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "medium",
+      "source": "2025一季报正文：极海微营业收入（子公司口径，非年报分产品表）【估算】"
     }
   },
   "300077": {
@@ -292,6 +362,20 @@
       "confidence": "medium",
       "source": "国民技术2025年报 主营业务分产品表「芯片类产品」行",
       "note": "口径=芯片类产品（含通用MCU+安全芯片+BMS+RF）；年报未拆分纯MCU；灼识咨询估算纯通用MCU约占90%"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 183401154.87,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 144717400.67,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "300327": {
@@ -343,6 +427,20 @@
       "confidence": "high",
       "source": "中颖电子2025年报 主营业务分产品表「工业控制」行",
       "mcu_gross_margin": 0.3376
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 262793698.2,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 259614202.31,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688595": {
@@ -402,6 +500,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "芯海科技2019年报 主营业务分产品表「通用微控制器芯片」行"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 71091069.93,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 73570813.48,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688380": {
@@ -428,6 +540,20 @@
     },
     "2025": {
       "mcu_gross_margin": 0.3428
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 321927736.54,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2026一季报：总营收×0.99（纯MCU公司近似，无分产品披露）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 204433186.16,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2025一季报：总营收×0.99（纯MCU公司近似，无分产品披露）【估算】"
     }
   },
   "688279": {
@@ -486,6 +612,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "峰岹科技2025年报 主营业务分产品表「电机主控芯片MCU」行"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 155994471.7,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 109670263.05,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688391": {
@@ -544,6 +684,20 @@
       "data_type": "reported",
       "confidence": "high",
       "source": "钜泉科技2025年报 主营业务分产品表「智能电表芯片」行"
+    },
+    "2026Q1": {
+      "mcu_revenue_yuan": 92327322.13,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 106373934.85,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   }
 }

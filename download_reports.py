@@ -261,6 +261,7 @@ def fetch_company(session: requests.Session, stock_id: str, info: dict,
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    global OUTPUT_DIR
     parser = argparse.ArgumentParser(
         description="Download CNINFO annual reports for 11 MCU companies"
     )
@@ -277,7 +278,6 @@ def main() -> None:
                         help="Show what would be downloaded without doing it")
     args = parser.parse_args()
 
-    global OUTPUT_DIR
     OUTPUT_DIR = Path(args.out)
 
     symbols = args.symbols or list(COMPANY_INFO.keys())
