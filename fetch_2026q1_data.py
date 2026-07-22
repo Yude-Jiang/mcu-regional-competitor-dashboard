@@ -157,7 +157,10 @@ def _prior_q1_mcu_yuan(
     q1_2025_total: float | None,
     data: dict,
 ) -> float | None:
-    """Estimate 2025Q1 MCU for YoY (same rules as 2026Q1 extraction)."""
+    k = known_mcu.get(symbol, {}).get("2025Q1")
+    if isinstance(k, dict) and k.get("mcu_revenue_yuan"):
+        return k["mcu_revenue_yuan"]
+
     k25 = known_mcu.get(symbol, {}).get("2025")
     fin25 = (data.get("companies", {}).get(symbol, {}) or {}).get("financials", {}).get("2025", {})
     rev25 = fin25.get("total_revenue_yuan")
@@ -168,7 +171,7 @@ def _prior_q1_mcu_yuan(
     if strat == "total_proxy" and q1_2025_total:
         return round(q1_2025_total * mult, 2)
     if strat == "subsidiary_geehy":
-        return None  # needs PDF parse for 2025 Q1 if desired
+        return None
     if q1_2025_total and ratio:
         return round(q1_2025_total * ratio, 2)
     return None
@@ -223,8 +226,23 @@ def apply_mcu_known_q1(
     )
     if row["mcu_data_type"] == "reported":
         row["filing_status"] = "q1_reported"
-    elif row["mcu_data_type"] == "derived":
-        row["filing_status"] = "derived"
+    elif row["mcu_data_type"] in ("derived", "estimated"):
+        row["filing_status"] = "estimated"
+    row["mcu_estimate"] = True
+    row["mcu_source_label"] = known_entry.get("source") or row.get("mcu_source")
+
+
+def fetch_q1_pl(symbol: str, period_end: str) -> dict | None:
+    """Single-quarter merged P&L row (no MCU merge)."""
+    sym = em_symbol(symbol)
+    try:
+        df = ak.stock_profit_sheet_by_report_em(symbol=sym)
+    except Exception:
+        return None
+    row = row_at(df, period_end)
+    if row is None:
+        return None
+    return parse_pl_row(row)
 
 
 def fetch_symbol(symbol: str, meta: dict) -> dict | None:

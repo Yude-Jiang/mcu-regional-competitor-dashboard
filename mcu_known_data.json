@@ -60,9 +60,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 869107284.01,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 438720858.09,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688766": {
@@ -97,9 +104,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 331965443.66,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 86949929.45,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688385": {
@@ -141,9 +155,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 123000000.0,
       "mcu_gross_margin": null,
-      "data_type": "reported",
+      "data_type": "estimated",
       "confidence": "high",
-      "source": "2026一季报 经营情况讨论 智能电表芯片产品线收入"
+      "source": "2026一季报经营讨论：智能电表芯片产品线收入（非完整分产品表）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 103000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2025一季报经营讨论：智能电表芯片产品线收入（非完整分产品表）【估算】"
     }
   },
   "688018": {
@@ -206,9 +227,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 247557042.87,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 217658249.45,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "002180": {
@@ -287,9 +315,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 319000000.0,
       "mcu_gross_margin": null,
-      "data_type": "reported",
+      "data_type": "estimated",
       "confidence": "medium",
-      "source": "2026一季报 极海微营业收入（子公司合并口径，含工控/汽车/主控等）"
+      "source": "2026一季报正文：极海微营业收入（子公司口径，非年报分产品表）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 254000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "medium",
+      "source": "2025一季报正文：极海微营业收入（子公司口径，非年报分产品表）【估算】"
     }
   },
   "300077": {
@@ -331,9 +366,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 183401154.87,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 144717400.67,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "300327": {
@@ -389,9 +431,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 262793698.2,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 259614202.31,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688595": {
@@ -455,9 +504,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 71091069.93,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 73570813.48,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688380": {
@@ -488,9 +544,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 321927736.54,
       "mcu_gross_margin": null,
-      "data_type": "derived",
+      "data_type": "estimated",
       "confidence": "high",
-      "source": "2026一季报 总营收×0.99（纯MCU公司近似）"
+      "source": "2026一季报：总营收×0.99（纯MCU公司近似，无分产品披露）【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 204433186.16,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "high",
+      "source": "2025一季报：总营收×0.99（纯MCU公司近似，无分产品披露）【估算】"
     }
   },
   "688279": {
@@ -553,9 +616,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 155994471.7,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 109670263.05,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   },
   "688391": {
@@ -618,9 +688,16 @@
     "2026Q1": {
       "mcu_revenue_yuan": 92327322.13,
       "mcu_gross_margin": null,
-      "data_type": "derived",
-      "confidence": "medium",
-      "source": "2026一季报未披露分产品MCU；按FY2025 MCU/总营收占比×Q1合并营收"
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025Q1": {
+      "mcu_revenue_yuan": 106373934.85,
+      "mcu_gross_margin": null,
+      "data_type": "estimated",
+      "confidence": "low",
+      "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
     }
   }
 }

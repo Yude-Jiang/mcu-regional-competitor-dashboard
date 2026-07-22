@@ -224,6 +224,11 @@ td {
 }
 .mcu-cell { display:flex; align-items:center; justify-content:flex-end; gap:4px; }
 #tbl .mcu-cell { justify-content:center; width:100%; }
+.mcu-est-badge {
+  font-size:9px; font-weight:700; padding:0 3px; border-radius:2px; line-height:1.35;
+  background:rgba(217,119,6,.15); color:var(--yel-1,#d97706); cursor:help; flex-shrink:0;
+}
+.dp-metric-sub.mcu-src { font-size:10px; color:var(--text-dim); white-space:normal; line-height:1.35; max-width:220px; }
 #tbl td svg { display:block; margin:0 auto; }
 td.l { text-align:left; } td.c { text-align:center; }
 td.sticky {
@@ -1009,7 +1014,9 @@ const I18N = {
     tbl_src:'数据来源：年报 / 一季报 / AKShare / 招股书',
     tab_annual:'年报',
     tab_2026q1:'2026一季报',
-    period_q1_note:'一季报单季合并口径（1–3月）；YoY 对比上年同期。MCU：正文直接披露优先，否则按 FY2025 MCU 占比×Q1 总营收（derived）。',
+    period_q1_note:'一季报单季合并口径（1–3月）；YoY 对比上年同期。MCU 列均为估算（一季报通常无年报级分产品表），悬停单元格或打开详情可查看来源说明。',
+    mcu_est_badge:'估',
+    mcu_est_note:'MCU为估算值',
     legend_conf_ttl:'MCU数据置信度：',
     legend_reported:'年报直接披露', legend_derived:'推算（高置信）',
     legend_estimated:'估算（低置信）', legend_unavail:'数据缺失',
@@ -1083,7 +1090,9 @@ const I18N = {
     tbl_src:'Source: Annual Reports / Q1 Reports / AKShare / Prospectus',
     tab_annual:'Annual',
     tab_2026q1:'2026 Q1',
-    period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. MCU: explicit Q1 text when available, else FY2025 MCU share × Q1 total rev (derived).',
+    period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. All MCU figures are estimates (Q1 reports rarely disclose full product breakdown). Hover table cells or open detail for source notes.',
+    mcu_est_badge:'Est',
+    mcu_est_note:'MCU revenue is estimated',
     legend_conf_ttl:'MCU Data Confidence:',
     legend_reported:'Annual Report (Direct)', legend_derived:'Derived (High Conf.)',
     legend_estimated:'Estimated (Low Conf.)', legend_unavail:'Unavailable',
@@ -1637,19 +1646,40 @@ const fYoY = v => {
   return `<span class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : ''}${v.toFixed(1)}%</span>`;
 };
 const fEmp = v => v != null ? Number(v).toLocaleString('zh-CN') : '<span class="na">—</span>';
+function escAttr(s) {
+  if (s == null || s === '') return '';
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/\n/g, ' ');
+}
+function mcuSrcText(f) {
+  if (!f) return '';
+  return f.mcu_source_label || f.mcu_source || '';
+}
+function mcuIsEstimate(f) {
+  if (!f) return false;
+  return f.mcu_estimate === true || f.filing_status === 'estimated';
+}
+function mcuCellTitleAttr(f) {
+  const t = escAttr(mcuSrcText(f));
+  return t ? ` title="${t}"` : '';
+}
+function mcuEstBadgeHtml(f) {
+  if (!mcuIsEstimate(f)) return '';
+  return `<span class="mcu-est-badge"${mcuCellTitleAttr(f)}>${T('mcu_est_badge')}</span>`;
+}
 const mcuN = (v, dt) =>
   `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fN(v)}</div>`;
 // Currency-aware MCU cell: raw value in either _musd or _yuan, curV converts
-const mcuN2 = (raw, dt) => {
+const mcuN2 = (raw, dt, f) => {
   const v = curV(raw);
   const s = v != null ? v.toFixed(curDec()) : '<span class="na">—</span>';
-  return `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
+  const attr = mcuCellTitleAttr(f);
+  return `<div class="mcu-cell"${attr}>${mcuEstBadgeHtml(f)}<span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
 };
-const mcuY = (v, dt) =>
-  `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${fYoY(v)}</div>`;
-const mcuW = (v, dt) => {
+const mcuY = (v, dt, f) =>
+  `<div class="mcu-cell"${mcuCellTitleAttr(f)}><span class="dot ${DOT[dt]||'dn'}">●</span>${fYoY(v)}</div>`;
+const mcuW = (v, dt, f) => {
   const s = v != null ? v.toFixed(1) + '%' : '<span class="na">—</span>';
-  return `<div class="mcu-cell"><span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
+  return `<div class="mcu-cell"${mcuCellTitleAttr(f)}><span class="dot ${DOT[dt]||'dn'}">●</span>${s}</div>`;
 };
 
 // ── Sparkline ─────────────────────────────────────────────────────────────
@@ -1763,9 +1793,9 @@ function renderTable(year, query) {
       <td class="g-rev c">${fYoY(f.revenue_yoy_pct)}</td>
       <td class="g-rev c">${cagr}</td>
       <td class="g-mcu c" style="padding:4px 8px">${sparkline(spkVals)}</td>
-      <td class="g-mcu">${mcuN2(f[curF('mcu_revenue')], dt)}</td>
-      <td class="g-mcu c">${mcuY(f.mcu_yoy_pct, dt)}</td>
-      <td class="g-mcu c">${mcuW(f.mcu_weight_pct, dt)}</td>
+      <td class="g-mcu">${mcuN2(f[curF('mcu_revenue')], dt, f)}</td>
+      <td class="g-mcu c">${mcuY(f.mcu_yoy_pct, dt, f)}</td>
+      <td class="g-mcu c">${mcuW(f.mcu_weight_pct, dt, f)}</td>
       <td class="g-mcu c">${f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1) + '%' : '<span class="na">—</span>'}</td>
       <td style="font-size:var(--fz-xs);color:var(--text-dim);max-width:100px;white-space:normal">${m.foundry_fab || '—'}</td>
       <td class="g-rd">${fmtRd !== '—' ? fmtRd.split(' ')[0] : '<span class="na">—</span>'}</td>
@@ -2209,8 +2239,17 @@ function _updateDetailMetrics(sym, year) {
       sub: f.revenue_yoy_pct != null ? (f.revenue_yoy_pct>=0?'+':'')+f.revenue_yoy_pct.toFixed(1)+'% YoY' : '',
       cls: f.revenue_yoy_pct!=null ? (f.revenue_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
     { key:'mcu_rev',   lbl:T('m_mcu_rev'),    val: curFmt(f[curF('mcu_revenue')]),
-      sub: f.mcu_yoy_pct != null ? (f.mcu_yoy_pct>=0?'+':'')+f.mcu_yoy_pct.toFixed(1)+'% YoY' : '',
-      cls: f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '' },
+      sub: (() => {
+        const lines = [];
+        if (mcuIsEstimate(f)) lines.push(T('mcu_est_note'));
+        const src = mcuSrcText(f);
+        if (src) lines.push(src);
+        if (f.mcu_yoy_pct != null) {
+          lines.push((f.mcu_yoy_pct >= 0 ? '+' : '') + f.mcu_yoy_pct.toFixed(1) + '% YoY');
+        }
+        return lines.join(' · ');
+      })(),
+      cls: (mcuSrcText(f) || mcuIsEstimate(f)) ? 'mcu-src' : (f.mcu_yoy_pct!=null ? (f.mcu_yoy_pct>=0?'dp-metric-pos':'dp-metric-neg') : '') },
     { key:'mcu_pct',   lbl:T('m_mcu_pct'),    val: f.mcu_weight_pct != null ? f.mcu_weight_pct.toFixed(1)+'%' : '—',
       sub: stratLbl(m.mcu_strategy, true) },
     { key:'gross_mgn', lbl:T('m_gross_mgn'),  val: f.gross_margin_pct != null ? f.gross_margin_pct.toFixed(1)+'%' : '—',
@@ -2384,11 +2423,14 @@ function openDetail(sym) {
       const rdP   = hf.rd_pct != null ? hf.rd_pct.toFixed(1)+'%' : '—';
       const emp   = hf.employee_count != null ? localeNum(hf.employee_count) : '—';
       const filed = hf.filing_date ? hf.filing_date.slice(5) : '—'; // MM-DD
-      const fstat = hf.filing_status === 'reported' ? '✓' : (hf.filing_status || '');
+      const fstat = hf.filing_status === 'reported' ? '✓'
+        : (hf.filing_status === 'estimated' ? T('mcu_est_badge') : (hf.filing_status || ''));
+      const mcuAttr = mcuCellTitleAttr(hf);
+      const mcuEst = mcuIsEstimate(hf) ? ` <span class="mcu-est-badge">${T('mcu_est_badge')}</span>` : '';
       return `<tr class="${isCur?'dp-hist-cur':''}">
         <td>${y}${isProsp ? `<span class="src-badge src-prosp">${T('src_prospectus')}</span>` : ''}</td>
         <td style="color:var(--text-faint)">${fstat}&nbsp;${filed}</td>
-        <td>${revV}</td><td>${mcuV}</td>
+        <td>${revV}</td><td${mcuAttr}>${mcuV}${mcuEst}</td>
         <td>${mcuW}</td><td>${gm}</td><td>${rdP}</td><td>${emp}</td>
       </tr>`;
     }).join('') + `</tbody>`;
