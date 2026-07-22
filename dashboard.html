@@ -620,7 +620,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
 .view-toggle-btn.active { background:var(--navy-1); color:#fff; }
 .chart-swap-body canvas.chart-swap-hidden { display:none !important; }
 
-/* ── 2×2 chart grid (MCU / 总营收 / 毛利率 / 净利率) ── */
+/* ── 2×2 chart grid (总营收 / MCU / 净利率 / 毛利率) ── */
 .chart-quad {
   display:grid; grid-template-columns:1fr 1fr;
   background:var(--bg-1); border-bottom:1px solid var(--border); flex-shrink:0;
@@ -845,7 +845,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
 </div>
 
-<!-- ── 四宫格：总营收 / MCU / 毛利率 / 净利率 ── -->
+<!-- ── 四宫格：总营收 / MCU / 净利率 / 毛利率（左列总营收口径，右列 MCU 口径） ── -->
 <div class="chart-quad">
   <div class="chart-quad-cell">
     <div class="cs-hdr">
@@ -875,19 +875,19 @@ body.panel-open .table-wrap { padding-right:50vw; }
   </div>
   <div class="chart-quad-cell">
     <div class="cs-hdr">
-      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">MCU毛利率</span>
-      <span class="cs-title" data-i18n="chart_gm_title">按公司 · MCU 毛利率 %</span>
-    </div>
-    <div class="cs-desc" data-i18n="desc_gm">MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。</div>
-    <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
-  </div>
-  <div class="chart-quad-cell">
-    <div class="cs-hdr">
       <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">总营收净利率</span>
       <span class="cs-title" data-i18n="chart_net_title">按公司 · 总营收净利润率 %</span>
     </div>
     <div class="cs-desc" data-i18n="desc_net">净利润率 = 归母净利润 ÷ 公司总营收 × 100%（含非 MCU 业务，如负极材料、打印耗材等）。非 MCU 分产品净利率。</div>
     <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
+  </div>
+  <div class="chart-quad-cell">
+    <div class="cs-hdr">
+      <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">MCU毛利率</span>
+      <span class="cs-title" data-i18n="chart_gm_title">按公司 · MCU 毛利率 %</span>
+    </div>
+    <div class="cs-desc" data-i18n="desc_gm">MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。</div>
+    <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
   </div>
 </div>
 
