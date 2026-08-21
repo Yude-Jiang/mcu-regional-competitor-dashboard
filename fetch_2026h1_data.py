@@ -18,6 +18,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from fetch_utils import notice_date_from_row
+
 try:
     import akshare as ak
 except ImportError as e:
@@ -83,6 +85,7 @@ def parse_pl_row(row) -> dict:
         "net_income_yuan": net_inc,
         "rd_expense_yuan": rd,
         "gross_margin_pct": gm,
+        "filing_date": notice_date_from_row(row),
     }
 
 
@@ -164,7 +167,6 @@ def build_h1_row(cur: dict, prev: dict | None, meta: dict) -> dict:
         "rd_expense_musd": to_musd(rd),
         "mcu_revenue_musd": None,
         "filing_status": "h1_reported",
-        "filing_date": "2026-08-31",
         "period_end": H1_2026_END,
         "period_label": "2026年半年报",
         "data_coverage": round(

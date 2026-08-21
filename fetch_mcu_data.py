@@ -21,6 +21,7 @@ except ImportError as e:
     sys.exit(f"Missing dependency: {e}\nInstall: pip install akshare pandas")
 
 import bq_writer
+from fetch_utils import notice_date_from_row
 
 logging.basicConfig(
     level=logging.INFO,
@@ -113,6 +114,7 @@ def _parse_long_df(df: "pd.DataFrame", annual_only: bool = True) -> dict[int, di
                 "net_income_yuan":    net_inc,
                 "rd_expense_yuan":    rd,
                 "gross_margin_pct":   gm_pct,
+                "filing_date":        notice_date_from_row(row),
             }
     return out
 
@@ -320,7 +322,7 @@ def compute_metrics(financials: dict[int, dict]) -> dict[int, dict]:
             else "estimated" if mcu is not None
             else "pending"
         )
-        row["filing_date"] = f"{yr}-04-30"
+        row.setdefault("filing_date", None)
         row["data_coverage"] = round(
             sum(1 for k in ["total_revenue_yuan", "rd_expense_yuan", "mcu_revenue_yuan"]
                 if row.get(k) is not None) / 3, 2
