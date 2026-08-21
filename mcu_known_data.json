@@ -1,5 +1,5 @@
 {
-  "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。支持季度键如 2026Q1（一季报）。",
+  "_comment": "手工录入MCU营收数据，单位：CNY元。优先级高于fetch_mcu_data.py自动推算。支持季度键如 2026Q1（一季报）、2026H1（半年报）。",
   "603986": {
     "2018": {
       "mcu_revenue_yuan": 404498501.99,
@@ -64,6 +64,13 @@
       "confidence": "low",
       "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
     },
+    "2026H1": {
+      "mcu_revenue_yuan": 1430000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "兆易创新2026半年报 分产品营业收入表「微控制器及模拟产品线」14.30亿元"
+    },
     "2025Q1": {
       "mcu_revenue_yuan": 438720858.09,
       "mcu_gross_margin": null,
@@ -107,6 +114,13 @@
       "data_type": "estimated",
       "confidence": "low",
       "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 329000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "普冉股份2026半年报 主营业务分产品表「存储+」3.29亿元（含MCU+模拟，非纯MCU）"
     },
     "2025Q1": {
       "mcu_revenue_yuan": 86949929.45,
@@ -158,6 +172,13 @@
       "data_type": "estimated",
       "confidence": "high",
       "source": "2026一季报经营讨论：智能电表芯片产品线收入（非完整分产品表）【估算】"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 275000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "复旦微电子2026半年报 主营业务分产品表「智能电表芯片」2.75亿元"
     },
     "2025Q1": {
       "mcu_revenue_yuan": 103000000.0,
@@ -230,6 +251,13 @@
       "data_type": "estimated",
       "confidence": "low",
       "source": "2026一季报未披露MCU分产品；按FY2025 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 516000000.0,
+      "mcu_gross_margin": null,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "乐鑫科技2026半年报 主营业务分产品表「芯片」5.16亿元（不含模组）"
     },
     "2025Q1": {
       "mcu_revenue_yuan": 217658249.45,
@@ -547,6 +575,13 @@
       "data_type": "estimated",
       "confidence": "high",
       "source": "2026一季报：总营收×0.99（纯MCU公司近似，无分产品披露）【估算】"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 718740000.0,
+      "mcu_gross_margin": null,
+      "data_type": "derived",
+      "confidence": "high",
+      "source": "2026半年报：合并总营收×0.99（纯MCU公司近似，无分产品披露）【推算】"
     },
     "2025Q1": {
       "mcu_revenue_yuan": 204433186.16,

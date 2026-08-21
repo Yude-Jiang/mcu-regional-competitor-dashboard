@@ -765,6 +765,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <div class="period-tabs" id="period-tabs" role="tablist" aria-label="数据周期">
       <button type="button" class="period-tab active" data-period="annual" data-i18n="tab_annual" role="tab">2018-2025</button>
       <button type="button" class="period-tab" data-period="2026Q1" data-i18n="tab_2026" role="tab">2026 Q1</button>
+      <button type="button" class="period-tab" data-period="2026H1" data-i18n="tab_2026_h1" role="tab">2026 H1</button>
     </div>
   </div>
   <div class="hdr-r">
@@ -792,7 +793,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
     <span class="tbl-legend-item"><span class="dot dp">●</span><span data-i18n="legend_estimated">估算（低置信）</span></span>
     <span class="tbl-legend-item"><span class="dot du">●</span><span data-i18n="legend_unavail">数据缺失</span></span>
   </div>
-  <span class="cs-unit" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" id="tbl-period-note" data-i18n="period_q1_note"></span>
+  <span class="cs-unit feature-hidden" style="margin-left:auto;font-size:var(--fz-xs);color:var(--text-faint)" id="tbl-period-note"></span>
   <span class="cs-unit feature-hidden" style="font-size:var(--fz-xs);color:var(--text-faint)" id="tbl-src-lbl" data-i18n="tbl_src">数据来源：年报 / 一季报 / AKShare / 招股书</span>
 </div>
 <!-- ── Table toolbar (search + currency) ── -->
@@ -1042,10 +1043,12 @@ const I18N = {
     desc_stacked:'11家公司 MCU 合计规模年度演变；纳思达极海微定位工业/汽车，单价较高。',
     desc_heatmap:'绿色=增长，红色=下滑。2023 年11家公司普遍同步回调；2024–2025 年复苏幅度因公司而异。',
     tag_tbl:'数据表', tbl_title:'公司详情 · 点击任意行查看完整画像与历史数据',
-    tbl_src:'数据来源：年报 / 一季报 / AKShare / 招股书',
+    tbl_src:'数据来源：年报 / 一季报 / 半年报 / AKShare / 招股书',
     tab_annual:'2018-2025',
     tab_2026:'2026 Q1',
-    period_q1_note:'一季报单季合并口径（1–3月）；YoY 对比上年同期。MCU 列均为估算（一季报通常无年报级分产品表），悬停单元格或打开详情可查看来源说明。',
+    tab_2026_h1:'2026 H1',
+    period_q1_note:'一季报单季合并口径（1–3月）；YoY 对比上年同期。MCU 列多为估算（一季报通常无年报级分产品表），悬停单元格或打开详情可查看来源说明。',
+    period_h1_note:'半年报累计口径（1–6月，含 Q1，非 Q2 单季）；YoY 对比 2025 年同期半年报。当前 5/11 家已披露；MCU 按各公司半年报分部或推算口径，悬停查看来源。',
     mcu_est_badge:'估',
     mcu_est_note:'MCU为估算值',
     legend_conf_ttl:'MCU数据置信度：',
@@ -1118,10 +1121,12 @@ const I18N = {
     desc_stacked:'Annual evolution of 11-company MCU aggregate; Nasda/Geehy targets industrial & automotive with higher ASP.',
     desc_heatmap:'Green = growth, red = decline. 2023 saw broad synchronized correction across all 11 companies; 2024–25 recovery pace varies by company.',
     tag_tbl:'Table', tbl_title:'Company Detail · Click any row for full profile & history',
-    tbl_src:'Source: Annual Reports / Q1 Reports / AKShare / Prospectus',
+    tbl_src:'Source: Annual Reports / Q1 / H1 / AKShare / Prospectus',
     tab_annual:'2018-2025',
     tab_2026:'2026 Q1',
-    period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. All MCU figures are estimates (Q1 reports rarely disclose full product breakdown). Hover table cells or open detail for source notes.',
+    tab_2026_h1:'2026 H1',
+    period_q1_note:'Q1 = Jan–Mar consolidated; YoY vs prior-year Q1. Most MCU figures are estimates (Q1 reports rarely disclose full product breakdown). Hover table cells or open detail for source notes.',
+    period_h1_note:'H1 = Jan–Jun cumulative (includes Q1, not a standalone Q2 quarter); YoY vs prior-year H1. 5/11 companies disclosed so far; MCU per semi-annual segment or derived methodology. Hover for source notes.',
     mcu_est_badge:'Est',
     mcu_est_note:'MCU revenue is estimated',
     legend_conf_ttl:'MCU Data Confidence:',
@@ -1277,7 +1282,19 @@ const ORDER = [
 ];
 const DEFAULT_FY = 2025;
 const PERIOD_Q1_KEY = '2026Q1';
+const PERIOD_H1_KEY = '2026H1';
+const INTERIM_PERIODS = new Set([PERIOD_Q1_KEY, PERIOD_H1_KEY]);
 let DATA_PERIOD = 'annual';
+
+function isInterimPeriod(p) {
+  return INTERIM_PERIODS.has(String(p));
+}
+function interimPeriodLabel(key) {
+  const s = String(key);
+  if (s === PERIOD_Q1_KEY) return T('tab_2026');
+  if (s === PERIOD_H1_KEY) return T('tab_2026_h1');
+  return s;
+}
 
 function isAnnualYear(y) {
   const s = String(y);
@@ -1293,23 +1310,31 @@ function yearColor(y) {
 }
 function yearPillText(y) {
   if (String(y) === PERIOD_Q1_KEY) return LANG === 'zh' ? '26Q1' : '26Q1';
+  if (String(y) === PERIOD_H1_KEY) return LANG === 'zh' ? '26H1' : '26H1';
   return String(y);
 }
 function yearPillFg(y) {
   const s = String(y);
-  if (s === PERIOD_Q1_KEY || s === '2020' || s === '2025') return '#03234b';
+  if (s === PERIOD_Q1_KEY || s === PERIOD_H1_KEY || s === '2020' || s === '2025') return '#03234b';
   return '#fff';
 }
 function chartYearOptions() {
   return Object.keys(YEAR_PAL).filter(yr => {
-    const key = yr === '2026Q1' ? PERIOD_Q1_KEY : Number(yr);
+    const key = yr === '2026Q1' ? PERIOD_Q1_KEY : yr === '2026H1' ? PERIOD_H1_KEY : Number(yr);
     if (!yearInData(key)) return false;
-    if (DATA_PERIOD === 'annual' && key === PERIOD_Q1_KEY) return false;
+    if (DATA_PERIOD === 'annual' && isInterimPeriod(key)) return false;
+    if (DATA_PERIOD === '2026Q1' && key !== PERIOD_Q1_KEY) return false;
+    if (DATA_PERIOD === '2026H1' && key !== PERIOD_H1_KEY) return false;
     return true;
-  }).map(yr => (yr === '2026Q1' ? PERIOD_Q1_KEY : Number(yr)));
+  }).map(yr => {
+    if (yr === '2026Q1') return PERIOD_Q1_KEY;
+    if (yr === '2026H1') return PERIOD_H1_KEY;
+    return Number(yr);
+  });
 }
 function activeTableYear() {
   if (DATA_PERIOD === '2026Q1') return PERIOD_Q1_KEY;
+  if (DATA_PERIOD === '2026H1') return PERIOD_H1_KEY;
   const sel = $('year-sel');
   return sel ? +sel.value : DEFAULT_FY;
 }
@@ -1355,6 +1380,7 @@ const YEAR_PAL = {
   2021:'#81d4fa', 2022:'#3cb4e6',
   2023:'#f48fb1', 2024:'#e6007e', 2025:'#ffd200',
   '2026Q1':'#26c6da',
+  '2026H1':'#00897b',
 };
 // Company palette: maximise hue gap between adjacent companies in stack ORDER
 // ORDER: 603986→300327→688380→300077→688279→002180→688385→688766→688595→688391→688018
@@ -1497,14 +1523,22 @@ function rebuildYearPills() {
 }
 
 function updatePeriodUi() {
-  const q1 = DATA_PERIOD === '2026Q1';
-  $('tbl-period-note')?.classList.toggle('feature-hidden', !q1);
-  $('tbl-src-lbl')?.classList.toggle('feature-hidden', q1);
+  const interim = isInterimPeriod(DATA_PERIOD);
+  const noteEl = $('tbl-period-note');
+  if (noteEl) {
+    noteEl.classList.toggle('feature-hidden', !interim);
+    if (interim) {
+      noteEl.textContent = DATA_PERIOD === '2026H1'
+        ? T('period_h1_note')
+        : T('period_q1_note');
+    }
+  }
+  $('tbl-src-lbl')?.classList.toggle('feature-hidden', interim);
   const mcuEl = $('cs-unit-mcu');
   if (mcuEl) {
     const uu = curUnit();
-    mcuEl.textContent = q1
-      ? `${uu} · ${T('tab_2026')}`
+    mcuEl.textContent = interim
+      ? `${uu} · ${interimPeriodLabel(DATA_PERIOD)}`
       : `${uu} · 2018—2025`;
   }
 }
@@ -1533,6 +1567,9 @@ function setDataPeriod(period) {
   if (period === '2026Q1') {
     CF.years = new Set([PERIOD_Q1_KEY]);
     CF.sortYear = PERIOD_Q1_KEY;
+  } else if (period === '2026H1') {
+    CF.years = new Set([PERIOD_H1_KEY]);
+    CF.sortYear = PERIOD_H1_KEY;
   } else {
     CF.years = new Set((G?.years || []).filter(isAnnualYear).map(Number));
     CF.sortYear = DEFAULT_FY;
@@ -1613,7 +1650,7 @@ function initChartCtrl() {
   });
   $('chart-sort-year').addEventListener('change', e => {
     const v = e.target.value;
-    CF.sortYear = v === PERIOD_Q1_KEY ? PERIOD_Q1_KEY : +v;
+    CF.sortYear = (v === PERIOD_Q1_KEY || v === PERIOD_H1_KEY) ? v : +v;
     rerenderCharts();
   });
 
@@ -1774,8 +1811,8 @@ function sortVal(sym, year, col) {
 function renderTable(year, query) {
   const yl = $('tbl-year-lbl');
   if (yl) {
-    yl.textContent = String(year) === PERIOD_Q1_KEY
-      ? (LANG === 'zh' ? '2026 Q1' : '2026 Q1')
+    yl.textContent = isInterimPeriod(String(year))
+      ? interimPeriodLabel(String(year))
       : year;
   }
   const q = (query || '').toLowerCase();
