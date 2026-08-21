@@ -884,7 +884,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <span class="cs-title" data-i18n="chart_rev_title">按公司 · 总营收 (来自年报)</span>
       <span class="cs-unit" id="cs-unit-rev">M USD</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
+    <div class="cs-desc" id="chart-desc-rev">2021–2022 年缺芯潮拉动营收激增，2023 年去库存压力导致普遍下滑；2024 年底部复苏分化明显，兆易/乐鑫弹性较强。</div>
     <div class="chart-quad-body"><canvas id="c-total-rev"></canvas></div>
     <div class="rev-summary" id="rev-summary"></div>
   </div>
@@ -909,7 +909,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <span class="cs-tag" style="background:#5c6bc0;color:#fff" data-i18n="tag_net_margin">总营收净利率</span>
       <span class="cs-title" data-i18n="chart_net_title">按公司 · 总营收净利润率 %</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_net">净利润率 = 归母净利润 ÷ 公司总营收 × 100%（含非 MCU 业务，如负极材料、打印耗材等）。非 MCU 分产品净利率。</div>
+    <div class="cs-desc" id="chart-desc-net">净利润率 = 归母净利润 ÷ 公司总营收 × 100%（含非 MCU 业务，如负极材料、打印耗材等）。非 MCU 分产品净利率。</div>
     <div class="chart-quad-body"><canvas id="c-net-margin"></canvas></div>
   </div>
   <div class="chart-quad-cell">
@@ -917,7 +917,7 @@ body.panel-open .table-wrap { padding-right:50vw; }
       <span class="cs-tag" style="background:#e65100;color:#fff" data-i18n="tag_gross_margin">MCU毛利率</span>
       <span class="cs-title" data-i18n="chart_gm_title">按公司 · MCU 毛利率 %</span>
     </div>
-    <div class="cs-desc" data-i18n="desc_gm">MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。</div>
+    <div class="cs-desc" id="chart-desc-gm">MCU / 分产品毛利率（年报主营业务分产品表，口径因公司而异）。无分产品披露时显示 —；中微半导为总营收综合毛利率（纯 MCU 公司近似 MCU 口径）。</div>
     <div class="chart-quad-body"><canvas id="c-gross-margin"></canvas></div>
   </div>
 </div>
@@ -1463,6 +1463,227 @@ function cfSyms()   {
   return ss;
 }
 
+// ── Interim chart insights (Q1 / H1) ────────────────────────────────────────
+function activePeriodKey() {
+  if (DATA_PERIOD === '2026Q1') return PERIOD_Q1_KEY;
+  if (DATA_PERIOD === '2026H1') return PERIOD_H1_KEY;
+  return null;
+}
+
+function coLabel(sym) {
+  const m = G.companies[sym]?.meta || {};
+  return (LANG === 'en' ? m.name_en : m.name_cn) || sym;
+}
+
+function fmtYoY(p) {
+  if (p == null || !Number.isFinite(p)) return null;
+  return (p >= 0 ? '+' : '') + p.toFixed(1) + '%';
+}
+
+function symsDisclosedRev(pk) {
+  return ORDER.filter(s => {
+    if (!G.companies[s]) return false;
+    const f = finOf(G.companies[s], pk);
+    return f.filing_status !== 'pending' && f[curF('total_revenue')] != null;
+  });
+}
+
+function portfolioYoy(syms, pk, valBase, yoyField) {
+  let cur = 0;
+  let prev = 0;
+  const vf = curF(valBase);
+  syms.forEach(s => {
+    const f = finOf(G.companies[s], pk);
+    const val = f[vf];
+    const yoy = f[yoyField];
+    if (val != null && yoy != null) {
+      cur += val;
+      prev += val / (1 + yoy / 100);
+    }
+  });
+  return prev > 0 ? (cur / prev - 1) * 100 : null;
+}
+
+function topSymsByYoy(syms, pk, yoyField, n = 2) {
+  return syms
+    .map(s => ({ s, y: finOf(G.companies[s], pk)[yoyField] }))
+    .filter(x => x.y != null)
+    .sort((a, b) => b.y - a.y)
+    .slice(0, n);
+}
+
+function bottomSymsByYoy(syms, pk, yoyField, n = 1) {
+  return syms
+    .map(s => ({ s, y: finOf(G.companies[s], pk)[yoyField] }))
+    .filter(x => x.y != null)
+    .sort((a, b) => a.y - b.y)
+    .slice(0, n);
+}
+
+function buildRevInsight() {
+  const pk = activePeriodKey();
+  if (!pk) return T('desc_rev');
+  const disclosed = symsDisclosedRev(pk);
+  const total = ORDER.filter(s => G.companies[s]).length;
+  const pending = total - disclosed.length;
+  const portYoy = portfolioYoy(disclosed, pk, 'total_revenue', 'revenue_yoy_pct');
+  const top = topSymsByYoy(disclosed, pk, 'revenue_yoy_pct', 2);
+  const plabel = interimPeriodLabel(pk);
+
+  if (LANG === 'zh') {
+    let s = `${plabel}：${disclosed.length}/${total} 家已披露`;
+    if (pending > 0) s += `（${pending} 家待披露）`;
+    if (portYoy != null) s += `；已披露合计总营收 YoY ${fmtYoY(portYoy)}`;
+    if (top.length) s += `；增速领先 ${top.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join('、')}`;
+    const weak = bottomSymsByYoy(disclosed, pk, 'revenue_yoy_pct', 1).filter(x => x.y < 0);
+    if (weak.length) s += `；${coLabel(weak[0].s)} ${fmtYoY(weak[0].y)} 回落`;
+    return s + '。';
+  }
+
+  let s = `${plabel}: ${disclosed.length}/${total} filed`;
+  if (pending > 0) s += ` (${pending} pending)`;
+  if (portYoy != null) s += `; disclosed total revenue YoY ${fmtYoY(portYoy)}`;
+  if (top.length) s += `; fastest growth ${top.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join(', ')}`;
+  const weak = bottomSymsByYoy(disclosed, pk, 'revenue_yoy_pct', 1).filter(x => x.y < 0);
+  if (weak.length) s += `; ${coLabel(weak[0].s)} ${fmtYoY(weak[0].y)}`;
+  return s + '.';
+}
+
+function buildMcuInsight(stacked = false) {
+  const pk = activePeriodKey();
+  if (!pk) return T(stacked ? 'desc_stacked' : 'desc_mcu');
+  const withMcu = ORDER.filter(s => {
+    if (!G.companies[s]) return false;
+    return finOf(G.companies[s], pk)[curF('mcu_revenue')] != null;
+  });
+  const plabel = interimPeriodLabel(pk);
+  if (!withMcu.length) {
+    return LANG === 'zh'
+      ? `${plabel}：暂无 MCU 分产品数据（待披露或估算缺口）。`
+      : `${plabel}: No MCU segment figures yet (pending disclosure or estimate gaps).`;
+  }
+
+  const portYoy = portfolioYoy(withMcu, pk, 'mcu_revenue', 'mcu_yoy_pct');
+  const byMcu = withMcu
+    .map(s => ({ s, v: finOf(G.companies[s], pk)[curF('mcu_revenue')] }))
+    .filter(x => x.v != null)
+    .sort((a, b) => b.v - a.v);
+  const leader = byMcu[0];
+  const topYoy = topSymsByYoy(withMcu, pk, 'mcu_yoy_pct', 2);
+  const estCount = withMcu.filter(s => mcuIsEstimate(finOf(G.companies[s], pk))).length;
+
+  if (LANG === 'zh') {
+    let s = `${plabel}：${withMcu.length} 家有 MCU 数据`;
+    if (estCount) s += `（${estCount} 家估算/推算）`;
+    if (portYoy != null) s += `；MCU 合计 YoY ${fmtYoY(portYoy)}`;
+    if (leader) s += `；${coLabel(leader.s)} MCU 规模居首`;
+    if (topYoy.length) s += `；MCU 增速 ${topYoy.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join('、')}`;
+    return s + '。';
+  }
+
+  let s = `${plabel}: MCU data for ${withMcu.length} companies`;
+  if (estCount) s += ` (${estCount} estimated/derived)`;
+  if (portYoy != null) s += `; MCU total YoY ${fmtYoY(portYoy)}`;
+  if (leader) s += `; ${coLabel(leader.s)} leads MCU scale`;
+  if (topYoy.length) s += `; MCU growth ${topYoy.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join(', ')}`;
+  return s + '.';
+}
+
+function buildNetInsight() {
+  const pk = activePeriodKey();
+  if (!pk) return T('desc_net');
+  const disclosed = symsDisclosedRev(pk);
+  const margins = disclosed
+    .map(s => ({ s, m: netMarginPct(finOf(G.companies[s], pk)) }))
+    .filter(x => x.m != null)
+    .sort((a, b) => b.m - a.m);
+  const niYoy = topSymsByYoy(disclosed, pk, 'net_income_yoy_pct', 2);
+  const plabel = interimPeriodLabel(pk);
+
+  if (LANG === 'zh') {
+    let s = `${plabel}：`;
+    if (margins.length) {
+      s += `净利率最高 ${coLabel(margins[0].s)} ${margins[0].m.toFixed(1)}%`;
+      if (margins.length > 1) {
+        const lo = margins[margins.length - 1];
+        s += `，最低 ${coLabel(lo.s)} ${lo.m.toFixed(1)}%`;
+      }
+    } else {
+      s += '已披露公司净利率数据有限';
+    }
+    if (niYoy.length) s += `；净利润 YoY 领先 ${niYoy.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join('、')}`;
+    s += '。含非 MCU 业务，非 MCU 分产品净利率。';
+    return s;
+  }
+
+  let s = `${plabel}: `;
+  if (margins.length) {
+    s += `highest net margin ${coLabel(margins[0].s)} ${margins[0].m.toFixed(1)}%`;
+    if (margins.length > 1) {
+      const lo = margins[margins.length - 1];
+      s += `, lowest ${coLabel(lo.s)} ${lo.m.toFixed(1)}%`;
+    }
+  } else {
+    s += 'limited net margin data among filers';
+  }
+  if (niYoy.length) s += `; net income YoY leaders ${niYoy.map(x => `${coLabel(x.s)} ${fmtYoY(x.y)}`).join(', ')}`;
+  s += '. Consolidated P&L — not MCU-segment net margin.';
+  return s;
+}
+
+function buildGmInsight() {
+  const pk = activePeriodKey();
+  if (!pk) return T('desc_gm');
+  const gms = ORDER
+    .filter(s => G.companies[s] && finOf(G.companies[s], pk).gross_margin_pct != null)
+    .map(s => ({
+      s,
+      g: finOf(G.companies[s], pk).gross_margin_pct,
+      est: mcuIsEstimate(finOf(G.companies[s], pk)),
+    }))
+    .sort((a, b) => b.g - a.g);
+  const plabel = interimPeriodLabel(pk);
+
+  if (LANG === 'zh') {
+    let s = `${plabel}：`;
+    if (gms.length >= 2) {
+      s += `MCU/分产品毛利率 ${coLabel(gms[0].s)} ${gms[0].g.toFixed(1)}% 最高、${coLabel(gms[gms.length - 1].s)} ${gms[gms.length - 1].g.toFixed(1)}% 最低`;
+    } else if (gms.length === 1) {
+      s += `${coLabel(gms[0].s)} ${gms[0].g.toFixed(1)}%`;
+    } else {
+      s += '毛利率数据有限';
+    }
+    const est = gms.filter(x => x.est).length;
+    if (est) s += `；${est} 家为估算或合并口径近似`;
+    s += '。口径因公司而异，悬停查看来源。';
+    return s;
+  }
+
+  let s = `${plabel}: `;
+  if (gms.length >= 2) {
+    s += `MCU GM high ${coLabel(gms[0].s)} ${gms[0].g.toFixed(1)}%, low ${coLabel(gms[gms.length - 1].s)} ${gms[gms.length - 1].g.toFixed(1)}%`;
+  } else if (gms.length === 1) {
+    s += `${coLabel(gms[0].s)} ${gms[0].g.toFixed(1)}%`;
+  } else {
+    s += 'limited gross margin data';
+  }
+  const est = gms.filter(x => x.est).length;
+  if (est) s += `; ${est} estimated or consolidated proxy`;
+  s += '. Scope varies — hover for source notes.';
+  return s;
+}
+
+function updateChartDescs() {
+  const revEl = $('chart-desc-rev');
+  const netEl = $('chart-desc-net');
+  const gmEl = $('chart-desc-gm');
+  const mcuEl = $('mcu-chart-desc');
+  if (revEl) revEl.textContent = buildRevInsight();
+  if (netEl) netEl.textContent = buildNetInsight();
+  if (gmEl) gmEl.textContent = buildGmInsight();
+  if (mcuEl) mcuEl.textContent = buildMcuInsight(MCU_VIEW !== 'company');
+}
+
 function rerenderCharts() {
   renderTotalRevChart();
   renderGrossMarginChart();
@@ -1472,6 +1693,7 @@ function rerenderCharts() {
   _updateMcuSummary(cfYears(), cfSyms());
   renderStacked();
   setMcuView(MCU_VIEW, true);
+  updateChartDescs();
 }
 
 let MCU_VIEW = 'company';
@@ -1483,8 +1705,7 @@ function setMcuView(mode, resize = true) {
   $('mcu-view-stacked')?.classList.toggle('active', !isCompany);
   $('c-mcu-grp')?.classList.toggle('chart-swap-hidden', !isCompany);
   $('c-stacked')?.classList.toggle('chart-swap-hidden', isCompany);
-  const descEl = $('mcu-chart-desc');
-  if (descEl) descEl.textContent = T(isCompany ? 'desc_mcu' : 'desc_stacked');
+  updateChartDescs();
   if (resize) {
     const key = isCompany ? 'mcuGrp' : 'stacked';
     if (charts[key]) charts[key].resize();
@@ -2718,6 +2939,7 @@ async function loadData() {
     renderTable(defYear, '');
     initChartCtrl();
     initMcuViewToggle();
+    applyI18n();
     rerenderCharts();
 
     watchResize('c-total-rev',     'totalRev');
@@ -2726,7 +2948,6 @@ async function loadData() {
     watchResize('c-mcu-grp',     'mcuGrp');
     watchResize('c-stacked',     'stacked');
     applyChartTheme();
-    applyI18n();
 
   } catch (err) {
     $('tbody').innerHTML = `<tr><td colspan="16"
