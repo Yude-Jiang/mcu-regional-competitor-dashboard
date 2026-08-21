@@ -1,0 +1,3 @@
+# AKShare data refresh (GitHub Actions refresh-interim-data workflow)
+akshare>=1.14,<2
+pandas>=2.0,<3
