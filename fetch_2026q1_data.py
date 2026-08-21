@@ -89,6 +89,15 @@ def to_musd(yuan: float | None) -> float | None:
     return round(yuan / fx / 1_000_000, 2)
 
 
+def period_rows_snapshot(data: dict, period_key: str) -> dict:
+    out: dict[str, dict] = {}
+    for sym, co in sorted(data.get("companies", {}).items()):
+        row = (co.get("financials") or {}).get(period_key)
+        if row is not None:
+            out[sym] = row
+    return out
+
+
 def build_q1_row(cur: dict, prev: dict | None, meta: dict) -> dict:
     rev = cur.get("total_revenue_yuan")
     rd = cur.get("rd_expense_yuan")
@@ -274,6 +283,7 @@ def main() -> int:
         return 1
 
     data = json.loads(data_path.read_text())
+    old_rows = period_rows_snapshot(data, PERIOD_KEY)
     companies = data.setdefault("companies", {})
     known_mcu = json.loads((HERE / "mcu_known_data.json").read_text())
     ok = 0
@@ -312,6 +322,11 @@ def main() -> int:
     }
     data["generated_at"] = date.today().isoformat()
     data["q1_updated_at"] = date.today().isoformat()
+
+    new_rows = period_rows_snapshot(data, PERIOD_KEY)
+    if old_rows == new_rows:
+        log.info("No %s changes — skipping data.json write", PERIOD_KEY)
+        return 0 if ok >= 10 else 1
 
     data_path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     log.info("Wrote %s — %d/11 companies with %s", data_path, ok, PERIOD_KEY)
