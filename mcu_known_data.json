@@ -404,6 +404,20 @@
       "data_type": "estimated",
       "confidence": "low",
       "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025H1": {
+      "mcu_revenue_yuan": 322140473.28,
+      "mcu_gross_margin": 0.311546,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术2025半年报 主营构成「集成电路和关键元器件等」"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 435439305.25,
+      "mcu_gross_margin": 0.321598,
+      "data_type": "reported",
+      "confidence": "medium",
+      "source": "国民技术2026半年报 主营构成「集成电路和关键元器件等」（芯片类产品口径，含MCU+安全芯片等）"
     }
   },
   "300327": {
@@ -469,6 +483,20 @@
       "data_type": "estimated",
       "confidence": "low",
       "source": "2025一季报未披露MCU分产品；按FY2024 MCU/总营收占比×Q1合并营收【估算】"
+    },
+    "2025H1": {
+      "mcu_revenue_yuan": 531104043.16,
+      "mcu_gross_margin": 0.354341,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "中颖电子2025半年报 主营构成「工业控制」"
+    },
+    "2026H1": {
+      "mcu_revenue_yuan": 716761552.47,
+      "mcu_gross_margin": 0.3003,
+      "data_type": "reported",
+      "confidence": "high",
+      "source": "中颖电子2026半年报 主营构成「微控制器」+「模拟产品」（2026H1分类调整，对应历史工业控制口径含工规MCU+BMIC）"
     }
   },
   "688595": {
