@@ -311,8 +311,8 @@
         "mcu_strategy": "segment_industrial",
         "mcu_multiplier": null,
         "mcu_confidence": "high",
-        "mcu_note": "年报「工业控制」分产品表直接披露；含工规MCU+BMIC电池管理芯片，不含AMOLED显示驱动；2019–2025有数据（2018年无披露）；2026Q1/H1 以各期 source 为准（无分产品表时多为估算）",
-        "mcu_note_en": "Industrial control chips segment from annual report product table; includes industrial MCU + BMIC battery management chips, excludes AMOLED display drivers; 2019–2025 data (no 2018 disclosure); 2026 Q1/H1 per-period source (often estimated without segment tables)"
+        "mcu_note": "年报「工业控制」分产品表直接披露；含工规MCU+BMIC电池管理芯片，不含AMOLED显示驱动；2019–2025有数据（2018年无披露）；2026Q1 为占比估算【估】、2026H1 为半年报主营构成「微控制器」+「模拟产品」直取（2026H1分类名调整，对应历史工业控制口径）",
+        "mcu_note_en": "Industrial control segment in annual report product table; incl. industrial MCU + BMIC, excludes AMOLED display drivers; 2019–2025 (no 2018); 2026 Q1 ratio-estimated [Est.]; 2026 H1 semi-annual MCU Controller + Analog lines (renamed from Industrial Control, same scope)"
       },
       "financials": {
         "2018": {
@@ -881,8 +881,8 @@
         "mcu_strategy": "estimated",
         "mcu_multiplier": null,
         "mcu_confidence": "medium",
-        "mcu_note": "口径：年报「芯片类产品」行（含通用MCU+安全MCU/USBKey+BMS+RF，非纯MCU；灼识咨询估算纯通用MCU约占90%）；2022–2025有数据，2018–2021暂无；2026Q1/H1 若标「估」为合并营收×占比推算，≠H股招股书「芯片产品」审计分部（招股书口径见详情 scope）",
-        "mcu_note_en": "Scope: annual report Chip Products line (incl. general MCU + secure MCU/USB Key + BMS + RF, not pure MCU; CIC estimates general MCU ~90%); 2022–2025 data, 2018–2021 N/A; 2026 Q1/H1 marked Est. use consolidated revenue × ratio — not the same as H-share prospectus audited Chip Products (see detail scope)",
+        "mcu_note": "口径：年报「芯片类产品」行（含通用MCU+安全MCU/USBKey+BMS+RF，非纯MCU；灼识咨询估算纯通用MCU约占90%）；2022–2025有数据，2018–2021暂无；2026Q1 为合并营收×占比估算【估】、2026H1 为半年报主营构成「集成电路和关键元器件等」直取（芯片类口径，不含负极材料；≠H股招股书审计分部，见详情 scope）",
+        "mcu_note_en": "Annual report Chip Products line (incl. MCU + secure/USB Key/BMS/RF, not pure MCU; CIC ~90% general MCU); 2022–2025; 2026 Q1 ratio-estimated [Est.]; 2026 H1 semi-annual IC & key components line (chip scope, excl. anode material; not H-share prospectus audited segment — see detail scope)",
         "business_lines": [
           "通用MCU",
           "专业市场芯片（安全MCU/USBKey）",
@@ -1456,8 +1456,8 @@
         "mcu_strategy": "subsidiary_geehy",
         "mcu_multiplier": null,
         "mcu_confidence": "medium",
-        "mcu_note": "极海微电子（APM32系列）子公司营收，从年报「集成电路」分部提取；纳思达集团总收入264亿含打印耗材完全排除；2018–2025数据完整；2026 interim 不采合并集团总营收/利润，极海 MCU 待子公司分部或半年报正文披露（见各期 source）",
-        "mcu_note_en": "Geehy Micro (APM32) subsidiary revenue from annual report IC segment; Nasda group revenue ¥26.4B incl. printer supplies fully excluded; 2018–2025 complete; 2026 interim excludes consolidated group revenue/P&L — Geehy MCU pending subsidiary segment or semi-annual text disclosure (see per-period source)"
+        "mcu_note": "极海微电子（APM32系列）子公司营收，从年报「集成电路」分部提取；纳思达集团总收入264亿含打印耗材完全排除；2018–2025数据完整；2026 interim 不采合并集团总营收/利润；2026H1 合并半年报已披露（8/26），极海 MCU 仍待子公司分部或人工录入（见各期 source）",
+        "mcu_note_en": "Geehy Micro (APM32) subsidiary from annual IC segment; Nasda group ¥26.4B incl. printer supplies excluded; 2018–2025 complete; 2026 interim excludes consolidated group revenue/P&L; 2026 H1 semi-annual filed (Aug 26) — Geehy MCU still pending subsidiary segment or manual entry (see per-period source)"
       },
       "financials": {
         "2018": {
